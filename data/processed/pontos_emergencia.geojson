@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.498765, -20.487654] },
+      "properties": {
+        "id_infra": 501,
+        "tipo": "PMA",
+        "nome": "Pelotão da Polícia Militar Ambiental",
+        "telefone_emergencia": "190",
+        "possui_rampa": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.515000, -20.495000] },
+      "properties": {
+        "id_infra": 502,
+        "tipo": "Bombeiros",
+        "nome": "Corpo de Bombeiros Militar",
+        "telefone_emergencia": "193",
+        "possui_rampa": 0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.530000, -20.520000] },
+      "properties": {
+        "id_infra": 503,
+        "tipo": "Rampa",
+        "nome": "Rampa Pública - Passo do Lontra",
+        "telefone_emergencia": "",
+        "possui_rampa": 1
+      }
+    }
+  ]
+}

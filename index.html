@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoFish MS</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b4f6c">
+
+  <!-- Estilos Leaflet -->
+  <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header id="header">
+    <h1>GeoFish MS</h1>
+    <span id="status-rede">Online</span>
+  </header>
+
+  <div id="map"></div>
+
+  <!-- Botão flutuante de localização sob demanda -->
+  <button id="btn-localizacao" class="btn-gps" title="Onde estou agora?">
+    📍 Minha Posição
+  </button>
+
+  <!-- Gaveta inferior para detalhes de trechos e guias -->
+  <div id="bottom-sheet" class="bottom-sheet hidden">
+    <button id="close-sheet" class="close-btn" aria-label="Fechar painel">&times;</button>
+    <div id="sheet-content"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="lib/leaflet/leaflet.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Atualização simples do indicador de rede
+    const statusEl = document.getElementById('status-rede');
+    function atualizarStatus() {
+      if (navigator.onLine) {
+        statusEl.textContent = 'Online';
+        statusEl.className = 'online';
+      } else {
+        statusEl.textContent = 'Modo Offline';
+        statusEl.className = 'offline';
+      }
+    }
+    window.addEventListener('online', atualizarStatus);
+    window.addEventListener('offline', atualizarStatus);
+    atualizarStatus();
+  </script>
+</body>
+</html>
