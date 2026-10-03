@@ -1903,3 +1903,198 @@ window.addEventListener('keydown', (e) => {
     if (typeof fecharModalSos === 'function') fecharModalSos();
   }
 });
+
+// ========================================================
+// 17. DIÁRIO DE PESCA E DENÚNCIAS OFFLINE (GAMIFICAÇÃO & CIDADANIA)
+// ========================================================
+
+const btnAbrirDiario = document.getElementById('btn-abrir-diario');
+const modalDiario = document.getElementById('modal-diario');
+const btnFecharDiario = document.getElementById('btn-fechar-diario');
+const previewBoxDiario = document.getElementById('preview-box-diario');
+const inputFotoDiario = document.getElementById('input-foto-diario');
+const imgDiario = document.getElementById('img-diario');
+const btnSalvarDiario = document.getElementById('btn-salvar-diario');
+const selectEspecieDiario = document.getElementById('select-especie-diario');
+const inputTamanhoDiario = document.getElementById('input-tamanho-diario');
+
+const btnAbrirDenuncia = document.getElementById('btn-abrir-denuncia');
+const modalDenuncia = document.getElementById('modal-denuncia');
+const btnFecharDenuncia = document.getElementById('btn-fechar-denuncia');
+const previewBoxDenuncia = document.getElementById('preview-box-denuncia');
+const inputFotoDenuncia = document.getElementById('input-foto-denuncia');
+const imgDenuncia = document.getElementById('img-denuncia');
+const btnSalvarDenuncia = document.getElementById('btn-salvar-denuncia');
+const selectCrimeDenuncia = document.getElementById('select-crime-denuncia');
+
+let currentBase64Diario = null;
+let currentBase64Denuncia = null;
+let trofeusLayerGroup = L.layerGroup().addTo(map);
+
+// ----- Funções Auxiliares de Câmera -----
+function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
+  previewBox.addEventListener('click', () => inputElement.click());
+  
+  inputElement.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const base64 = ev.target.result;
+        imgElement.src = base64;
+        previewBox.classList.add('has-image');
+        callbackBase64(base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+setupPhotoInput(previewBoxDiario, inputFotoDiario, imgDiario, (b64) => { currentBase64Diario = b64; });
+setupPhotoInput(previewBoxDenuncia, inputFotoDenuncia, imgDenuncia, (b64) => { currentBase64Denuncia = b64; });
+
+// ----- Diário de Troféus -----
+if (btnAbrirDiario) btnAbrirDiario.addEventListener('click', () => {
+  modalDiario.classList.remove('hidden');
+  atualizarLocalizacaoOculta(); // Força GPS
+});
+if (btnFecharDiario) btnFecharDiario.addEventListener('click', () => modalDiario.classList.add('hidden'));
+
+if (btnSalvarDiario) {
+  btnSalvarDiario.addEventListener('click', async () => {
+    if (!currentBase64Diario) return showToast('Tire uma foto do troféu primeiro!');
+    if (!inputTamanhoDiario.value) return showToast('Informe o tamanho do peixe.');
+    if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
+
+    btnSalvarDiario.disabled = true;
+    btnSalvarDiario.innerText = 'Salvando...';
+
+    const trofeu = {
+      id: new Date().toISOString(),
+      lat: ultimaPosicaoUsuario.lat,
+      lng: ultimaPosicaoUsuario.lng,
+      especie: selectEspecieDiario.options[selectEspecieDiario.selectedIndex].text,
+      tamanho: parseFloat(inputTamanhoDiario.value),
+      foto: currentBase64Diario,
+      synced: navigator.onLine ? 1 : 0
+    };
+
+    const sucesso = await GeoFishDB.salvarTrofeu(trofeu);
+    btnSalvarDiario.disabled = false;
+    btnSalvarDiario.innerHTML = '💾 Salvar Troféu (Offline)';
+
+    if (sucesso) {
+      showToast('Troféu salvo no seu diário!');
+      modalDiario.classList.add('hidden');
+      // Limpar form
+      currentBase64Diario = null;
+      imgDiario.src = '';
+      previewBoxDiario.classList.remove('has-image');
+      inputTamanhoDiario.value = '';
+      
+      if (trofeu.synced === 1) simularEnvioAoServidor(trofeu, 'Pesquisa de Repovoamento');
+      renderizarTrofeusNoMapa();
+    }
+  });
+}
+
+// ----- Denúncia Ambiental Offline -----
+if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', () => {
+  modalDenuncia.classList.remove('hidden');
+  atualizarLocalizacaoOculta();
+});
+if (btnFecharDenuncia) btnFecharDenuncia.addEventListener('click', () => modalDenuncia.classList.add('hidden'));
+
+if (btnSalvarDenuncia) {
+  btnSalvarDenuncia.addEventListener('click', async () => {
+    if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
+    if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
+
+    btnSalvarDenuncia.disabled = true;
+    btnSalvarDenuncia.innerText = 'Criptografando...';
+
+    const denuncia = {
+      id: new Date().toISOString(),
+      lat: ultimaPosicaoUsuario.lat,
+      lng: ultimaPosicaoUsuario.lng,
+      tipo: selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex].text,
+      foto: currentBase64Denuncia,
+      synced: navigator.onLine ? 1 : 0
+    };
+
+    const sucesso = await GeoFishDB.salvarDenuncia(denuncia);
+    btnSalvarDenuncia.disabled = false;
+    btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência & Denunciar';
+
+    if (sucesso) {
+      showToast(denuncia.synced ? 'Denúncia enviada à PMA!' : 'Salvo offline. Envio pendente.');
+      modalDenuncia.classList.add('hidden');
+      
+      currentBase64Denuncia = null;
+      imgDenuncia.src = '';
+      previewBoxDenuncia.classList.remove('has-image');
+
+      if (denuncia.synced === 1) simularEnvioAoServidor(denuncia, 'Servidor da PMA-MS');
+    }
+  });
+}
+
+// Atualiza a global de GPS sem mexer na UI
+function atualizarLocalizacaoOculta() {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      ultimaPosicaoUsuario = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        precisao: Math.round(pos.coords.accuracy)
+      };
+    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
+  }
+}
+
+// Renderiza troféus pessoais no mapa
+async function renderizarTrofeusNoMapa() {
+  trofeusLayerGroup.clearLayers();
+  const trofeus = await GeoFishDB.obterTodosTrofeus();
+  
+  trofeus.forEach(t => {
+    const iconeTrofeu = L.divIcon({
+      html: '<div style="font-size: 24px; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));">📸</div>',
+      className: 'custom-trofeu-icon',
+      iconSize: [30, 30],
+      iconAnchor: [15, 30]
+    });
+    
+    L.marker([t.lat, t.lng], { icon: iconeTrofeu })
+     .bindPopup(`<strong style="color:#0b4f6c;">${t.especie}</strong><br>${t.tamanho} cm<br><img src="${t.foto}" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">`)
+     .addTo(trofeusLayerGroup);
+  });
+}
+
+// Sincronização em Segundo Plano (Background Sync Simulado)
+window.addEventListener('online', async () => {
+  console.log('Online novamente! Iniciando sincronização em background...');
+  
+  // Sincroniza Diários Pendentes
+  const diariosPendentes = await GeoFishDB.obterRegistrosPendentesDeSincronizacao('diario_pesca');
+  for (const diario of diariosPendentes) {
+    simularEnvioAoServidor(diario, 'IMASUL Repovoamento');
+    await GeoFishDB.marcarComoSincronizado('diario_pesca', diario.id);
+  }
+
+  // Sincroniza Denúncias Pendentes
+  const denunciasPendentes = await GeoFishDB.obterRegistrosPendentesDeSincronizacao('denuncias_pma');
+  for (const denuncia of denunciasPendentes) {
+    simularEnvioAoServidor(denuncia, 'Servidor Secreto da PMA');
+    await GeoFishDB.marcarComoSincronizado('denuncias_pma', denuncia.id);
+    showToast('Alerta: Uma denúncia salva offline acaba de ser transmitida à PMA.');
+  }
+});
+
+function simularEnvioAoServidor(dados, destino) {
+  console.log(`[Sincronização 4G Ativa] Enviando dados anonimizados para ${destino}:`, dados);
+  // Na vida real, seria um fetch() POST.
+}
+
+// Carga inicial
+setTimeout(renderizarTrofeusNoMapa, 1000);

@@ -314,6 +314,16 @@
     <span style="font-size: 1.2rem;">🆘</span> S.O.S
   </button>
 
+  <!-- FAB Container (Ações Secundárias Direita) -->
+  <div class="fab-container">
+    <button id="btn-abrir-diario" class="fab-btn" title="Diário de Pesca" aria-label="Registrar Peixe no Diário">
+      📸
+    </button>
+    <button id="btn-abrir-denuncia" class="fab-btn btn-denuncia" title="Denunciar Crime Ambiental" aria-label="Denunciar Rede Irregular">
+      🚨
+    </button>
+  </div>
+
   <!-- Modal Central de Emergência & S.O.S Fluvial -->
   <div id="modal-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sos-title">
     <div class="modal-dialog">
@@ -377,6 +387,84 @@
 
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Diário de Pesca (Gamificação) -->
+  <div id="modal-diario" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 style="font-size: 1.15rem; color: #0b4f6c;">📸 Meu Diário de Troféus</h2>
+        <button id="btn-fechar-diario" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Registre seu troféu offline. Os dados ajudarão na pesquisa de repovoamento estadual quando sincronizados.</p>
+        
+        <input type="file" id="input-foto-diario" accept="image/*" capture="environment" style="display: none;">
+        <div id="preview-box-diario" class="photo-preview-box">
+          <div class="preview-placeholder">
+            <div style="font-size: 2rem;">📷</div>
+            <div style="margin-top: 8px; font-weight: 600;">Tirar Foto do Peixe</div>
+          </div>
+          <img id="img-diario" src="" alt="Troféu">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Espécie:</label>
+          <select id="select-especie-diario" class="checker-select" style="margin-bottom: 0;">
+            <option value="pintado">Pintado / Surubim</option>
+            <option value="pacu">Pacu</option>
+            <option value="dourado">Dourado</option>
+            <option value="cachara">Cachara</option>
+            <option value="outro">Outro...</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Comprimento (cm):</label>
+          <input type="number" id="input-tamanho-diario" class="checker-input" placeholder="Ex: 85" style="margin-bottom: 0;">
+        </div>
+
+        <button id="btn-salvar-diario" class="btn-cta" style="background: #0284c7; border: none; min-height: 48px; margin-top: 0;">
+          💾 Salvar Troféu (Offline)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Denúncia Cidadã -->
+  <div id="modal-denuncia" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2500;">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background-color: #b91c1c;">
+        <h2 style="font-size: 1.15rem;">🚨 Denúncia Anônima</h2>
+        <button id="btn-fechar-denuncia" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Presenciou crime ambiental? Fotografe offline. O envio será feito automaticamente e anonimamente à PMA assim que houver sinal 4G.</p>
+        
+        <input type="file" id="input-foto-denuncia" accept="image/*" capture="environment" style="display: none;">
+        <div id="preview-box-denuncia" class="photo-preview-box" style="border-color: #fca5a5;">
+          <div class="preview-placeholder">
+            <div style="font-size: 2rem;">📸</div>
+            <div style="margin-top: 8px; font-weight: 600; color: #b91c1c;">Fotografar Irregularidade</div>
+          </div>
+          <img id="img-denuncia" src="" alt="Denúncia">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Tipo de Crime:</label>
+          <select id="select-crime-denuncia" class="checker-select" style="margin-bottom: 0;">
+            <option value="rede">Rede / Tarrafa armada</option>
+            <option value="espinhel">Espinhel / Anzol de Galha</option>
+            <option value="pesca_predatoria">Pesca Predatória / Dourado</option>
+            <option value="poluicao">Poluição / Desmatamento</option>
+          </select>
+        </div>
+
+        <button id="btn-salvar-denuncia" class="btn-cta" style="background: #dc2626; border: none; min-height: 48px; margin-top: 8px;">
+          🔒 Salvar Evidência & Denunciar
+        </button>
       </div>
     </div>
   </div>
