@@ -1,0 +1,31 @@
+{
+  "name": "geofish-ms",
+  "version": "1.0.0",
+  "description": "GeoFish MS - Plataforma WebGIS PWA e Inteligência Fluvial da Bacia do Rio Miranda (MS)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync",
+    "cap:open": "cap open android"
+  },
+  "keywords": [
+    "webgis",
+    "pantanal",
+    "rio-miranda",
+    "pesca-esportiva",
+    "pwa",
+    "gemini-ai",
+    "civic-tech"
+  ],
+  "author": "Comunidade Pantaneira GeoFish MS",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.4.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

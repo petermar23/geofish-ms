@@ -2563,3 +2563,391 @@ body.map-fullscreen .local-search-container {
 .nav-sos-trigger {
   color: #dc2626 !important;
 }
+
+/* ========================================================
+   ICTIÓLOGO VIRTUAL COM IA NATIVA (GOOGLE GEMINI)
+   ======================================================== */
+.ai-id-section {
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.btn-ia-analisar {
+  flex: 1;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  transition: all var(--transition-fast);
+}
+
+.btn-ia-analisar:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  transform: translateY(-1px);
+}
+
+.btn-ia-analisar:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ai-sparkle {
+  font-size: 1rem;
+  animation: pulse-sparkle 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-sparkle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+.btn-ia-config {
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  color: #334155;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.btn-ia-config:hover {
+  background: #f1f5f9;
+}
+
+.ai-key-box {
+  background: #ffffff;
+  border: 1px solid #7dd3fc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.btn-ia-save-key {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.ai-loading-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px dashed #0284c7;
+  border-radius: 8px;
+  margin-top: 8px;
+  color: #0369a1;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ai-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #bae6fd;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-resultado-box {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-left: 4px solid #0284c7;
+  font-size: 0.85rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.ai-resultado-box.legal {
+  border-left-color: #16a34a;
+}
+
+.ai-resultado-box.alerta {
+  border-left-color: #f59e0b;
+}
+
+.ai-resultado-box.proibido {
+  border-left-color: #dc2626;
+}
+
+.ai-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ai-badge.badge-permitido {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ai-badge.badge-atencao {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ai-badge.badge-proibido {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ========================================================
+   BANNER DE SERVIÇOS & CENTRAL DE PARCERIAS INTERATIVA
+   ======================================================== */
+.servicos-banner-callout {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.servicos-banner-header {
+  margin-bottom: 20px;
+}
+
+.banner-badge-hub {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.servicos-banner-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0b4f6c;
+  margin-bottom: 6px;
+}
+
+.servicos-banner-desc {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.servicos-banner-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .servicos-banner-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.servicos-banner-col {
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.servicos-banner-col.col-comercial {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+}
+
+.servicos-banner-col.col-social {
+  background: #eff6ff;
+  border: 1.5px solid #93c5fd;
+}
+
+.servicos-banner-col .col-icon {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.servicos-banner-col h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.col-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  align-self: flex-start;
+}
+
+.tag-comercial {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag-social {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.servicos-banner-col p {
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.45;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.btn-banner-action {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-banner-comercial {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-banner-comercial:hover {
+  background: #15803d;
+}
+
+.btn-banner-social {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-banner-social:hover {
+  background: #1d4ed8;
+}
+
+/* Modal Central de Parcerias */
+.parcerias-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  gap: 4px;
+}
+
+.parceria-tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.parceria-tab-btn.active {
+  background: #ffffff;
+  color: #0b4f6c;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.parceria-callout-box {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.parceria-callout-comercial {
+  background: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  color: #166534;
+}
+
+.parceria-callout-social {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+  color: #1e40af;
+}
+
+.amenities-checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+@media (max-width: 480px) {
+  .amenities-checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.amenity-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #334155;
+  cursor: pointer;
+}

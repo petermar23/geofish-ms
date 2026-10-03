@@ -447,13 +447,55 @@
           <img id="img-diario" src="" alt="Troféu">
         </div>
 
+        <!-- Seção de Identificação com Inteligência Artificial (Google Gemini) -->
+        <div id="ai-id-section" class="ai-id-section">
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+            <button type="button" id="btn-ia-identificar" class="btn-ia-analisar" title="Identificar espécie e conformidade ambiental com IA">
+              <span class="ai-sparkle">✨</span>
+              <span>Identificar Peixe com IA (Gemini)</span>
+            </button>
+            <button type="button" id="btn-config-gemini" class="btn-ia-config" title="Configurar chave do Google Gemini (AI Studio)">
+              ⚙️
+            </button>
+          </div>
+
+          <!-- Caixa de Configuração de Chave API (Expansível) -->
+          <div id="ai-key-box" class="ai-key-box hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <strong style="color: #0369a1; font-size: 0.8rem;">Chave Google Gemini API (Gratuita)</strong>
+              <button type="button" id="btn-fechar-key-box" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #64748b; line-height: 1;">&times;</button>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <input type="password" id="input-gemini-key" placeholder="Cole sua chave (AIzaSy...)" class="checker-input" style="margin-bottom: 0; font-size: 0.8rem; padding: 6px 10px; height: 38px; flex: 1;">
+              <button type="button" id="btn-salvar-gemini-key" class="btn-ia-save-key">Salvar</button>
+            </div>
+            <p style="margin-top: 6px; font-size: 0.73rem; color: #0284c7; line-height: 1.35;">
+              💡 Pegue sua chave grátis no Google AI Studio (<a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-weight: 700; color: #0369a1; text-decoration: underline;">aistudio.google.com</a>). Salva apenas no seu navegador com segurança.
+            </p>
+          </div>
+
+          <!-- Spinner e Status de Carregamento -->
+          <div id="ai-loading-box" class="ai-loading-box hidden">
+            <div class="ai-spinner"></div>
+            <span id="ai-loading-msg">Consultando Ictiólogo Virtual Pantaneiro com Gemini...</span>
+          </div>
+
+          <!-- Caixa de Resultado da IA -->
+          <div id="ai-resultado-box" class="ai-resultado-box hidden"></div>
+        </div>
+
         <div style="margin-bottom: 12px;">
           <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Espécie:</label>
           <select id="select-especie-diario" class="checker-select" style="margin-bottom: 0;">
             <option value="pintado">Pintado / Surubim</option>
             <option value="pacu">Pacu</option>
-            <option value="dourado">Dourado</option>
             <option value="cachara">Cachara</option>
+            <option value="jau">Jaú</option>
+            <option value="dourado">Dourado (Proibido Abate)</option>
+            <option value="piraputanga">Piraputanga</option>
+            <option value="curimbata">Curimbatá</option>
+            <option value="piavucu">Piavuçu</option>
+            <option value="barbado">Barbado</option>
             <option value="outro">Outro...</option>
           </select>
         </div>
@@ -542,32 +584,159 @@
   <div id="modal-parceiros" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
     <div class="modal-dialog">
       <div class="modal-header" style="background-color: #0b4f6c;">
-        <h2 style="font-size: 1.15rem; color: #ffffff;">🤝 Rede de Parceiros & Pousadas</h2>
+        <h2 style="font-size: 1.15rem; color: #ffffff;">🤝 Central de Cadastros &amp; Parcerias</h2>
         <button id="btn-fechar-parceiros" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 14px; line-height: 1.4;">
-          O <strong>GeoFish MS</strong> conecta o turista diretamente com quem faz o turismo pantaneiro acontecer na beira do rio, sem intermediários.
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px; line-height: 1.4;">
+          O <strong>GeoFish MS</strong> conecta o pescador esportivo e o turista diretamente a quem vive e trabalha na beira do rio, unindo sustentabilidade financeira e responsabilidade social no Pantanal.
         </p>
 
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
-          <h4 style="color: #166534; font-size: 0.95rem; margin-bottom: 6px;">🚤 Para Piloteiros e Guias Nativos</h4>
-          <p style="font-size: 0.8rem; color: #15803d; line-height: 1.35; margin-bottom: 8px;">
-            Piloteiros das Colônias Z-1 (Miranda/Corumbá) e Z-7 (Aquidauana/Bonito) têm cadastro <strong>100% gratuito</strong> no mapa com link para seu WhatsApp direto.
-          </p>
-          <a href="https://wa.me/5567999999999?text=Ol%C3%A1%2C%20sou%20piloteiro%2Fguia%20e%20gostaria%20de%20cadastrar%20meu%20ponto%20no%20GeoFish%20MS" target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #16a34a; font-size: 0.85rem; padding: 10px; margin-top: 4px;">
-            📲 Cadastrar como Piloteiro
-          </a>
+        <!-- Seletor de Abas da Central de Cadastros -->
+        <div class="parcerias-tabs" role="tablist">
+          <button type="button" id="tab-btn-pousadas" class="parceria-tab-btn active" role="tab" aria-selected="true">
+            🏨 Pousadas &amp; Ranchos (Anúncio Pago)
+          </button>
+          <button type="button" id="tab-btn-piloteiros" class="parceria-tab-btn" role="tab" aria-selected="false">
+            🚤 Piloteiros Z-1 / Z-7 (100% Grátis)
+          </button>
         </div>
 
-        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px;">
-          <h4 style="color: #1e40af; font-size: 0.95rem; margin-bottom: 6px;">🏨 Para Pousadas, Ranchos e Lojas Náuticas</h4>
-          <p style="font-size: 0.8rem; color: #1d4ed8; line-height: 1.35; margin-bottom: 8px;">
-            Destaque seu rancho, porto de descida ou loja de isca no WebGIS da Bacia do Miranda com selo de <strong>Parceiro Verificado</strong> e botão de reserva direta.
-          </p>
-          <a href="https://wa.me/5567999999999?text=Ol%C3%A1%2C%20tenho%20um%20rancho%2Fpousada%2Fcom%C3%A9rcio%20e%20gostaria%20de%20anunciar%20no%20GeoFish%20MS" target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #2563eb; font-size: 0.85rem; padding: 10px; margin-top: 4px;">
-            ⭐ Seja um Rancho / Parceiro Verificado
-          </a>
+        <!-- ABA 1: POUSADAS & RANCHOS (COMERCIAL / PAGO) -->
+        <div id="tab-pane-pousadas" class="tab-pane">
+          <div class="parceria-callout-box parceria-callout-comercial">
+            <strong>💼 Sustentabilidade e Parceria Comercial:</strong> Divulgue sua pousada, rancho ou marina com presença destacada no WebGIS, fotos da rampa de descida, amenidades e botão direto para seu WhatsApp de reservas — sem comissões abusivas de plataformas internacionais.
+          </div>
+
+          <form id="form-parceria-pousada" onsubmit="event.preventDefault();">
+            <div style="margin-bottom: 10px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome do Rancho / Pousada / Marina:</label>
+              <input type="text" id="pousada-nome" class="checker-input" placeholder="Ex: Pousada Pantaneira Beira Rio" required style="margin-bottom: 0;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Localização no Rio:</label>
+                <select id="pousada-rio" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
+                  <option value="Rio Miranda (Urbano / Porto Geral)">Rio Miranda (Urbano / Porto Geral)</option>
+                  <option value="Rio Miranda (Passo do Lontra / Vermelho)">Rio Miranda (Passo do Lontra / Vermelho)</option>
+                  <option value="Rio Aquidauana (Urbano / Anastácio)">Rio Aquidauana (Urbano / Anastácio)</option>
+                  <option value="Rio Aquidauana (Palmeiras / Piraputanga)">Rio Aquidauana (Palmeiras / Piraputanga)</option>
+                  <option value="Estrada Parque Pantanal MS-184">Estrada Parque Pantanal MS-184</option>
+                  <option value="Outro Trecho da Bacia">Outro Trecho da Bacia</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp de Reservas:</label>
+                <input type="tel" id="pousada-wpp" class="checker-input" placeholder="(67) 99999-9999" required style="margin-bottom: 0;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Descrição da Rampa e Estrutura Náutica:</label>
+              <input type="text" id="pousada-rampa" class="checker-input" placeholder="Ex: Rampa de concreto homologada para lanchas e voadeiras" style="margin-bottom: 0;">
+            </div>
+
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Serviços e Comodidades Oferecidas:</label>
+            <div class="amenities-checkbox-grid">
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Rampa de Concreto"> ⚓ Rampa Concreto
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Aluguel de Voadeiras"> 🚤 Voadeiras 25/40hp
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Venda de Isca Viva"> 🧊 Venda Isca Viva
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Apartamentos Climatizados"> ❄️ Ar-Condicionado
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Restaurante / Pensão Completa"> 🍽️ Pensão Completa
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Gasolina Náutica"> ⛽ Gasolina Náutica
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Wi-Fi Beira Rio"> 📶 Wi-Fi Beira Rio
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="pousada-amenity" value="Piloteiros Credenciados"> 🎣 Piloteiros Nativos
+              </label>
+            </div>
+
+            <button type="button" id="btn-enviar-proposta-pousada" class="btn-cta" style="background: #16a34a; font-size: 0.9rem; padding: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>📲</span>
+              <span>Enviar Proposta de Anúncio via WhatsApp</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1 E Z-7) -->
+        <div id="tab-pane-piloteiros" class="tab-pane hidden">
+          <div class="parceria-callout-box parceria-callout-social">
+            <strong>🚤 Compromisso Social Ribeirinho:</strong> Piloteiros e guias profissionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong> e <strong>Z-7 (Aquidauana/Anastácio)</strong> <strong>NÃO PAGAM NADA</strong>. O cadastro no mapa com seu WhatsApp direto é 100% gratuito e livre de qualquer taxa ou mensalidade.
+          </div>
+
+          <form id="form-parceria-guia" onsubmit="event.preventDefault();">
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome Completo:</label>
+                <input type="text" id="guia-nome" class="checker-input" placeholder="Ex: Sebastião da Silva" required style="margin-bottom: 0;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Apelido de Rio:</label>
+                <input type="text" id="guia-apelido" class="checker-input" placeholder="Ex: Mestre Tião" style="margin-bottom: 0;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
+                <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
+                  <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
+                  <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
+                  <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nº Carteira / RGP:</label>
+                <input type="text" id="guia-rgp" class="checker-input" placeholder="Ex: RGP 12345678" style="margin-bottom: 0;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Porto de Saída Habitual:</label>
+                <input type="text" id="guia-porto" class="checker-input" placeholder="Ex: Porto Geral de Miranda" required style="margin-bottom: 0;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Turistas:</label>
+                <input type="tel" id="guia-wpp" class="checker-input" placeholder="(67) 99999-9999" required style="margin-bottom: 0;">
+              </div>
+            </div>
+
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Diferenciais Náuticos e Atendimento:</label>
+            <div class="amenities-checkbox-grid">
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="guia-diferencial" value="Coletes Homologados Marinha"> 🦺 Coletes Homologados
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="guia-diferencial" value="Barco e Motor Próprio"> 🚤 Barco Próprio Revisado
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="guia-diferencial" value="Especialista em Pesque e Solte"> 🐟 Pesque &amp; Solte Esportivo
+              </label>
+              <label class="amenity-checkbox-item">
+                <input type="checkbox" name="guia-diferencial" value="Conhecimento de Rebojos e Ceveiros"> 🎯 Conhecimento do Rio
+              </label>
+            </div>
+
+            <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="background: #2563eb; font-size: 0.9rem; padding: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>🚤</span>
+              <span>Solicitar Ativação Gratuita no WebGIS</span>
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -777,6 +946,46 @@
       </p>
     </div>
 
+    <!-- Banner de Chamada: Modelo Híbrido Comercial vs Social -->
+    <div class="servicos-banner-callout">
+      <div class="servicos-banner-header">
+        <span class="banner-badge-hub">HUB COMUNITÁRIO &amp; SUSTENTABILIDADE</span>
+        <h3 class="servicos-banner-title">Como Funciona a Presença no GeoFish MS</h3>
+        <p class="servicos-banner-desc">
+          Um modelo transparente que une sustentabilidade financeira para o portal e apoio social total às famílias ribeirinhas do Pantanal:
+        </p>
+      </div>
+      <div class="servicos-banner-grid">
+        <!-- Coluna 1: Pousadas, Ranchos & Marinas (Comercial / Pago) -->
+        <div class="servicos-banner-col col-comercial">
+          <div class="col-icon">🏨</div>
+          <h4>Pousadas, Ranchos &amp; Marinas</h4>
+          <span class="col-tag tag-comercial">Comercial / Anúncio Pago</span>
+          <p>
+            O motor de faturamento e sustentabilidade do projeto. O rancho ou pousada ganha presença destacada no WebGIS, fotos, descrição da rampa de barcos, amenidades e botão direto para o WhatsApp de reservas — sem comissões abusivas.
+          </p>
+          <button type="button" class="btn-banner-action btn-banner-comercial" onclick="abrirModalParceriasTab('pousadas')">
+            <span>🏨</span>
+            <span>Anunciar Estabelecimento &rarr;</span>
+          </button>
+        </div>
+
+        <!-- Coluna 2: Piloteiros & Guias Comunitários (100% Gratuito Z-1 / Z-7) -->
+        <div class="servicos-banner-col col-social">
+          <div class="col-icon">🚤</div>
+          <h4>Piloteiros &amp; Guias Nativos</h4>
+          <span class="col-tag tag-social">Colônias Z-1 e Z-7 / 100% Grátis</span>
+          <p>
+            Compromisso comunitário e de responsabilidade social com os ribeirinhos. Os piloteiros e pescadores profissionais das Colônias Z-1 (Miranda/Corumbá) e Z-7 (Aquidauana/Anastácio) NÃO PAGAM NADA. Cadastro e divulgação 100% livres de taxas.
+          </p>
+          <button type="button" class="btn-banner-action btn-banner-social" onclick="abrirModalParceriasTab('piloteiros')">
+            <span>🚤</span>
+            <span>Cadastrar Guia Grátis &rarr;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="showcase-grid">
       <!-- Parceiro 1 -->
       <article class="showcase-card">
@@ -884,9 +1093,9 @@
           <span>📲 Botão Direto para seu WhatsApp</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Sou%20da%20regi%C3%A3o%20e%20gostaria%20de%20apoiar%20ou%20anunciar%20minha%20pousada/servi%C3%A7o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff;">
-            💬 Anunciar ou Apoiar via WhatsApp
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff; border: none; cursor: pointer;">
+            💬 Anunciar Pousada ou Rancho &rarr;
+          </button>
         </div>
       </article>
     </div>

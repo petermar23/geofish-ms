@@ -2038,6 +2038,248 @@ if (btnFecharDiario) btnFecharDiario.addEventListener('click', () => modalDiario
 
 const cbLgpdDiario = document.getElementById('cb-lgpd-diario');
 
+// ========================================================
+// 17.1. ICTIÓLOGO VIRTUAL COM IA NATIVA (GOOGLE GEMINI)
+// ========================================================
+const btnIaIdentificar = document.getElementById('btn-ia-identificar');
+const btnConfigGemini = document.getElementById('btn-config-gemini');
+const aiKeyBox = document.getElementById('ai-key-box');
+const btnFecharKeyBox = document.getElementById('btn-fechar-key-box');
+const inputGeminiKey = document.getElementById('input-gemini-key');
+const btnSalvarGeminiKey = document.getElementById('btn-salvar-gemini-key');
+const aiLoadingBox = document.getElementById('ai-loading-box');
+const aiLoadingMsg = document.getElementById('ai-loading-msg');
+const aiResultadoBox = document.getElementById('ai-resultado-box');
+
+function obterChaveGemini() {
+  return localStorage.getItem('geofish_gemini_api_key') || 
+         (typeof window.GEMINI_API_KEY === 'string' ? window.GEMINI_API_KEY : '') ||
+         (window.__ENV__ && window.__ENV__.GEMINI_API_KEY ? window.__ENV__.GEMINI_API_KEY : '');
+}
+
+if (btnConfigGemini && aiKeyBox) {
+  btnConfigGemini.addEventListener('click', () => {
+    aiKeyBox.classList.toggle('hidden');
+    if (!aiKeyBox.classList.contains('hidden') && inputGeminiKey) {
+      inputGeminiKey.value = obterChaveGemini();
+      inputGeminiKey.focus();
+    }
+  });
+}
+
+if (btnFecharKeyBox && aiKeyBox) {
+  btnFecharKeyBox.addEventListener('click', () => {
+    aiKeyBox.classList.add('hidden');
+  });
+}
+
+if (btnSalvarGeminiKey && inputGeminiKey) {
+  btnSalvarGeminiKey.addEventListener('click', () => {
+    const val = inputGeminiKey.value.trim();
+    if (!val) {
+      localStorage.removeItem('geofish_gemini_api_key');
+      showToast('Chave da API removida.');
+    } else {
+      localStorage.setItem('geofish_gemini_api_key', val);
+      showToast('Chave da Google Gemini API salva!');
+    }
+    if (aiKeyBox) aiKeyBox.classList.add('hidden');
+  });
+}
+
+async function analisarFotoComIA() {
+  if (!currentBase64Diario) {
+    vibrar(30);
+    return showToast('Tire ou selecione uma foto do peixe primeiro!');
+  }
+
+  if (!navigator.onLine) {
+    vibrar(30);
+    return showToast('📡 Sem sinal de internet. Use a régua offline para conferir a medida legal.');
+  }
+
+  const apiKey = obterChaveGemini();
+  if (!apiKey) {
+    if (aiKeyBox) {
+      aiKeyBox.classList.remove('hidden');
+      if (inputGeminiKey) inputGeminiKey.focus();
+    }
+    vibrar(30);
+    return showToast('Insira sua chave gratuita do Google AI Studio para ativar o Ictiólogo IA.');
+  }
+
+  if (btnIaIdentificar) btnIaIdentificar.disabled = true;
+  if (aiLoadingBox) aiLoadingBox.classList.remove('hidden');
+  if (aiResultadoBox) {
+    aiResultadoBox.classList.add('hidden');
+    aiResultadoBox.innerHTML = '';
+  }
+
+  try {
+    const commaIdx = currentBase64Diario.indexOf(',');
+    const metaPart = currentBase64Diario.substring(0, commaIdx);
+    const base64Data = currentBase64Diario.substring(commaIdx + 1);
+    const mimeMatch = metaPart.match(/:(.*?);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+
+    const systemPrompt = `Você é um ictiólogo e fiscal ambiental de referência na Bacia do Rio Miranda e Pantanal de Mato Grosso do Sul, especialista no Decreto Estadual nº 15.166/MS (Cota Zero para transporte rodoviário, consumo local, medidas mínimas e máximas de captura) e Lei Estadual de Proteção ao Dourado.
+Analise a imagem deste peixe e responda EXCLUSIVAMENTE em formato JSON puro, sem crases de markdown e sem texto antes ou depois:
+{
+  "especie": "Nome Comum (ex: Pintado, Pacu, Cachara, Jaú, Dourado, Piraputanga, Curimbatá, Piavuçu, Barbado)",
+  "nomeCientifico": "Nome científico em latim",
+  "confianca": "Alta, Média ou Baixa",
+  "tamanhoEstimadoCm": null,
+  "medidaMinima": 85,
+  "medidaMaxima": 125,
+  "statusLegal": "PERMITIDO CONSUMO LOCAL | PROIBIDO TOTAL (COTA ZERO) | ATENÇÃO À FAIXA LEGAL",
+  "regraTexto": "Explicação resumida das regras do IMASUL MS para a espécie",
+  "dicaPantaneira": "Dica prática pantaneira sobre soltura, manuseio seguro ou biologia do peixe"
+}`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: systemPrompt },
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
+                }
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.1,
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      const msg = errData?.error?.message || `Erro HTTP ${resp.status}`;
+      throw new Error(msg);
+    }
+
+    const data = await resp.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) throw new Error('Resposta vazia da IA Gemini.');
+
+    let resultado;
+    try {
+      resultado = JSON.parse(rawText.trim());
+    } catch (_) {
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) resultado = JSON.parse(jsonMatch[0]);
+      else throw new Error('Não foi possível interpretar o retorno da IA.');
+    }
+
+    // Auto-preenche o select de espécies
+    if (selectEspecieDiario && resultado.especie) {
+      const especieNorm = resultado.especie.toLowerCase();
+      for (const opt of selectEspecieDiario.options) {
+        const valNorm = opt.value.toLowerCase();
+        const textNorm = opt.text.toLowerCase();
+        if (especieNorm.includes(valNorm) || textNorm.includes(especieNorm)) {
+          selectEspecieDiario.value = opt.value;
+          break;
+        }
+      }
+    }
+
+    // Preenche tamanho se estimado
+    if (inputTamanhoDiario && resultado.tamanhoEstimadoCm && !inputTamanhoDiario.value) {
+      inputTamanhoDiario.value = resultado.tamanhoEstimadoCm;
+    }
+
+    // Determina badge e cores
+    let statusClass = 'legal';
+    let badgeClass = 'badge-permitido';
+    const statusUpper = (resultado.statusLegal || '').toUpperCase();
+
+    if (statusUpper.includes('PROIBIDO') || (resultado.especie || '').toLowerCase().includes('dourado')) {
+      statusClass = 'proibido';
+      badgeClass = 'badge-proibido';
+    } else if (statusUpper.includes('ATENÇÃO') || statusUpper.includes('FAIXA') || statusUpper.includes('FORA')) {
+      statusClass = 'alerta';
+      badgeClass = 'badge-atencao';
+    }
+
+    let faixaTexto = '';
+    if (resultado.medidaMinima && resultado.medidaMaxima) {
+      faixaTexto = `<div style="font-size: 0.78rem; color: #475569; margin-top: 4px;">📏 <strong>Faixa legal:</strong> ${resultado.medidaMinima} cm a ${resultado.medidaMaxima} cm</div>`;
+    } else if (resultado.medidaMinima) {
+      faixaTexto = `<div style="font-size: 0.78rem; color: #475569; margin-top: 4px;">📏 <strong>Tamanho Mínimo Legal:</strong> ${resultado.medidaMinima} cm</div>`;
+    }
+
+    if (aiResultadoBox) {
+      aiResultadoBox.className = `ai-resultado-box ${statusClass}`;
+      aiResultadoBox.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <span class="ai-badge ${badgeClass}">${escapeHTML(resultado.statusLegal || 'Identificado')}</span>
+            <h4 style="font-size: 0.95rem; color: #0f172a; margin-top: 3px; font-weight: 800;">
+              🐟 ${escapeHTML(resultado.especie)}
+              <span style="font-size: 0.78rem; color: #64748b; font-weight: 400; font-style: italic;">(${escapeHTML(resultado.nomeCientifico || '')})</span>
+            </h4>
+          </div>
+          <span style="font-size: 0.7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">Confiança: ${escapeHTML(resultado.confianca || 'Normal')}</span>
+        </div>
+        <p style="font-size: 0.8rem; color: #334155; margin-top: 6px; line-height: 1.4;">
+          <strong>⚖️ Regra MS:</strong> ${escapeHTML(resultado.regraTexto || 'Consulte o Decreto Estadual 15.166/MS.')}
+        </p>
+        ${faixaTexto}
+        ${resultado.dicaPantaneira ? `
+          <p style="font-size: 0.76rem; color: #0369a1; margin-top: 6px; background: #f0f9ff; padding: 6px 8px; border-radius: 6px; line-height: 1.35;">
+            💡 <strong>Dica Pantaneira:</strong> ${escapeHTML(resultado.dicaPantaneira)}
+          </p>
+        ` : ''}
+      `;
+      aiResultadoBox.classList.remove('hidden');
+    }
+
+    vibrar([30, 60, 30]);
+    showToast(`Identificado: ${resultado.especie}!`);
+  } catch (err) {
+    console.error('Erro na identificação com Gemini:', err);
+    vibrar(40);
+    showToast(`Erro na IA: ${err.message || 'Verifique sua chave ou conexão.'}`);
+    if (aiResultadoBox) {
+      aiResultadoBox.className = 'ai-resultado-box alerta';
+      aiResultadoBox.innerHTML = `
+        <p style="font-size: 0.8rem; color: #b45309;">
+          ⚠️ <strong>Não foi possível identificar:</strong> ${escapeHTML(err.message)}
+        </p>
+        <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+          Verifique se a foto está nítida ou clique na engrenagem ⚙️ para conferir sua chave da Google Gemini API.
+        </p>
+      `;
+      aiResultadoBox.classList.remove('hidden');
+    }
+  } finally {
+    if (btnIaIdentificar) btnIaIdentificar.disabled = false;
+    if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
+  }
+}
+
+if (btnIaIdentificar) {
+  btnIaIdentificar.addEventListener('click', analisarFotoComIA);
+}
+
 if (btnSalvarDiario) {
   btnSalvarDiario.addEventListener('click', async () => {
     if (!currentBase64Diario) return showToast('Tire uma foto do troféu primeiro!');
@@ -2070,6 +2312,10 @@ if (btnSalvarDiario) {
       imgDiario.src = '';
       previewBoxDiario.classList.remove('has-image');
       inputTamanhoDiario.value = '';
+      if (aiResultadoBox) {
+        aiResultadoBox.classList.add('hidden');
+        aiResultadoBox.innerHTML = '';
+      }
       
       if (trofeu.synced === 1) simularEnvioAoServidor(trofeu, 'Pesquisa de Repovoamento');
       renderizarTrofeusNoMapa();
@@ -2212,27 +2458,138 @@ if (btnVerAlertaRegras) {
   });
 }
 
-// Modal de Parceiros & Pousadas
+// Modal Central de Parcerias & Cadastros Comunitários
 const modalParceiros = document.getElementById('modal-parceiros');
 const btnParceirosTopo = document.getElementById('btn-parceiros-topo');
 const btnFecharParceiros = document.getElementById('btn-fechar-parceiros');
 const footerBtnParceiros = document.getElementById('footer-btn-parceiros');
 const footerBtnPiloteiros = document.getElementById('footer-btn-piloteiros');
 
-function abrirModalParceiros() {
-  if (modalParceiros) {
-    vibrar(25);
-    modalParceiros.classList.remove('hidden');
+const tabBtnPousadas = document.getElementById('tab-btn-pousadas');
+const tabBtnPiloteiros = document.getElementById('tab-btn-piloteiros');
+const tabPanePousadas = document.getElementById('tab-pane-pousadas');
+const tabPanePiloteiros = document.getElementById('tab-pane-piloteiros');
+
+function alternarAbaParcerias(aba = 'pousadas') {
+  vibrar(20);
+  if (aba === 'piloteiros') {
+    tabBtnPiloteiros?.classList.add('active');
+    tabBtnPousadas?.classList.remove('active');
+    tabBtnPiloteiros?.setAttribute('aria-selected', 'true');
+    tabBtnPousadas?.setAttribute('aria-selected', 'false');
+    tabPanePiloteiros?.classList.remove('hidden');
+    tabPanePousadas?.classList.add('hidden');
+  } else {
+    tabBtnPousadas?.classList.add('active');
+    tabBtnPiloteiros?.classList.remove('active');
+    tabBtnPousadas?.setAttribute('aria-selected', 'true');
+    tabBtnPiloteiros?.setAttribute('aria-selected', 'false');
+    tabPanePousadas?.classList.remove('hidden');
+    tabPanePiloteiros?.classList.add('hidden');
   }
 }
+
+if (tabBtnPousadas) tabBtnPousadas.addEventListener('click', () => alternarAbaParcerias('pousadas'));
+if (tabBtnPiloteiros) tabBtnPiloteiros.addEventListener('click', () => alternarAbaParcerias('piloteiros'));
+
+function abrirModalParcerias(aba = 'pousadas') {
+  if (modalParceiros) {
+    alternarAbaParcerias(aba);
+    modalParceiros.classList.remove('hidden');
+    vibrar(25);
+  }
+}
+
 function fecharModalParceiros() {
   if (modalParceiros) modalParceiros.classList.add('hidden');
 }
 
-if (btnParceirosTopo) btnParceirosTopo.addEventListener('click', abrirModalParceiros);
-if (footerBtnParceiros) footerBtnParceiros.addEventListener('click', abrirModalParceiros);
-if (footerBtnPiloteiros) footerBtnPiloteiros.addEventListener('click', abrirModalParceiros);
+window.abrirModalParceriasTab = (aba) => abrirModalParcerias(aba);
+window.abrirModalParceiros = () => abrirModalParcerias('pousadas');
+
+if (btnParceirosTopo) btnParceirosTopo.addEventListener('click', () => abrirModalParcerias('pousadas'));
+if (footerBtnParceiros) footerBtnParceiros.addEventListener('click', () => abrirModalParcerias('pousadas'));
+if (footerBtnPiloteiros) footerBtnPiloteiros.addEventListener('click', () => abrirModalParcerias('piloteiros'));
 if (btnFecharParceiros) btnFecharParceiros.addEventListener('click', fecharModalParceiros);
+
+// Envio de Proposta Comercial de Pousada / Rancho via WhatsApp
+const btnEnviarPropostaPousada = document.getElementById('btn-enviar-proposta-pousada');
+if (btnEnviarPropostaPousada) {
+  btnEnviarPropostaPousada.addEventListener('click', () => {
+    const nome = document.getElementById('pousada-nome')?.value.trim();
+    const rio = document.getElementById('pousada-rio')?.value;
+    const wpp = document.getElementById('pousada-wpp')?.value.trim();
+    const rampa = document.getElementById('pousada-rampa')?.value.trim();
+
+    if (!nome) {
+      vibrar(30);
+      return showToast('Informe o nome da pousada ou rancho.');
+    }
+    if (!wpp) {
+      vibrar(30);
+      return showToast('Informe o WhatsApp para contato de reservas.');
+    }
+
+    const comodidades = [];
+    document.querySelectorAll('input[name="pousada-amenity"]:checked').forEach(cb => comodidades.push(cb.value));
+
+    const texto = `*SOLICITAÇÃO DE ANÚNCIO - GEOFISH MS (Pousadas & Ranchos)*\n\n` +
+      `🏨 *Estabelecimento:* ${nome}\n` +
+      `📍 *Localização:* ${rio}\n` +
+      `💬 *WhatsApp Reservas:* ${wpp}\n` +
+      `⚓ *Rampa/Estrutura:* ${rampa || 'A informar'}\n` +
+      `✨ *Comodidades:* ${comodidades.length > 0 ? comodidades.join(', ') : 'Padrão'}\n\n` +
+      `Olá! Tenho interesse no plano comercial de divulgação da temporada para destacar meu estabelecimento no WebGIS da Bacia do Miranda!`;
+
+    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+    window.open(urlWpp, '_blank');
+    vibrar(30);
+    showToast('Abrindo WhatsApp para enviar proposta comercial...');
+  });
+}
+
+// Envio de Cadastro Gratuito de Piloteiro Z-1 / Z-7 via WhatsApp
+const btnEnviarCadastroGuia = document.getElementById('btn-enviar-cadastro-guia');
+if (btnEnviarCadastroGuia) {
+  btnEnviarCadastroGuia.addEventListener('click', () => {
+    const nome = document.getElementById('guia-nome')?.value.trim();
+    const apelido = document.getElementById('guia-apelido')?.value.trim();
+    const colonia = document.getElementById('guia-colonia')?.value;
+    const rgp = document.getElementById('guia-rgp')?.value.trim();
+    const porto = document.getElementById('guia-porto')?.value.trim();
+    const wpp = document.getElementById('guia-wpp')?.value.trim();
+
+    if (!nome) {
+      vibrar(30);
+      return showToast('Informe o seu nome completo.');
+    }
+    if (!porto) {
+      vibrar(30);
+      return showToast('Informe seu porto de saída habitual.');
+    }
+    if (!wpp) {
+      vibrar(30);
+      return showToast('Informe o WhatsApp para os pescadores te contatarem.');
+    }
+
+    const diferenciais = [];
+    document.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
+
+    const texto = `*CADASTRO GRATUITO DE PILOTEIRO - GEOFISH MS*\n\n` +
+      `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
+      `📜 *Colônia de Filiação:* ${colonia}\n` +
+      `🆔 *RGP / Carteira:* ${rgp || 'Em regularização / Apresentará'}\n` +
+      `📍 *Porto de Saída:* ${porto}\n` +
+      `💬 *WhatsApp Turistas:* ${wpp}\n` +
+      `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
+      `Olá! Sou piloteiro da região e gostaria de ativar meu ponto e contato GRATUITAMENTE no mapa do GeoFish MS!`;
+
+    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+    window.open(urlWpp, '_blank');
+    vibrar(30);
+    showToast('Abrindo WhatsApp para ativação gratuita do guia...');
+  });
+}
 
 // Modal de Apoio PIX
 const modalApoiePix = document.getElementById('modal-apoie-pix');
