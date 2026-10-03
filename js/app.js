@@ -1732,3 +1732,99 @@ function inicializarBuscaLocal() {
     }
   });
 }
+
+
+// 16. Modal S.O.S e Utilidade Pública (Integração GPS e WhatsApp)
+const modalSos = document.getElementById('modal-sos');
+const btnAbrirSos = document.getElementById('btn-sos');
+const btnFecharSos = document.getElementById('btn-fechar-sos');
+const sosLocationText = document.getElementById('sos-location-text');
+const btnSosGps = document.getElementById('btn-sos-gps');
+const btnSosWa = document.getElementById('btn-sos-wa');
+
+let ultimaLocalizacaoSos = null;
+
+function abrirModalSos() {
+  if (!modalSos) return;
+  modalSos.classList.remove('hidden');
+  modalSos.setAttribute('aria-hidden', 'false');
+  vibrar(30);
+  try { history.pushState({ modal: 'sos' }, ''); } catch (_) {}
+  atualizarLocalizacaoSos();
+}
+
+function fecharModalSos() {
+  if (!modalSos) return;
+  modalSos.classList.add('hidden');
+  modalSos.setAttribute('aria-hidden', 'true');
+}
+
+function atualizarLocalizacaoSos() {
+  if (!('geolocation' in navigator)) {
+    if (sosLocationText) sosLocationText.innerHTML = 'GPS não suportado neste dispositivo.';
+    return;
+  }
+  
+  if (sosLocationText) sosLocationText.innerHTML = '<span class="spinner" style="display:inline-block; border-top-color:#0b4f6c; width:12px; height:12px;"></span> Buscando sinal de GPS...';
+  if (btnSosWa) btnSosWa.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const latFmt = lat.toFixed(5);
+      const lngFmt = lng.toFixed(5);
+      
+      const conformidade = avaliarConformidadePosicao(lat, lng);
+      let refLocal = 'Bacia do Rio Miranda / Pantanal MS';
+      
+      if (conformidade.apoio && conformidade.apoio.distanciaKm < 50) {
+         refLocal = `Aprox. ${conformidade.apoio.distanciaKm.toFixed(1)}km de ${conformidade.apoio.nome}`;
+      } else if (conformidade.trecho) {
+         refLocal = `Próximo ao ${conformidade.trecho.rio}`;
+      }
+
+      ultimaLocalizacaoSos = { lat: latFmt, lng: lngFmt, ref: refLocal };
+
+      if (sosLocationText) {
+        sosLocationText.innerHTML = `
+          Lat: <strong>${latFmt}</strong><br>
+          Long: <strong>${lngFmt}</strong><br>
+          <small style="color: #64748b; font-weight: 500; display: block; margin-top: 6px;">📍 ${escapeHTML(refLocal)}</small>
+        `;
+      }
+      if (btnSosWa) btnSosWa.disabled = false;
+    },
+    (err) => {
+      if (sosLocationText) sosLocationText.innerHTML = '<span style="color: #d32f2f;">Falha ao obter GPS. Verifique se a localização do celular está ativada e ao ar livre.</span>';
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+  );
+}
+
+if (btnAbrirSos) btnAbrirSos.addEventListener('click', abrirModalSos);
+if (btnFecharSos) btnFecharSos.addEventListener('click', fecharModalSos);
+if (btnSosGps) btnSosGps.addEventListener('click', atualizarLocalizacaoSos);
+
+if (btnSosWa) {
+  btnSosWa.addEventListener('click', () => {
+    if (!ultimaLocalizacaoSos) return;
+    vibrar(20);
+    const msg = `🚨 *S.O.S / Emergência Náutica*\n\nPreciso de apoio. Minha posição atual registrada pelo app GeoFish MS:\n\n📍 *Lat:* ${ultimaLocalizacaoSos.lat}\n📍 *Long:* ${ultimaLocalizacaoSos.lng}\n🗺️ *Referência:* ${ultimaLocalizacaoSos.ref}\n\nLink Google Maps:\nhttps://maps.google.com/?q=${ultimaLocalizacaoSos.lat},${ultimaLocalizacaoSos.lng}`;
+    const urlWa = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    window.open(urlWa, '_blank');
+  });
+}
+
+if (modalSos) {
+  modalSos.addEventListener('click', (e) => {
+    if (e.target === modalSos) fecharModalSos();
+  });
+}
+
+// Interceptar o fechamento do Modal SOS via Tecla ESC
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && typeof fecharModalSos === 'function') {
+    fecharModalSos();
+  }
+});
