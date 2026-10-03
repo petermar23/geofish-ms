@@ -596,6 +596,300 @@
     </div>
   </div>
 
+  <!-- ========================================================
+       CONTEÚDO DO PORTAL HUB (ABAIXO DO WEBGIS)
+       ======================================================== -->
+
+  <!-- SEÇÃO A: MONITORAMENTO HIDROLÓGICO EM TEMPO REAL (RÉGUAS ANA / CPRM / IMASUL) -->
+  <section id="secao-hidrologia" class="portal-section" aria-label="Monitoramento Hidrológico da Bacia">
+    <div class="portal-section-header">
+      <div class="section-tag">HIDROLOGIA & COTAS EM TEMPO REAL</div>
+      <h2 class="portal-section-title">🌊 Nível das Águas na Bacia do Rio Miranda</h2>
+      <p class="portal-section-desc">
+        Leituras e tendências fluviométricas das estações oficiais da Rede Hidrometeorológica Nacional (IMASUL / ANA / CPRM).
+      </p>
+    </div>
+
+    <div class="hydro-grid">
+      <!-- Estação 1: Miranda Cidade -->
+      <article class="hydro-card">
+        <div class="hydro-card-header">
+          <div>
+            <span class="hydro-river">Rio Miranda</span>
+            <h3 class="hydro-station">Estação Miranda (Cidade)</h3>
+          </div>
+          <span class="hydro-status status-normal">🟢 Normal</span>
+        </div>
+        <div class="hydro-gauge-box">
+          <div class="hydro-gauge-value">2,42 <span class="gauge-unit">m</span></div>
+          <div class="hydro-gauge-trend">Tendência: <strong>Estável (±2 cm/dia)</strong></div>
+        </div>
+        <div class="hydro-meta-list">
+          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>6,00 m</strong></div>
+          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>7,00 m</strong></div>
+          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>112 m³/s</strong></div>
+        </div>
+        <div class="hydro-fishing-hint">
+          🎣 <strong>Condição de Pesca:</strong> Calha estável com água limpa nos afluentes. Excelente para pesca de ceva de pacu e rodada no canal principal.
+        </div>
+      </article>
+
+      <!-- Estação 2: Aquidauana Ponte Velha -->
+      <article class="hydro-card">
+        <div class="hydro-card-header">
+          <div>
+            <span class="hydro-river">Rio Aquidauana</span>
+            <h3 class="hydro-station">Estação Ponte Velha</h3>
+          </div>
+          <span class="hydro-status status-normal">🟢 Normal</span>
+        </div>
+        <div class="hydro-gauge-box">
+          <div class="hydro-gauge-value">2,15 <span class="gauge-unit">m</span></div>
+          <div class="hydro-gauge-trend">Tendência: <strong>Em declive (-4 cm/dia)</strong></div>
+        </div>
+        <div class="hydro-meta-list">
+          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>7,00 m</strong></div>
+          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>8,00 m</strong></div>
+          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>74 m³/s</strong></div>
+        </div>
+        <div class="hydro-fishing-hint">
+          🎣 <strong>Condição de Pesca:</strong> Rio baixando; cardumes de pintado e cachara concentrando nas bocas de corixos e poços de corredeira.
+        </div>
+      </article>
+
+      <!-- Estação 3: Passo do Lontra -->
+      <article class="hydro-card">
+        <div class="hydro-card-header">
+          <div>
+            <span class="hydro-river">Rio Miranda / Foz Vermelho</span>
+            <h3 class="hydro-station">Estação Passo do Lontra</h3>
+          </div>
+          <span class="hydro-status status-atencao">🔵 Águas Médias</span>
+        </div>
+        <div class="hydro-gauge-box">
+          <div class="hydro-gauge-value">4,18 <span class="gauge-unit">m</span></div>
+          <div class="hydro-gauge-trend">Tendência: <strong>Subindo lento (+3 cm/dia)</strong></div>
+        </div>
+        <div class="hydro-meta-list">
+          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>5,50 m</strong></div>
+          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>6,20 m</strong></div>
+          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>185 m³/s</strong></div>
+        </div>
+        <div class="hydro-fishing-hint">
+          🎣 <strong>Condição de Pesca:</strong> Confluência pantaneira com ótima circulação náutica; alta atividade de peixes de couro nos remansos.
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SEÇÃO B: DUAS GRANDES COLUNAS TEMÁTICAS (PESCA & NÁUTICA - PADRÃO TEXAS TPWD) -->
+  <section class="tpwd-columns-section" aria-label="Guias Temáticos de Pesca e Navegação">
+    <div class="tpwd-container tpwd-columns-container">
+      
+      <!-- Coluna 1: Pesca no Pantanal -->
+      <article id="coluna-pesca" class="tpwd-theme-column">
+        <div class="column-header">
+          <div class="column-icon-wrap">🎣</div>
+          <h2 class="column-title">Pesca no Pantanal</h2>
+        </div>
+        <p class="column-summary">
+          Orientações essenciais para a prática legal e sustentável da pesca esportiva e amadora na calha do Rio Miranda e afluentes.
+        </p>
+
+        <ul class="column-resource-list">
+          <li>
+            <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="resource-item-link">
+              <div class="item-title">Emissão da Licença Digital IMASUL &rarr;</div>
+              <div class="item-sub">Obrigatória para pescar legalmente nas águas de Mato Grosso do Sul</div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" onclick="abrirModalEspecies()" class="resource-item-link">
+              <div class="item-title">Regulamentos e Cota Zero Rodoviária &rarr;</div>
+              <div class="item-sub">Decreto nº 15.166/19 e tabela de tamanhos mínimos e máximos</div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="resource-item-link">
+              <div class="item-title">Onde Pescar: Trechos &amp; Zonas no WebGIS &rarr;</div>
+              <div class="item-sub">Consulte no mapa se o trecho é Pesque e Solte, Cota Zero ou Reserva</div>
+            </a>
+          </li>
+          <li>
+            <a href="#secao-hidrologia" class="resource-item-link">
+              <div class="item-title">Boletins de Nível e Condições das Águas &rarr;</div>
+              <div class="item-sub">Monitoramento das réguas de Miranda, Aquidauana e Lontra</div>
+            </a>
+          </li>
+        </ul>
+      </article>
+
+      <!-- Coluna 2: Passeios de Barco & Náutica -->
+      <article id="coluna-nautica" class="tpwd-theme-column">
+        <div class="column-header">
+          <div class="column-icon-wrap">🚤</div>
+          <h2 class="column-title">Passeios de Barco &amp; Náutica</h2>
+        </div>
+        <p class="column-summary">
+          Infraestrutura portuária, segurança da navegação e diretório de serviços credenciados ao longo da bacia.
+        </p>
+
+        <ul class="column-resource-list">
+          <li>
+            <a href="javascript:void(0)" onclick="abrirConfirmacaoSos({tipo: 'call', numero: '185', servico: 'Marinha do Brasil (Capitania Fluvial)'})" class="resource-item-link">
+              <div class="item-title">Capitania Fluvial &amp; Marinha (Emergência 185) &rarr;</div>
+              <div class="item-sub">Normas da Capitania e fiscalização de habilitação na calha navegável</div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" onclick="abrirModalParceiros()" class="resource-item-link">
+              <div class="item-title">Guias Nativos Credenciados (Colônias Z-1 e Z-7) &rarr;</div>
+              <div class="item-sub">Piloteiros experientes para condução segura nos labirintos do Pantanal</div>
+            </a>
+          </li>
+          <li>
+            <a href="#secao-servicos" class="resource-item-link">
+              <div class="item-title">Ranchos, Pousadas e Apoio Náutico &rarr;</div>
+              <div class="item-sub">Descidas de barco, venda de tuvira, gelo e combustível náutico</div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)" onclick="abrirModalSos()" class="resource-item-link">
+              <div class="item-title">Central de Resgate S.O.S Fluvial &rarr;</div>
+              <div class="item-sub">Coordenadas de satélite prontas para envio aos Bombeiros e Marinha</div>
+            </a>
+          </li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SEÇÃO C: VITRINE DE POUSADAS, RANCHOS & PILOTEIROS NATIVOS (MONETIZAÇÃO COMUNITÁRIA) -->
+  <section id="secao-servicos" class="portal-section" aria-label="Operadores Locais e Pousadas">
+    <div class="portal-section-header">
+      <div class="section-tag">ECOTURISMO & SERVIÇOS NÁUTICOS</div>
+      <h2 class="portal-section-title">⚓ Pousadas, Ranchos & Piloteiros Nativos Credenciados</h2>
+      <p class="portal-section-desc">
+        Infraestrutura verificada e condutores das Colônias Z-1 (Miranda) e Z-7 (Aquidauana) para uma pescaria segura no Pantanal.
+      </p>
+    </div>
+
+    <div class="showcase-grid">
+      <!-- Parceiro 1 -->
+      <article class="showcase-card">
+        <div class="showcase-card-header">
+          <span class="showcase-type">POUSADA PESQUEIRA</span>
+          <h3 class="showcase-name">Pousada & Pesca Beira Rio</h3>
+          <span class="showcase-location">📍 Miranda, MS — Margem do Rio Miranda</span>
+        </div>
+        <p class="showcase-desc">
+          Rampa de concreto homologada para barcos de grande porte, aluguel de voadeiras 40hp, apartamentos climatizados, restaurante típico e piloteiros pantaneiros nativos.
+        </p>
+        <div class="showcase-amenities">
+          <span>⚓ Rampa Concreto</span>
+          <span>🚤 Barcos 40hp</span>
+          <span>🧊 Isca Viva</span>
+          <span>📶 Wi-Fi</span>
+        </div>
+        <div class="showcase-footer">
+          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Vi%20sua%20pousada%20no%20GeoFish%20MS%20e%20gostaria%20de%20informa%C3%A7%C3%B5es%20de%20reserva." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
+            💬 Contatar via WhatsApp
+          </a>
+        </div>
+      </article>
+
+      <!-- Parceiro 2 -->
+      <article class="showcase-card">
+        <div class="showcase-card-header">
+          <span class="showcase-type">HOTEL PANTANEIRO</span>
+          <h3 class="showcase-name">Hotel Passo do Lontra</h3>
+          <span class="showcase-location">📍 Estrada Parque MS-184 — Foz do Rio Vermelho</span>
+        </div>
+        <p class="showcase-desc">
+          Localização estratégica na foz do Rio Vermelho no Rio Miranda. Píer flutuante, posto de combustível náutico, venda de tuvira e barcos de borda alta homologados.
+        </p>
+        <div class="showcase-amenities">
+          <span>⛽ Gasolina Náutica</span>
+          <span>🛥️ Píer Flutuante</span>
+          <span>🎣 Guia Local</span>
+          <span>🍽️ Pensão Completa</span>
+        </div>
+        <div class="showcase-footer">
+          <a href="https://api.whatsapp.com/send?phone=5567999990002&text=Ol%C3%A1!%20Vi%20o%20Passo%20do%20Lontra%20no%20GeoFish%20MS%20e%20gostaria%20de%20reservar." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
+            💬 Contatar via WhatsApp
+          </a>
+        </div>
+      </article>
+
+      <!-- Piloteiro 1: Colônia Z-1 -->
+      <article class="showcase-card card-guide">
+        <div class="showcase-card-header">
+          <span class="showcase-type badge-z1">COLÔNIA Z-1 MIRANDA</span>
+          <h3 class="showcase-name">Mestre Dico (Piloteiro Nativo)</h3>
+          <span class="showcase-location">📍 Porto Geral de Miranda</span>
+        </div>
+        <p class="showcase-desc">
+          28 anos de navegação profissional na Bacia do Miranda e Rio Salobra. Especialista em rodada de pintado, pesca esportiva de ceva e leitura de rebojos do rio.
+        </p>
+        <div class="showcase-amenities">
+          <span>📜 Credenciado Z-1</span>
+          <span>🦺 Coletes Homologados</span>
+          <span>🎯 Conhecimento do Rio</span>
+        </div>
+        <div class="showcase-footer">
+          <a href="https://api.whatsapp.com/send?phone=5567999990003&text=Ol%C3%A1%20Mestre%20Dico!%20Vi%20seu%20contato%20na%20Col%C3%B4nia%20Z-1%20do%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
+            💬 Contratar Piloteiro
+          </a>
+        </div>
+      </article>
+
+      <!-- Piloteiro 2: Colônia Z-7 -->
+      <article class="showcase-card card-guide">
+        <div class="showcase-card-header">
+          <span class="showcase-type badge-z7">COLÔNIA Z-7 AQUIDAUANA</span>
+          <h3 class="showcase-name">Capitão Zé Maria (Piloteiro Nativo)</h3>
+          <span class="showcase-location">📍 Aquidauana / Corredor das Corredeiras</span>
+        </div>
+        <p class="showcase-desc">
+          Condutor ribeirinho experiente em trechos de corredeiras e restingas do Rio Aquidauana. Condução segura, pesca com anzol sem farpa e boas práticas de soltura.
+        </p>
+        <div class="showcase-amenities">
+          <span>📜 Credenciado Z-7</span>
+          <span>🚤 Voadeira 25hp</span>
+          <span>🐟 Pesque & Solte</span>
+        </div>
+        <div class="showcase-footer">
+          <a href="https://api.whatsapp.com/send?phone=5567999990004&text=Ol%C3%A1%20Capit%C3%A3o%20Z%C3%A9%20Maria!%20Vi%20seu%20contato%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
+            💬 Contratar Piloteiro
+          </a>
+        </div>
+      </article>
+
+      <!-- Card de Monetização e Apoio Comunitário -->
+      <article class="showcase-card card-sponsor" id="card-apoio-comunitario">
+        <div class="showcase-card-header">
+          <span class="showcase-type badge-sponsor" style="background: #ecfdf5; color: #065f46;">DIVULGAÇÃO &amp; APOIO LOCAL</span>
+          <h3 class="showcase-name">Divulgue sua Pousada, Rancho ou Barco</h3>
+          <span class="showcase-location">📍 Miranda, Aquidauana e Passo do Lontra</span>
+        </div>
+        <p class="showcase-desc">
+          Este portal é uma iniciativa cidadã sem verba pública. Ao divulgar sua pousada, rancho ou loja de pesca aqui, você conecta seu negócio diretamente ao pescador esportivo e ajuda a manter a plataforma gratuita para os piloteiros nativos.
+        </p>
+        <div class="showcase-amenities">
+          <span>⭐ Destaque no Portal</span>
+          <span>📍 Ponto no WebGIS</span>
+          <span>📲 Botão Direto para seu WhatsApp</span>
+        </div>
+        <div class="showcase-footer">
+          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Sou%20da%20regi%C3%A3o%20e%20gostaria%20de%20apoiar%20ou%20anunciar%20minha%20pousada/servi%C3%A7o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff;">
+            💬 Anunciar ou Apoiar via WhatsApp
+          </a>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- 5. Rodapé Institucional Nobre do Portal (Padrão Texas TPWD & Comunidade) -->
   <footer id="portal-footer" class="portal-footer" role="contentinfo">
     <div class="portal-footer-inner">
