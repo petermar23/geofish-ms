@@ -1667,3 +1667,113 @@ body.sheet-open .btn-sos {
   min-height: 44px;
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
+
+
+/* ========================================================
+   RESPONSIVIDADE PARA DESKTOP E NOTEBOOKS (Telas Grandes)
+   ======================================================== */
+@media (min-width: 992px) {
+  /* O Mapa é empurrado para a direita para dar espaço à barra lateral */
+  #map-container {
+    left: 80px;
+    height: calc(100vh - 56px); /* Altura total menos o header */
+  }
+
+  /* 1. Transforma a Barra Inferior (Android) em Barra Lateral Esquerda */
+  .android-bottom-bar {
+    top: 56px; /* Fica abaixo do Header */
+    left: 0;
+    bottom: 0;
+    width: 80px;
+    height: calc(100vh - 56px);
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px;
+    border-top: none;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    z-index: 2000;
+  }
+
+  .nav-item {
+    margin-bottom: 24px;
+    padding: 10px 5px;
+  }
+  .nav-item:hover {
+    background-color: var(--primary-light);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* 2. Barra de Busca e Filtros - Ajusta posição para não sobrepor a Sidebar */
+  .quick-filters-bar {
+    top: 76px;
+    left: 100px; /* Afasta da sidebar */
+    max-width: 700px; /* Maior em notebooks */
+  }
+  
+  .local-search-container {
+    max-width: 400px;
+  }
+
+  /* 3. Transforma o Bottom Sheet em um Painel Lateral Esquerdo (estilo Google Maps) */
+  .bottom-sheet {
+    top: 56px;
+    left: 80px; /* Começa ao lado da sidebar */
+    bottom: 0;
+    width: 420px;
+    max-height: calc(100vh - 56px);
+    border-radius: 0; /* Remove borda de celular */
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    transform: translateX(-100%); /* Escondido para a esquerda */
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .bottom-sheet:not(.hidden) {
+    transform: translateX(0); /* Desliza suavemente da esquerda para a direita */
+  }
+  
+  /* Remove a barrinha de arrastar nativa de celular */
+  .sheet-handle-bar {
+    display: none;
+  }
+
+  .sheet-content {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* 4. Ajuste Inteligente do Botão S.O.S */
+  .btn-sos {
+    left: 100px; /* Fica ao lado da sidebar */
+    bottom: 30px;
+  }
+  
+  body.sheet-open .btn-sos {
+    bottom: 30px; /* Não sobe mais no desktop, pois o painel agora é lateral */
+    left: 520px; /* Desvia do painel lateral quando ele abre */
+  }
+
+  /* 5. Modais Centralizados Maiores */
+  .modal-dialog {
+    max-width: 650px; /* Expande modais em telas grandes */
+  }
+  
+  /* Divide a lista de espécies e telefones em 2 colunas no desktop */
+  .species-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Ajuste das Notificações Toast */
+  #toast-container {
+    bottom: 30px;
+    left: 100px;
+    right: auto;
+    width: auto;
+    min-width: 300px;
+  }
+}
