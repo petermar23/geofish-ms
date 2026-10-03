@@ -923,11 +923,19 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => {
-        // Service worker registrado
+        reg.update();
       })
       .catch((err) => {
         console.warn('Erro ao registrar Service Worker do PWA:', err);
       });
+  });
+
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!reloading) {
+      reloading = true;
+      window.location.reload();
+    }
   });
 }
 
