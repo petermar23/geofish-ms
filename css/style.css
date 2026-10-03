@@ -1869,3 +1869,37 @@ body.sheet-open .fab-container {
 .photo-preview-box.has-image .preview-placeholder {
   display: none;
 }
+
+/* ========================================================
+   TERMOS DE ACEITE (LGPD E JURÍDICO)
+   ======================================================== */
+.lgpd-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.lgpd-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #0b4f6c;
+}
+
+.lgpd-text {
+  font-size: 0.75rem;
+  color: #475569;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lgpd-text strong {
+  color: #0f172a;
+}

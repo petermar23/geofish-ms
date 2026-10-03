@@ -1960,10 +1960,13 @@ if (btnAbrirDiario) btnAbrirDiario.addEventListener('click', () => {
 });
 if (btnFecharDiario) btnFecharDiario.addEventListener('click', () => modalDiario.classList.add('hidden'));
 
+const cbLgpdDiario = document.getElementById('cb-lgpd-diario');
+
 if (btnSalvarDiario) {
   btnSalvarDiario.addEventListener('click', async () => {
     if (!currentBase64Diario) return showToast('Tire uma foto do troféu primeiro!');
     if (!inputTamanhoDiario.value) return showToast('Informe o tamanho do peixe.');
+    if (cbLgpdDiario && !cbLgpdDiario.checked) return showToast('Você precisa aceitar o Termo de Consentimento.');
     if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
 
     btnSalvarDiario.disabled = true;
@@ -2005,9 +2008,12 @@ if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', () => {
 });
 if (btnFecharDenuncia) btnFecharDenuncia.addEventListener('click', () => modalDenuncia.classList.add('hidden'));
 
+const cbLgpdDenuncia = document.getElementById('cb-lgpd-denuncia');
+
 if (btnSalvarDenuncia) {
   btnSalvarDenuncia.addEventListener('click', async () => {
     if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
+    if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
     if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
 
     btnSalvarDenuncia.disabled = true;
