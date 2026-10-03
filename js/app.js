@@ -2827,6 +2827,22 @@ if (btnQuickSos) {
   });
 }
 
+const btnHeroSpecies = document.getElementById('btn-hero-species');
+if (btnHeroSpecies) {
+  btnHeroSpecies.addEventListener('click', () => {
+    vibrar(35);
+    abrirModalEspecies();
+  });
+}
+
+const btnHeroParceiros = document.getElementById('btn-hero-parceiros');
+if (btnHeroParceiros) {
+  btnHeroParceiros.addEventListener('click', () => {
+    vibrar(35);
+    abrirModalParcerias('pousadas');
+  });
+}
+
 // ========================================================
 // 20. CARTILHA OFICIAL DO PESCADOR (BPMA / PMA-MS)
 // ========================================================

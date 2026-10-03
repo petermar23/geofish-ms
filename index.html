@@ -32,58 +32,160 @@
 </head>
 <body>
 
-  <!-- 1. Barra de Autenticidade e Cidadania Comunitária (Estilo Texas TPWD) -->
-  <div class="gov-auth-bar" role="banner" aria-label="Identificação Territorial Comunitária">
-    <div class="gov-auth-inner">
+  <!-- 1. Barra de Identificação Territorial e Iniciativa Cidadã -->
+  <div class="gov-auth-bar" role="region" aria-label="Identificação Comunitária Independente">
+    <div class="tpwd-container gov-auth-inner">
       <div class="gov-auth-flag">
-        <span class="flag-pantanal" aria-hidden="true">🌿💧</span>
-        <span>Iniciativa Cidadã Independente &bull; <strong>Bacia do Rio Miranda / Pantanal MS</strong></span>
+        <span class="flag-ms" aria-hidden="true">🟩⬜🟦</span>
+        <span>Iniciativa Cidadã &bull; <strong>Guia Aberto &amp; Comunitário da Bacia do Rio Miranda / MS</strong></span>
       </div>
       <div class="gov-auth-badge">
-        <span>Apoio Comunitário: Ribeirinhos, Piloteiros &bull; Colônias Z-1 e Z-7</span>
+        <span aria-hidden="true">🌿</span> Ecoturismo de Base Comunitária &bull; Apoio às Colônias Z-1 e Z-7
       </div>
     </div>
   </div>
 
-  <!-- 2. Faixa de Alerta Oficial (Cota Zero Rodoviária e Defeso) -->
-  <aside class="tpwd-alert-bar" role="alert" aria-label="Aviso Legal e Normativo">
-    <div class="tpwd-alert-inner">
+  <!-- 2. Faixa de Alerta Oficial (Cota Zero e Pesque & Solte) -->
+  <aside class="tpwd-alert-bar" role="region" aria-label="Aviso Legal e Normativo">
+    <div class="tpwd-container tpwd-alert-inner">
       <div class="tpwd-alert-content">
         <span class="alert-icon" aria-hidden="true">⚠️</span>
         <div class="alert-text">
-          <strong>ALERTA AMBIENTAL (Decreto 15.166/MS):</strong> Transporte de pescado é <strong>COTA ZERO (0 kg)</strong> nas rodovias. Consumo permitido apenas no barco/rancho.
+          <strong>AVISO AO PESCADOR:</strong> Transporte de pescado proibido nas rodovias de MS (Cota Zero Rodoviária). Pesque, solte e valorize o turismo e os piloteiros locais!
         </div>
       </div>
-      <button id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Regras &rarr;</button>
+      <a href="#secao-cartilha" id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Normas Vigentes &rarr;</a>
     </div>
   </aside>
 
-  <!-- Cabeçalho Principal do Hub -->
-  <header id="header">
-    <div class="brand-wrapper">
-      <img src="icons/favicon-32.png" alt="GeoFish MS" class="brand-logo" width="32" height="32">
-      <div>
-        <h1 class="brand-title">GeoFish MS</h1>
-        <span class="brand-subtitle">Guia Comunitário &bull; Inteligência Náutica</span>
+  <!-- 3. Header Principal Escuro Institucional (Estilo Texas Parks and Wildlife) -->
+  <header id="header" class="tpwd-header" role="banner">
+    <div class="tpwd-container tpwd-header-inner">
+      <div class="tpwd-brand">
+        <a href="#secao-mapa" class="brand-link" aria-label="Página Inicial do GeoFish MS">
+          <div class="brand-logo-symbol" aria-hidden="true">🐟</div>
+          <div class="brand-text">
+            <span class="brand-title">GeoFish <strong>MS</strong></span>
+            <span class="brand-sub">Guia Aberto da Bacia do Rio Miranda</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Navegação Desktop -->
+      <nav class="tpwd-nav" aria-label="Navegação Principal">
+        <ul class="tpwd-menu">
+          <li><a href="#secao-mapa" class="tpwd-menu-link active">🗺️ Mapa WebGIS</a></li>
+          <li><a href="#coluna-pesca" class="tpwd-menu-link">🎣 Pesca Esportiva</a></li>
+          <li><a href="#coluna-nautica" class="tpwd-menu-link">🚤 Náutica &amp; Rampas</a></li>
+          <li><a href="#secao-hidrologia" class="tpwd-menu-link">🌊 Nível dos Rios</a></li>
+          <li><a href="#secao-cartilha" class="tpwd-menu-link">📋 Normas &amp; Defeso</a></li>
+        </ul>
+      </nav>
+
+      <!-- Ações do Header (Status PWA Offline, Instalar e Sobre) -->
+      <div class="header-actions">
+        <span id="status-rede"><span class="status-dot"></span> Online</span>
+        <button id="btn-parceiros-topo" class="btn-header" style="display: none;" title="Rede de parceiros locais e pousadas">
+          🤝 Parceiros
+        </button>
+        <button id="btn-install-pwa" type="button" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo">
+          📲 Instalar
+        </button>
+        <button id="btn-sobre" type="button" class="btn-header" title="Informações sobre o projeto comunitário">
+          ℹ️ Sobre
+        </button>
       </div>
     </div>
-    
-    <div class="header-actions">
-      <span id="status-rede"><span class="status-dot"></span> Online</span>
-      <button id="btn-parceiros-topo" class="btn-header" title="Rede de parceiros locais e pousadas">
-        🤝 Parceiros
-      </button>
-      <button id="btn-apoie-pix-topo" class="btn-header btn-pix-highlight" title="Apoie esta iniciativa independente">
-        ☕ Apoie
-      </button>
-      <button id="btn-install-pwa" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo no Android ou computador">
-        📲 App
-      </button>
-      <button id="btn-sobre" class="btn-header" title="Informações e legislação de pesca">
-        ℹ️ Sobre
+  </header>
+
+  <!-- 4. Barra Utilitária de Ações Rápidas (Quick Bar com Ícones) -->
+  <nav class="tpwd-quick-bar" aria-label="Acesso Rápido de Utilidade do Pescador">
+    <div class="tpwd-container tpwd-quick-inner">
+      <a href="#secao-mapa" class="quick-btn">
+        <span class="quick-icon" aria-hidden="true">📍</span>
+        <span class="quick-label">Onde Pescar</span>
+      </a>
+      <a href="#secao-hidrologia" class="quick-btn">
+        <span class="quick-icon" aria-hidden="true">🌊</span>
+        <span class="quick-label">Nível do Rio</span>
+      </a>
+      <a href="https://servicos.imasul.ms.gov.br/pesca/" target="_blank" rel="noopener noreferrer" class="quick-btn quick-license">
+        <span class="quick-icon" aria-hidden="true">💳</span>
+        <span class="quick-label">Emitir Licença</span>
+      </a>
+      <button id="btn-quick-sos" type="button" class="quick-btn quick-sos" title="Abrir Central de Emergência e Resgate Náutico" aria-label="Emergência S.O.S Fluvial">
+        <span class="quick-icon" aria-hidden="true">🚨</span>
+        <span class="quick-label">S.O.S Fluvial</span>
       </button>
     </div>
-  </header>
+  </nav>
+
+  <!-- 5. Seção Hero Panorâmica com Card Sobreposto (Padrão TPWD) -->
+  <section class="tpwd-hero-section" aria-label="Apresentação do Pantanal da Bacia do Miranda">
+    <div class="hero-backdrop-gradient"></div>
+    <div class="tpwd-container tpwd-hero-container">
+      
+      <!-- Card Branco Frontal Sobreposto (Formato Retângulo Deitado / Panorâmico) -->
+      <div class="tpwd-hero-card">
+        <div class="hero-card-col-main">
+          <span class="hero-card-kicker">INICIATIVA CIDADÃ &bull; PANTANAL SUSTENTÁVEL</span>
+          <h1 class="hero-card-title">Guia Comunitário e Pesca na Bacia do Rio Miranda</h1>
+          <p class="hero-card-desc">
+            Um portal independente e aberto criado para pescadores, piloteiros e comunidades pantaneiras. Acesse o WebGIS com GPS no rio, réguas de cheia, medidas legais e contato direto com trabalhadores locais sem intermediários.
+          </p>
+
+          <div class="hero-card-actions">
+            <a href="https://servicos.imasul.ms.gov.br/pesca/" target="_blank" rel="noopener noreferrer" class="btn-primary-action">
+              💳 Licença Digital IMASUL
+            </a>
+            <button id="btn-hero-species" type="button" class="btn-secondary-action">
+              📏 Medidas &amp; Cotas
+            </button>
+            <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-secondary-action" style="background: #14281d; border-color: #2d5a3f; color: #86efac;" title="Baixar Cartilha Oficial da PMA-MS">
+              📖 Cartilha PMA (PDF)
+            </a>
+            <button id="btn-hero-parceiros" type="button" class="btn-secondary-action" style="background: #ecfdf5; border-color: #10b981; color: #065f46;">
+              🤝 Apoiar / Divulgar Pousada
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-card-col-side">
+          <div class="hero-offline-box">
+            <div class="offline-icon" aria-hidden="true">📡</div>
+            <div class="offline-text">
+              <strong>Tecnologia Aberta &bull; 100% Funcional Offline:</strong>
+              <span>Criado em código aberto para navegar nos corixos pantaneiros mesmo onde nenhuma operadora de celular pega.</span>
+            </div>
+          </div>
+
+          <div class="hero-highlights-list">
+            <div class="hero-highlight-pill">
+              <span class="highlight-icon">🛰️</span>
+              <div class="highlight-info">
+                <strong>WebGIS Satélite Esri</strong>
+                <span>Navegação com GPS ativo no barco</span>
+              </div>
+            </div>
+            <div class="hero-highlight-pill">
+              <span class="highlight-icon">🌊</span>
+              <div class="highlight-info">
+                <strong>Réguas ANA / CPRM</strong>
+                <span>Cotas oficiais de cheia em tempo real</span>
+              </div>
+            </div>
+            <div class="hero-highlight-pill">
+              <span class="highlight-icon">🚨</span>
+              <div class="highlight-info">
+                <strong>S.O.S Resgate Fluvial 24h</strong>
+                <span>Coordenadas prontas para Marinha e Bombeiros</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal -->
   <div id="banner-defeso" class="banner-defeso hidden" role="alert" aria-live="assertive">
@@ -119,7 +221,7 @@
   </div>
 
   <!-- 3. Core Central WebGIS (Leaflet 100% Nativo com Modo Barco) -->
-  <section class="portal-map-section" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
+  <section id="secao-mapa" class="portal-map-section" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
     <div class="map-toolbar-top">
       <span class="map-status-pill">🗺️ Bacia do Rio Miranda &bull; SIRGAS 2000</span>
       <button id="btn-toggle-fullscreen" class="btn-map-fullscreen" title="Alternar entre visualização do Portal e Modo Barco em tela cheia">
