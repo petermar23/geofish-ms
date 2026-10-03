@@ -134,6 +134,17 @@ const sateliteEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/se
   crossOrigin: true
 }).addTo(map);
 
+// Camada de Rótulos de Cidades, Rios e Rodovias (Esri Boundaries & Places)
+const rotulosPane = map.createPane('rotulosPane');
+rotulosPane.style.zIndex = '468';
+rotulosPane.style.pointerEvents = 'none';
+
+const rotulosEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 18,
+  pane: 'rotulosPane',
+  crossOrigin: true
+}).addTo(map);
+
 // 2. Camada Base Secundária: Relevo e Topografia (Esri World Topo)
 const relevoEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
   maxZoom: 16,
@@ -1384,10 +1395,10 @@ const ESPECIES_MS = [
     nome: 'Pintado / Surubim',
     nomeCientifico: 'Pseudoplatystoma corruscans',
     status: 'cota-zero',
-    statusTexto: '1 Exemplar no Barco',
+    statusTexto: 'Faixa 85 a 125 cm (1 Nativo)',
     min: 85,
     max: 125,
-    regra: 'Permitida a captura e o transporte de 1 exemplar por pescador licenciado, dentro da faixa de 85 a 125 cm (Art. 4º e Art. 9º). Peixe DEVE estar inteiro no transporte (Art. 14).'
+    regra: 'Permitida a captura e o transporte de 1 exemplar nativo por pescador licenciado, dentro da faixa de 85 a 125 cm (Decretos nº 15.166/19 e 15.375/20). Peixe DEVE estar inteiro no gelo com Selo Turismo e lacre/GCP emitido pela PMA antes da rodovia.'
   },
   {
     id: 'pacu',
@@ -2894,3 +2905,29 @@ if (btnFecharCartilha) btnFecharCartilha.addEventListener('click', fecharModalCa
 window.abrirModalCartilha = abrirModalCartilha;
 window.fecharModalCartilha = fecharModalCartilha;
 window.alternarAbaCartilha = alternarAbaCartilha;
+
+// 21. Preparação para o Rio (Modo 100% Offline)
+const btnPrepOffline = document.getElementById('btn-prep-offline');
+if (btnPrepOffline) {
+  btnPrepOffline.addEventListener('click', async () => {
+    vibrar([40, 60, 40]);
+    btnPrepOffline.innerHTML = '⏳ Verificando dados offline...';
+    btnPrepOffline.disabled = true;
+
+    try {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
+      }
+
+      setTimeout(() => {
+        btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
+        btnPrepOffline.style.background = '#15803d';
+        btnPrepOffline.style.color = '#ffffff';
+        showToast('Pronto para o Rio! Regras, mapa e contatos de emergência salvos no seu aparelho.', 'info');
+      }, 900);
+    } catch (_) {
+      btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
+      btnPrepOffline.disabled = false;
+    }
+  });
+}

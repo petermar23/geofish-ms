@@ -3,35 +3,98 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.498765, -20.487654] },
+      "geometry": { "type": "Point", "coordinates": [-56.3820, -20.2415] },
       "properties": {
         "id_infra": 501,
         "tipo": "PMA",
-        "nome": "Pelotão da Polícia Militar Ambiental",
-        "telefone_emergencia": "190",
-        "possui_rampa": 1
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.515000, -20.495000] },
-      "properties": {
-        "id_infra": 502,
-        "tipo": "Bombeiros",
-        "nome": "Corpo de Bombeiros Militar",
-        "telefone_emergencia": "193",
+        "nome": "Pelotão da Polícia Militar Ambiental (PMA) de Miranda",
+        "telefone_emergencia": "06732424344",
+        "endereco": "BR-262, km 565, Miranda - MS",
         "possui_rampa": 0
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.530000, -20.520000] },
+      "geometry": { "type": "Point", "coordinates": [-56.3770, -20.2430] },
+      "properties": {
+        "id_infra": 502,
+        "tipo": "Bombeiros",
+        "nome": "Corpo de Bombeiros Militar de Miranda",
+        "telefone_emergencia": "193",
+        "endereco": "Rua Barão do Rio Branco, Miranda - MS",
+        "possui_rampa": 0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.3790, -20.2390] },
       "properties": {
         "id_infra": 503,
+        "tipo": "Hospital",
+        "nome": "Hospital Municipal Renato Albuquerque Filho (Miranda)",
+        "telefone_emergencia": "06732421222",
+        "endereco": "Rua Elias Rezek, Centro, Miranda - MS",
+        "possui_rampa": 0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.3680, -20.2350] },
+      "properties": {
+        "id_infra": 504,
         "tipo": "Rampa",
-        "nome": "Rampa Pública - Passo do Lontra",
-        "telefone_emergencia": "",
+        "nome": "Porto Geral e Rampa Municipal de Miranda",
+        "telefone_emergencia": "190",
+        "endereco": "Margem Urbana do Rio Miranda, Miranda - MS",
         "possui_rampa": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-57.0090, -19.5750] },
+      "properties": {
+        "id_infra": 505,
+        "tipo": "PMA",
+        "nome": "Posto Operacional PMA Passo do Lontra",
+        "telefone_emergencia": "190",
+        "endereco": "Estrada Parque Pantanal MS-184, Rio Miranda",
+        "possui_rampa": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-57.0100, -19.5740] },
+      "properties": {
+        "id_infra": 506,
+        "tipo": "Rampa",
+        "nome": "Rampa Pública Passo do Lontra (Ponte de Madeira)",
+        "telefone_emergencia": "190",
+        "endereco": "MS-184 ao lado da ponte do Rio Miranda",
+        "possui_rampa": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.9600, -19.6400] },
+      "properties": {
+        "id_infra": 507,
+        "tipo": "PMA",
+        "nome": "Posto de Fiscalização 24h Buraco das Piranhas",
+        "telefone_emergencia": "06732314444",
+        "endereco": "Trevo BR-262 com MS-184",
+        "possui_rampa": 0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-55.7870, -20.4710] },
+      "properties": {
+        "id_infra": 508,
+        "tipo": "PMA",
+        "nome": "Pelotão da Polícia Militar Ambiental de Aquidauana",
+        "telefone_emergencia": "06739042070",
+        "endereco": "BR-262, Aquidauana - MS",
+        "possui_rampa": 0
       }
     }
   ]

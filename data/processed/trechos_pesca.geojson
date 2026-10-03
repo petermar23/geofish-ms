@@ -1,1 +1,107 @@
-﻿{"type":"FeatureCollection","features":[]}
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-56.368, -20.235],
+          [-56.450, -20.200],
+          [-56.550, -20.100],
+          [-56.700, -19.900],
+          [-56.850, -19.750],
+          [-57.010, -19.574],
+          [-57.100, -19.450],
+          [-57.250, -19.300]
+        ]
+      },
+      "properties": {
+        "id_trecho": 101,
+        "rio": "Rio Miranda (Calha Principal)",
+        "regra": "Cota Permitida (1 nativo + 5 piranhas)",
+        "cota": "1 exemplar nativo na medida + 5 piranhas. Peixe inteiro no gelo. Dourado proibido (Pesque e Solte). Licença IMASUL obrigatória.",
+        "obs": "Navegação livre para motores homologados pela Capitania. Proibido uso de redes, espinhéis e cevadores fixos."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-56.490, -20.480],
+          [-56.520, -20.520],
+          [-56.560, -20.580],
+          [-56.620, -20.650],
+          [-56.700, -20.720]
+        ]
+      },
+      "properties": {
+        "id_trecho": 102,
+        "rio": "Rio Salobra e Córrego Azul",
+        "regra": "Pesque e Solte",
+        "cota": "PESQUE E SOLTE EXCLUSIVO. Proibido abater qualquer espécie de peixe. Motor 4 tempos até 15HP ou elétrico (Decreto 15.166/19).",
+        "obs": "Área de preservação cênica e berçário biológico. Abate é crime ambiental inafiançável com perda da embarcação."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-55.780, -20.470],
+          [-55.850, -20.450],
+          [-55.950, -20.400],
+          [-56.100, -20.350],
+          [-56.250, -20.300],
+          [-56.368, -20.235]
+        ]
+      },
+      "properties": {
+        "id_trecho": 103,
+        "rio": "Rio Aquidauana",
+        "regra": "Cota Permitida (1 nativo + 5 piranhas)",
+        "cota": "1 exemplar nativo na medida + 5 piranhas. Dourado proibido (Pesque e Solte). Licença IMASUL obrigatória.",
+        "obs": "Atenção com pedrais e corredeiras rasas na estiagem. Proibida a pesca 200m acima da Ponte Velha."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-57.010, -19.574],
+          [-57.030, -19.620],
+          [-57.060, -19.700],
+          [-57.100, -19.800]
+        ]
+      },
+      "properties": {
+        "id_trecho": 104,
+        "rio": "Rio Vermelho (Passo do Lontra)",
+        "regra": "Cota Permitida (1 nativo + 5 piranhas)",
+        "cota": "1 exemplar nativo na medida + 5 piranhas. Dourado proibido. Licença IMASUL obrigatória.",
+        "obs": "Confluência pantaneira com o Rio Miranda na Estrada Parque MS-184. Ótimo trecho para peixes de couro."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-55.300, -19.500],
+          [-55.600, -19.450],
+          [-56.000, -19.400],
+          [-56.500, -19.350]
+        ]
+      },
+      "properties": {
+        "id_trecho": 105,
+        "rio": "Rio Negro (Pantanal)",
+        "regra": "Pesque e Solte",
+        "cota": "PESQUE E SOLTE OBRIGATÓRIO no trecho regulamentado (Resolução SEMADESC / IMASUL). Proibido abate.",
+        "obs": "Trecho da confluência com Córrego Lajeado até Fazenda Fazendinha."
+      }
+    }
+  ]
+}
