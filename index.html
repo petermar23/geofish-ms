@@ -77,8 +77,8 @@
           <li><a href="#secao-mapa" class="tpwd-menu-link active">🗺️ Mapa WebGIS</a></li>
           <li><a href="#coluna-pesca" class="tpwd-menu-link">🎣 Pesca Esportiva</a></li>
           <li><a href="#coluna-nautica" class="tpwd-menu-link">🚤 Náutica &amp; Rampas</a></li>
-          <li><a href="#secao-hidrologia" class="tpwd-menu-link">🌊 Nível dos Rios</a></li>
-          <li><a href="#secao-cartilha" class="tpwd-menu-link">📋 Normas &amp; Defeso</a></li>
+          <li><a href="#secao-transporte-passo-a-passo" class="tpwd-menu-link">📋 Regras de Transporte</a></li>
+          <li><a href="#secao-cartilha" class="tpwd-menu-link">📖 Cartilha PMA</a></li>
         </ul>
       </nav>
 
@@ -105,9 +105,9 @@
         <span class="quick-icon" aria-hidden="true">📍</span>
         <span class="quick-label">Onde Pescar</span>
       </a>
-      <a href="#secao-hidrologia" class="quick-btn">
-        <span class="quick-icon" aria-hidden="true">🌊</span>
-        <span class="quick-label">Nível do Rio</span>
+      <a href="javascript:void(0)" onclick="abrirModalEspecies()" class="quick-btn">
+        <span class="quick-icon" aria-hidden="true">📏</span>
+        <span class="quick-label">Medidas de Peixes</span>
       </a>
       <a href="https://servicos.imasul.ms.gov.br/pesca/" target="_blank" rel="noopener noreferrer" class="quick-btn quick-license">
         <span class="quick-icon" aria-hidden="true">💳</span>
@@ -168,10 +168,10 @@
               </div>
             </div>
             <div class="hero-highlight-pill">
-              <span class="highlight-icon">🌊</span>
+              <span class="highlight-icon">📏</span>
               <div class="highlight-info">
-                <strong>Réguas ANA / CPRM</strong>
-                <span>Cotas oficiais de cheia em tempo real</span>
+                <strong>Régua Digital de Espécies</strong>
+                <span>Tamanhos e cotas da PMA-MS na tela</span>
               </div>
             </div>
             <div class="hero-highlight-pill">
@@ -1392,88 +1392,6 @@
        CONTEÚDO DO PORTAL HUB (ABAIXO DO WEBGIS)
        ======================================================== -->
 
-  <!-- SEÇÃO A: MONITORAMENTO HIDROLÓGICO (RÉGUAS DE REFERÊNCIA ANA / CPRM) -->
-  <section id="secao-hidrologia" class="portal-section" aria-label="Monitoramento Hidrológico da Bacia">
-    <div class="portal-section-header">
-      <div class="section-tag">HIDROLOGIA & COTAS DE REFERÊNCIA</div>
-      <h2 class="portal-section-title">🌊 Nível das Águas na Bacia do Rio Miranda</h2>
-      <p class="portal-section-desc">
-        Leituras fluviométricas das estações oficiais da Rede Hidrometeorológica Nacional (ANA / CPRM) com médias históricas. <em>Consulte o piloteiro local para as condições exatas da calha e balseiros do dia.</em>
-      </p>
-    </div>
-
-    <div class="hydro-grid">
-      <!-- Estação 1: Miranda Cidade -->
-      <article class="hydro-card">
-        <div class="hydro-card-header">
-          <div>
-            <span class="hydro-river">Rio Miranda</span>
-            <h3 class="hydro-station">Estação Miranda (Cidade)</h3>
-          </div>
-          <span class="hydro-status status-normal">🟢 Normal</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">2,42 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Estável (±2 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>6,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>7,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>112 m³/s</strong></div>
-        </div>
-        <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Calha estável com água limpa nos afluentes. Excelente para pesca de batida de pacu no fruto (tucum) e rodada com isca viva no canal principal.
-        </div>
-      </article>
-
-      <!-- Estação 2: Aquidauana Ponte Velha -->
-      <article class="hydro-card">
-        <div class="hydro-card-header">
-          <div>
-            <span class="hydro-river">Rio Aquidauana</span>
-            <h3 class="hydro-station">Estação Ponte Velha</h3>
-          </div>
-          <span class="hydro-status status-normal">🟢 Normal</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">2,15 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Em declive (-4 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>7,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>8,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>74 m³/s</strong></div>
-        </div>
-        <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Rio baixando; cardumes de pintado e cachara concentrando nas bocas de corixos e poços de corredeira.
-        </div>
-      </article>
-
-      <!-- Estação 3: Passo do Lontra -->
-      <article class="hydro-card">
-        <div class="hydro-card-header">
-          <div>
-            <span class="hydro-river">Rio Miranda / Foz Vermelho</span>
-            <h3 class="hydro-station">Estação Passo do Lontra</h3>
-          </div>
-          <span class="hydro-status status-atencao">🔵 Águas Médias</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">4,18 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Subindo lento (+3 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>5,50 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>6,20 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>185 m³/s</strong></div>
-        </div>
-        <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Confluência pantaneira com ótima circulação náutica; alta atividade de peixes de couro nos remansos.
-        </div>
-      </article>
-    </div>
-  </section>
-
   <!-- SEÇÃO B: DUAS GRANDES COLUNAS TEMÁTICAS (PESCA & NÁUTICA - PADRÃO TEXAS TPWD) -->
   <section class="tpwd-columns-section" aria-label="Guias Temáticos de Pesca e Navegação">
     <div class="tpwd-container tpwd-columns-container">
@@ -1496,9 +1414,9 @@
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" onclick="abrirModalEspecies()" class="resource-item-link">
-              <div class="item-title">Regulamentos e Cota Zero Rodoviária &rarr;</div>
-              <div class="item-sub">Decreto nº 15.166/19 e tabela de tamanhos mínimos e máximos</div>
+            <a href="#secao-transporte-passo-a-passo" class="resource-item-link">
+              <div class="item-title">Regras de Transporte e Medidas &rarr;</div>
+              <div class="item-sub">Decretos nº 15.166/19 e 15.375/20 (1 exemplar nativo + 5 piranhas)</div>
             </a>
           </li>
           <li>
@@ -1508,9 +1426,9 @@
             </a>
           </li>
           <li>
-            <a href="#secao-hidrologia" class="resource-item-link">
-              <div class="item-title">Boletins de Nível e Condições das Águas &rarr;</div>
-              <div class="item-sub">Monitoramento das réguas de Miranda, Aquidauana e Lontra</div>
+            <a href="#secao-calendario-pesca" class="resource-item-link">
+              <div class="item-title">Calendário Pantaneiro de Pesca &rarr;</div>
+              <div class="item-sub">Temporadas de seca, vazante e período de defeso da piracema</div>
             </a>
           </li>
         </ul>
@@ -1793,7 +1711,7 @@
 
       <div class="footer-bottom">
         <div class="footer-disclaimer">
-          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma plataforma cívica colaborativa. As informações legislativas têm caráter orientativo com base nas publicações oficiais da SEMADESC, IMASUL e ANA.
+          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma plataforma cívica colaborativa. As informações legislativas têm caráter orientativo com base nas publicações oficiais da SEMADESC e IMASUL.
         </div>
         <div class="footer-copy">
           &copy; 2026 GeoFish MS &bull; Feito por quem vive e respeita o Pantanal.
