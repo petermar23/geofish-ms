@@ -1377,46 +1377,217 @@ chipsFiltro.forEach(chip => {
 });
 
 // 14. Tabela Oficial de Espécies e Régua de Medidas (IMASUL MS)
+// 14. Tabela Oficial de Espécies e Régua de Medidas (Decreto Estadual nº 15.166/19 e Decreto nº 15.375/20)
 const ESPECIES_MS = [
   {
     id: 'pintado',
     nome: 'Pintado / Surubim',
     nomeCientifico: 'Pseudoplatystoma corruscans',
     status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
+    statusTexto: '1 Exemplar no Barco',
     min: 85,
     max: 125,
-    regra: 'Permitido capturar e consumir no barco até 1 exemplar dentro da faixa de 85 a 125 cm. Transporte rodoviário é Cota 0 kg.'
+    regra: 'Permitida a captura e o transporte de 1 exemplar por pescador licenciado, dentro da faixa de 85 a 125 cm (Art. 4º e Art. 9º). Peixe DEVE estar inteiro no transporte (Art. 14).'
   },
   {
     id: 'pacu',
     nome: 'Pacu',
     nomeCientifico: 'Piaractus mesopotamicus',
     status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
+    statusTexto: 'Faixa 45 a 65 cm',
     min: 45,
-    max: null,
-    regra: 'Mínimo de 45 cm. Proibido abate de exemplares abaixo da medida legal. Transporte interestadual proibido.'
+    max: 65,
+    regra: 'Permitida a captura e o transporte de 1 exemplar entre 45 e 65 cm. Exemplares acima de 65 cm são matrizes protegidas por lei e devem ser soltos vivos imediatamente (Art. 9º, § 3º).'
   },
   {
     id: 'cachara',
     nome: 'Cachara',
     nomeCientifico: 'Pseudoplatystoma reticulatum',
     status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
+    statusTexto: 'Faixa 80 a 120 cm',
     min: 80,
     max: 120,
-    regra: 'Faixa permitida de 80 a 120 cm. Fora dessa faixa (menor que 80 ou maior que 120 cm) a soltura é obrigatória.'
+    regra: 'Faixa permitida de 80 a 120 cm. Fora dessa faixa (menor que 80 ou maior que 120 cm), a soltura é obrigatória (Art. 9º).'
   },
   {
     id: 'jau',
     nome: 'Jaú',
     nomeCientifico: 'Zungaro jahu',
     status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
+    statusTexto: 'Faixa 95 a 130 cm',
     min: 95,
+    max: 130,
+    regra: 'Permitida a captura e o transporte de 1 exemplar entre 95 e 130 cm. Exemplares gigantes acima de 130 cm são reprodutores protegidos por lei (Art. 9º).'
+  },
+  {
+    id: 'piraputanga',
+    nome: 'Piraputanga',
+    nomeCientifico: 'Brycon hilarii',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 30 cm',
+    min: 30,
     max: null,
-    regra: 'Tamanho mínimo de 95 cm. Espécie de grande porte com proteção rigorosa para reprodução.'
+    regra: 'Tamanho mínimo de 30 cm (Art. 9º). Atenção: na calha do Rio Salobra e afluentes é modalidade exclusivamente Pesque e Solte.'
+  },
+  {
+    id: 'curimbata',
+    nome: 'Curimbatá / Curimba / Papaterra',
+    nomeCientifico: 'Prochilodus lineatus',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 38 cm',
+    min: 38,
+    max: null,
+    regra: 'Tamanho mínimo de 38 cm (Art. 9º). Comercialização expressamente proibida na Bacia do Rio Paraguai (Art. 5º, Parágrafo único).'
+  },
+  {
+    id: 'piavucu',
+    nome: 'Piavussu / Piauçu',
+    nomeCientifico: 'Megaleporinus macrocephalus',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 38 cm',
+    min: 38,
+    max: null,
+    regra: 'Tamanho mínimo de 38 cm (Art. 9º). Integrante da cota permitida de 1 exemplar nativo.'
+  },
+  {
+    id: 'barbado',
+    nome: 'Barbado',
+    nomeCientifico: 'Pinirampus pirinampu',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 60 cm',
+    min: 60,
+    max: null,
+    regra: 'Tamanho mínimo de 60 cm (Art. 9º).'
+  },
+  {
+    id: 'pati',
+    nome: 'Pati',
+    nomeCientifico: 'Luciopimelodus pati',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 65 cm',
+    min: 65,
+    max: null,
+    regra: 'Tamanho mínimo de 65 cm (Art. 9º).'
+  },
+  {
+    id: 'jurupoca',
+    nome: 'Jurupoca',
+    nomeCientifico: 'Hemisorubim platyrhynchos',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 40 cm',
+    min: 40,
+    max: null,
+    regra: 'Tamanho mínimo de 40 cm (Art. 9º).'
+  },
+  {
+    id: 'jurupensem',
+    nome: 'Jurupensém',
+    nomeCientifico: 'Sorubim lima',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 35 cm',
+    min: 35,
+    max: null,
+    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
+  },
+  {
+    id: 'armao',
+    nome: 'Armao / Armado / Abotoado',
+    nomeCientifico: 'Pterodoras granulosus / Oxydoras kneri',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 35 cm',
+    min: 35,
+    max: null,
+    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
+  },
+  {
+    id: 'palmito',
+    nome: 'Palmito',
+    nomeCientifico: 'Ageneiosus spp.',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 35 cm',
+    min: 35,
+    max: null,
+    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
+  },
+  {
+    id: 'mandi',
+    nome: 'Mandi / Mandi Amarelo',
+    nomeCientifico: 'Pimelodus maculatus',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 25 cm',
+    min: 25,
+    max: null,
+    regra: 'Tamanho mínimo de 25 cm (Art. 9º).'
+  },
+  {
+    id: 'piau',
+    nome: 'Piau / Piau Três Pintas',
+    nomeCientifico: 'Leporinus spp. / Leporinus friderici',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 25 cm',
+    min: 25,
+    max: null,
+    regra: 'Tamanho mínimo de 25 cm (Art. 9º).'
+  },
+  {
+    id: 'pacupeva',
+    nome: 'Pacupeva',
+    nomeCientifico: 'Mylossoma paraguayensis',
+    status: 'cota-zero',
+    statusTexto: 'Mínimo 20 cm',
+    min: 20,
+    max: null,
+    regra: 'Tamanho mínimo de 20 cm (Art. 9º).'
+  },
+  {
+    id: 'piranha',
+    nome: 'Piranha (Vermelha / Amarela)',
+    nomeCientifico: 'Pygocentrus nattereri / Serrasalmus marginatus',
+    status: 'cota-zero',
+    statusTexto: 'Até 5 Exemplares',
+    min: null,
+    max: null,
+    regra: 'Cota de até 5 (cinco) exemplares autorizada cumulativamente com o exemplar nativo (Art. 4º, II do Decreto nº 15.166/19).'
+  },
+  {
+    id: 'tucunare',
+    nome: 'Tucunaré',
+    nomeCientifico: 'Cichla spp.',
+    status: 'exotica',
+    statusTexto: 'Captura e Cota Livre',
+    min: null,
+    max: null,
+    regra: 'Espécie alóctone/exótica listada no Art. 7º, IX. Captura e transporte LIVRES de limite de cota em MS.'
+  },
+  {
+    id: 'corvina',
+    nome: 'Corvina / Pescada-do-Piauí',
+    nomeCientifico: 'Plagioscion squamosissimus',
+    status: 'exotica',
+    statusTexto: 'Captura e Cota Livre',
+    min: null,
+    max: null,
+    regra: 'Espécie alóctone listada no Art. 7º, V. Captura e transporte LIVRES de limite de cota.'
+  },
+  {
+    id: 'tilapia',
+    nome: 'Tilápia',
+    nomeCientifico: 'Oreochromis spp. / Tilapia spp.',
+    status: 'exotica',
+    statusTexto: 'Captura e Cota Livre',
+    min: null,
+    max: null,
+    regra: 'Espécie exótica listada no Art. 7º, VIII. Captura e transporte LIVRES de limite de cota.'
+  },
+  {
+    id: 'tambaqui',
+    nome: 'Tambaqui',
+    nomeCientifico: 'Colossoma macropomum',
+    status: 'exotica',
+    statusTexto: 'Captura e Cota Livre',
+    min: null,
+    max: null,
+    regra: 'Espécie alóctone listada no Art. 7º, XI (acrescentado pelo Decreto nº 15.375/20). Captura e transporte LIVRES de cota.'
   },
   {
     id: 'dourado',
@@ -1426,47 +1597,7 @@ const ESPECIES_MS = [
     statusTexto: 'PROIBIDO / Moratória',
     min: null,
     max: null,
-    regra: 'PROIBIDA a captura, abate, transporte e comercialização em todo o MS (Lei Estadual nº 5.321 e 6.190). Permitido apenas Pesque e Solte esportivo.'
-  },
-  {
-    id: 'piraputanga',
-    nome: 'Piraputanga',
-    nomeCientifico: 'Brycon hilarii',
-    status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
-    min: 30,
-    max: null,
-    regra: 'Tamanho mínimo de 30 cm. Muito comum no Rio Salobra e Miranda; no Rio Salobra é exclusivamente Pesque e Solte.'
-  },
-  {
-    id: 'curimbata',
-    nome: 'Curimbatá',
-    nomeCientifico: 'Prochilodus lineatus',
-    status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
-    min: 38,
-    max: null,
-    regra: 'Tamanho mínimo de 38 cm para consumo local.'
-  },
-  {
-    id: 'piavucu',
-    nome: 'Piavuçu',
-    nomeCientifico: 'Megaleporinus macrocephalus',
-    status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
-    min: 38,
-    max: null,
-    regra: 'Tamanho mínimo de 38 cm.'
-  },
-  {
-    id: 'barbado',
-    nome: 'Barbado',
-    nomeCientifico: 'Pinirampus pirinampu',
-    status: 'cota-zero',
-    statusTexto: 'Cota Zero Transporte',
-    min: 60,
-    max: null,
-    regra: 'Tamanho mínimo de 60 cm.'
+    regra: 'PROIBIDA a captura, abate, transporte e comercialização em todo o MS (Art. 8º do Decreto nº 15.166 e Lei Estadual nº 5.321/19, prorrogada pela Lei nº 6.190/24 até 2029). Permitido exclusivamente Pesque e Solte esportivo.'
   }
 ];
 
@@ -1499,6 +1630,7 @@ function renderizarEspécies(termo = '') {
     let badgeClass = 'badge-cota-zero';
     if (esp.status === 'proibido') badgeClass = 'badge-proibido';
     else if (esp.status === 'pesque-solte') badgeClass = 'badge-pesque-solte';
+    else if (esp.status === 'exotica') badgeClass = 'badge-exotica';
 
     let medidasTexto = '';
     if (esp.min && esp.max) {
@@ -1544,29 +1676,38 @@ function verificarMedidaPescado() {
 
   if (esp.status === 'proibido') {
     measureResult.className = 'measure-result-box forbidden';
-    measureResult.innerHTML = `🚫 <strong>Dourado Proibido!</strong> Em Mato Grosso do Sul, a captura e o abate do Dourado são proibidos por lei (Lei Estadual 5.321). <strong>Soltura imediata e obrigatória!</strong>`;
+    measureResult.innerHTML = `🚫 <strong>Dourado Proibido!</strong> Em Mato Grosso do Sul, a captura e o abate do Dourado são proibidos por lei (Lei Estadual nº 5.321/19 prorrogada até 2029). <strong>Soltura imediata e obrigatória!</strong>`;
+    return;
+  }
+
+  if (esp.status === 'exotica') {
+    measureResult.className = 'measure-result-box allowed';
+    measureResult.innerHTML = `✅ <strong>Espécie Exótica / Alóctone!</strong> Captura e transporte <strong>totalmente livres de limite de cota</strong> (Decreto Estadual nº 15.166/19, Art. 7º). Ajude a controlar as espécies invasoras!`;
     return;
   }
 
   if (esp.min && esp.max) {
     if (valor >= esp.min && valor <= esp.max) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido apenas para <strong>consumo no barco/rancho (limite de 1 exemplar)</strong>. Transporte rodoviário é Cota Zero!`;
+      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL) ou consumo no local. O peixe transportado deve estar inteiro com cabeça e escamas/couro!`;
     } else if (valor < esp.min) {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave. <strong>Solte imediatamente!</strong>`;
+      measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave. <strong>Solte imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
     } else {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Acima da Medida Máxima!</strong> O peixe tem ${valor} cm e o limite máximo de preservação de matrizes é <strong>${esp.max} cm</strong>. <strong>Solte imediatamente!</strong>`;
+      measureResult.innerHTML = `❌ <strong>Acima da Medida Máxima!</strong> O exemplar tem ${valor} cm e o teto máximo de proteção de matrizes reprodutoras é <strong>${esp.max} cm</strong>. <strong>Solte vivo imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
     }
   } else if (esp.min) {
     if (valor >= esp.min) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Permitido para consumo no local. Transporte na estrada é proibido (Cota Zero).`;
+      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Permitido para captura e transporte (1 exemplar nativo) ou consumo local.`;
     } else {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate. <strong>Solte o peixe na água com cuidado!</strong>`;
+      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
     }
+  } else {
+    measureResult.className = 'measure-result-box allowed';
+    measureResult.innerHTML = `ℹ️ ${esp.regra}`;
   }
 }
 
@@ -2685,3 +2826,55 @@ if (btnQuickSos) {
     abrirModalSos();
   });
 }
+
+// ========================================================
+// 20. CARTILHA OFICIAL DO PESCADOR (BPMA / PMA-MS)
+// ========================================================
+const modalCartilha = document.getElementById('modal-cartilha');
+const btnFecharCartilha = document.getElementById('btn-fechar-cartilha');
+
+function abrirModalCartilha(abaInicial = 'rios') {
+  if (!modalCartilha) return;
+  modalCartilha.classList.remove('hidden');
+  modalCartilha.setAttribute('aria-hidden', 'false');
+  alternarAbaCartilha(abaInicial);
+  vibrar(25);
+}
+
+function fecharModalCartilha() {
+  if (!modalCartilha) return;
+  modalCartilha.classList.add('hidden');
+  modalCartilha.setAttribute('aria-hidden', 'true');
+}
+
+function alternarAbaCartilha(tipo) {
+  const tabs = {
+    rios: { btn: 'tab-btn-rios-proibidos', panel: 'panel-cartilha-rios' },
+    iscas: { btn: 'tab-btn-iscas', panel: 'panel-cartilha-iscas' },
+    transporte: { btn: 'tab-btn-transporte', panel: 'panel-cartilha-transporte' },
+    petrechos: { btn: 'tab-btn-petrechos', panel: 'panel-cartilha-petrechos' },
+    contatos: { btn: 'tab-btn-contatos', panel: 'panel-cartilha-contatos' }
+  };
+
+  Object.entries(tabs).forEach(([k, item]) => {
+    const b = document.getElementById(item.btn);
+    const p = document.getElementById(item.panel);
+    if (b && p) {
+      if (k === tipo) {
+        b.classList.add('active');
+        b.setAttribute('aria-selected', 'true');
+        p.classList.add('active');
+      } else {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+        p.classList.remove('active');
+      }
+    }
+  });
+}
+
+if (btnFecharCartilha) btnFecharCartilha.addEventListener('click', fecharModalCartilha);
+
+window.abrirModalCartilha = abrirModalCartilha;
+window.fecharModalCartilha = fecharModalCartilha;
+window.alternarAbaCartilha = alternarAbaCartilha;
