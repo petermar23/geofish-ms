@@ -44,9 +44,6 @@
     
     <div class="header-actions">
       <span id="status-rede"><span class="status-dot"></span> Online</span>
-      <button id="btn-sos" class="btn-header" style="background-color: #d32f2f; color: white; border: none; font-weight: 700;" title="Emergência e Utilidade Pública">
-        🆘 S.O.S
-      </button>
       <button id="btn-install-pwa" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo no Android ou computador">
         📲 Instalar App
       </button>
@@ -323,95 +320,92 @@
     </div>
   </div>
 
-  <!-- Modal SOS e Utilidade Pública -->
+  <!-- Botão Flutuante de Emergência S.O.S (Área do Polegar) -->
+  <button id="btn-sos" class="btn-sos" title="Emergência e Utilidade Pública" aria-label="Botão de emergência S.O.S">
+    <span style="font-size: 1.2rem;">🆘</span> S.O.S
+  </button>
+
+  <!-- Modal Central de Emergência & S.O.S Fluvial -->
   <div id="modal-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sos-title">
     <div class="modal-dialog">
-      <div class="modal-header" style="background-color: #b71c1c;">
+      <div class="modal-header sos-modal-header">
         <h2 id="sos-title" style="font-size: 1.15rem;">🆘 Emergência & Utilidade</h2>
         <button id="btn-fechar-sos" class="modal-close-btn" aria-label="Fechar alerta">&times;</button>
       </div>
       <div class="modal-body">
         
-        <!-- Bloco de Localização Dinâmica -->
-        <div class="measure-checker-card" style="background: #f8fafc; border-color: #cbd5e1;">
-          <div class="checker-title" style="color: #0b4f6c;">📍 Sua Localização Exata</div>
-          <p id="sos-coords-display" style="font-size: 0.95rem; margin-bottom: 12px; font-weight: 600; line-height: 1.4;">
-            Aguardando sinal GPS do satélite...
-          </p>
-          <div style="display: flex; gap: 8px;">
-            <button id="btn-copiar-resgate" class="btn-cta" style="min-height: 40px; padding: 8px; font-size: 0.85rem; background: #0288d1; color: white; flex: 1; margin-top: 0; border: none;">
-              📋 Copiar
-            </button>
-            <button id="btn-wpp-resgate" class="btn-cta btn-whatsapp" style="min-height: 40px; padding: 8px; font-size: 0.85rem; flex: 2; margin-top: 0; border: none;">
-              📱 Enviar WhatsApp
-            </button>
+        <div class="sos-legal-disclaimer">
+          <strong>Aviso Legal (Isenção de Responsabilidade):</strong> Este aplicativo é um utilitário de informações públicas e não possui vínculo com os serviços citados. Em caso de perigo iminente, falha técnica ou falta de sinal, busque a autoridade mais próxima.
+        </div>
+
+        <div class="sos-coords-card">
+          <div class="sos-coords-header">
+            <span class="sos-coords-icon">📍</span>
+            <div>
+              <div style="font-size: 0.8rem; color: #64748b; font-weight: 700;">Localização Exata (GPS)</div>
+              <div id="sos-coords-display" class="sos-coords-text">Aguardando sinal...</div>
+            </div>
+          </div>
+          <div class="sos-coords-actions">
+            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Mensagem</button>
+            <button id="btn-wpp-resgate" class="btn-sos-action btn-wpp-action">📱 Enviar WhatsApp</button>
           </div>
         </div>
 
-        <!-- Lista de Telefones de Emergência -->
-        <div class="checker-title" style="color: #b71c1c; margin-top: 8px;">📞 Telefones Oficiais</div>
-        <div class="species-grid" style="grid-template-columns: 1fr;">
+        <div class="sos-buttons-grid">
           
-          <button class="species-card sos-call-btn" data-service="Marinha do Brasil" data-number="185" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
-            <div style="font-size: 2rem;">⚓</div>
+          <button class="sos-call-btn btn-marinha" data-service="Marinha do Brasil" data-number="185">
+            <div class="sos-btn-badge">185</div>
             <div>
-              <div class="species-name" style="color: #0b4f6c;">Marinha do Brasil</div>
-              <div class="species-sci">Capitania Fluvial - Emergências</div>
-              <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">Disque 185</div>
+              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Marinha do Brasil</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Capitania Fluvial - Emergência</div>
             </div>
           </button>
 
-          <button class="species-card sos-call-btn" data-service="Polícia Militar Ambiental" data-number="190" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
-            <div style="font-size: 2rem;">🚓</div>
+          <button class="sos-call-btn btn-pma" data-service="Polícia Militar Ambiental" data-number="190">
+            <div class="sos-btn-badge">190</div>
             <div>
-              <div class="species-name" style="color: #0b4f6c;">Polícia Militar Ambiental</div>
-              <div class="species-sci">PMA MS / Pelotão de Miranda</div>
-              <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">190 ou (67) 3242-1464</div>
+              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Polícia Ambiental MS</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Pelotão de Miranda (PMA)</div>
             </div>
           </button>
 
-          <button class="species-card sos-call-btn" data-service="Corpo de Bombeiros" data-number="193" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
-            <div style="font-size: 2rem;">🚒</div>
+          <button class="sos-call-btn btn-bombeiros" data-service="Corpo de Bombeiros" data-number="193">
+            <div class="sos-btn-badge">193</div>
             <div>
-              <div class="species-name" style="color: #0b4f6c;">Corpo de Bombeiros</div>
-              <div class="species-sci">Resgate e Salvamento</div>
-              <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">Disque 193</div>
+              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Corpo de Bombeiros</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Resgate e Salvamento</div>
             </div>
           </button>
 
-          <button class="species-card sos-call-btn" data-service="Hospital de Miranda" data-number="06732421222" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
-            <div style="font-size: 2rem;">🏥</div>
+          <button class="sos-call-btn btn-samu" data-service="Hospital de Miranda" data-number="06732421222">
+            <div class="sos-btn-badge">3242-1222</div>
             <div>
-              <div class="species-name" style="color: #0b4f6c;">Hospital de Miranda</div>
-              <div class="species-sci">Atendimento Médico Regional</div>
-              <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">(67) 3242-1222</div>
+              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Hospital de Miranda</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Pronto Atendimento Médico</div>
             </div>
           </button>
 
-        </div>
-
-        <!-- Aviso Legal de Responsabilidade -->
-        <div class="legal-note-box" style="margin-top: 20px; font-size: 0.75rem;">
-          <strong>Aviso Legal (Isenção de Responsabilidade):</strong> Este aplicativo é um utilitário de informações públicas e não possui vínculo com os serviços citados. O app apenas organiza contatos oficiais do Estado de MS. Em caso de perigo iminente, falha técnica ou falta de sinal, procure a autoridade local.
         </div>
 
       </div>
     </div>
   </div>
 
-  <!-- Modal de Confirmação de S.O.S (Prevenção de Trote e Chamada Acidental) -->
+  <!-- Diálogo de Confirmação Anti-Toque Acidental -->
   <div id="modal-confirm-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 3000;">
-    <div class="modal-dialog" style="max-width: 400px; padding: 24px; text-align: center;">
-      <div style="font-size: 3rem; margin-bottom: 12px;">🚨</div>
-      <h3 style="color: #b91c1c; font-size: 1.25rem; margin-bottom: 14px; font-weight: 800;">Atenção: Ação de Emergência</h3>
-      <p id="confirm-sos-text" style="font-size: 0.95rem; color: #334155; margin-bottom: 24px; line-height: 1.5;"></p>
-      <div style="display: flex; gap: 12px; justify-content: center;">
-        <button id="btn-cancelar-sos-call" class="btn-cta" style="background: #e2e8f0; color: #475569; flex: 1; border: none; min-height: 48px; margin-top: 0;">
-          ❌ Cancelar
-        </button>
-        <button id="btn-executar-sos-call" class="btn-cta" style="background: #d32f2f; color: white; flex: 1; border: none; min-height: 48px; margin-top: 0;">
-          Ligar
-        </button>
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header confirm-modal-header">
+        <h3 style="color: #b91c1c; font-size: 1.15rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">🚨</span> Ação de Emergência
+        </h3>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <p id="confirm-sos-text" style="font-size: 0.9rem; color: #334155; margin-bottom: 24px; line-height: 1.5;"></p>
+        <div class="confirm-actions-row">
+          <button id="btn-cancelar-sos-call" class="btn-confirm-cancel">❌ Cancelar</button>
+          <button id="btn-executar-sos-call" class="btn-confirm-danger">Ligar</button>
+        </div>
       </div>
     </div>
   </div>
