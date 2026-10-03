@@ -1783,7 +1783,7 @@ body.sheet-open .btn-sos {
    ======================================================== */
 .fab-container {
   position: absolute;
-  bottom: calc(72px + max(12px, env(safe-area-inset-bottom)));
+  bottom: calc(140px + max(12px, env(safe-area-inset-bottom)));
   right: max(16px, env(safe-area-inset-right));
   display: flex;
   flex-direction: column;
@@ -1793,7 +1793,7 @@ body.sheet-open .btn-sos {
 }
 
 body.sheet-open .fab-container {
-  bottom: calc(50dvh + 16px);
+  bottom: calc(50dvh + 80px);
 }
 
 .fab-btn {
@@ -1829,11 +1829,11 @@ body.sheet-open .fab-container {
 
 @media (min-width: 992px) {
   .fab-container {
-    bottom: 30px;
+    bottom: 100px;
     right: 30px;
   }
   body.sheet-open .fab-container {
-    bottom: 30px;
+    bottom: 100px;
   }
 }
 
