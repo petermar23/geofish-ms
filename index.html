@@ -190,56 +190,31 @@
       </div>
       <div class="modal-body">
         
-        <!-- Cartão Oficial Colapsável: Consumo no Barco vs. Transporte na Rodovia (Decreto nº 15.166/MS) -->
-        <details class="cota-warning-details" role="region" aria-label="Regras cruciais de cota e penalidades legais">
-          <summary class="cota-summary-header">
-            <div class="cota-summary-content">
-              <div class="cota-summary-title-row">
-                <span class="cota-summary-icon">⚖️</span>
-                <strong class="cota-summary-title">Decreto 15.166/MS: Barco vs. Rodovia</strong>
-                <span class="cota-toggle-hint">Ver Regras & Penalidades ▼</span>
-              </div>
-              <div class="cota-summary-badges">
-                <span class="cota-mini-badge badge-barco">🟢 Consumo no Barco: 1 Exemplar</span>
-                <span class="cota-mini-badge badge-estrada">🔴 Rodovia: COTA ZERO (0 kg)</span>
-              </div>
-            </div>
-          </summary>
-
-          <div class="cota-details-body">
-            <div class="cota-comparison-grid">
-              <div class="cota-box cota-permitido">
-                <div class="cota-box-title">🟢 Consumo no Barco / Rancho</div>
-                <div class="cota-box-desc">
-                  <strong>PERMITIDO:</strong> Abate de <strong>1 exemplar</strong> dentro das medidas oficiais (mínima e máxima) + até <strong>5 piranhas</strong> para preparo e consumo imediato no próprio local ou rancho de pesca.
-                </div>
-              </div>
-              <div class="cota-box cota-proibido">
-                <div class="cota-box-title">🔴 Transporte na Rodovia (BR-262 / MS)</div>
-                <div class="cota-box-desc">
-                  <strong>CRIME AMBIENTAL: COTA ZERO (0 kg).</strong> É terminantemente proibido transportar peixe nativo (inteiro, eviscerado ou em filé) no porta-malas, carroceria ou caixa térmica fora do rancho.
-                </div>
-              </div>
-            </div>
-
-            <div class="cota-penalties-box">
-              <div class="penalties-title">🚨 Consequências do Flagrante pela PMA / PRF / Polícia Civil:</div>
-              <ul class="penalties-list">
-                <li><strong>💸 Multa Pesada no Bolso:</strong> De <strong>R$ 700,00 a R$ 100.000,00</strong>, acrescida de <strong>R$ 20,00 por quilo</strong> de pescado apreendido (Decreto Federal nº 6.514/08).</li>
-                <li><strong>🚤 Perda Total e Apreensão de Bens:</strong> Apreensão sumária do barco, motor de popa, carretinha, tralha de pesca e do próprio veículo automotor usado no transporte.</li>
-                <li><strong>🚔 Prisão em Flagrante:</strong> Condução do pescador algemado na viatura para a Delegacia da Polícia Civil (Art. 34 da Lei Federal nº 9.605/98: <strong>detenção de 1 a 3 anos</strong>).</li>
-                <li><strong>🚫 Cassação da Licença do IMASUL:</strong> Cancelamento imediato da carteira de pesca, bloqueio para novas emissões e abertura de processo penal no Ministério Público (MPMS).</li>
-              </ul>
+        <!-- Alerta Máximo Estático e Expandido -->
+        <div style="background-color: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 2px solid #fca5a5; padding-bottom: 10px;">
+            <span style="font-size: 2rem;">🚨</span>
+            <div>
+              <h3 style="color: #991b1b; font-size: 1.1rem; margin: 0; font-weight: 900; text-transform: uppercase;">Atenção: Crime Ambiental</h3>
+              <div style="font-size: 0.75rem; color: #b91c1c; font-weight: 700; margin-top: 2px;">Decreto Estadual nº 15.166 / PMA MS</div>
             </div>
           </div>
-        </details>
-
-        <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin-bottom: 16px; text-align: center;">
-          <h4 style="color: #0369a1; font-size: 0.9rem; margin-bottom: 8px;">Licença Ambiental Obrigatória</h4>
-          <p style="font-size: 0.8rem; color: #0284c7; margin-bottom: 10px; line-height: 1.3;">A pesca amadora ou desportiva no MS exige o porte da carteirinha oficial do IMASUL.</p>
-          <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #0284c7; color: #fff; font-weight: 700; font-size: 0.95rem; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); width: 100%; transition: transform 0.2s, background 0.2s;">
-            💳 Emitir Carteirinha IMASUL
-          </a>
+          <p style="font-size: 0.85rem; color: #7f1d1d; font-weight: 800; margin-bottom: 14px; line-height: 1.4;">
+            O transporte de qualquer peixe nativo em rodovias (BR/MS) é <span style="background: #991b1b; color: white; padding: 2px 6px; border-radius: 4px;">COTA ZERO (0 kg)</span>.
+          </p>
+          
+          <div style="background: white; border-radius: 6px; padding: 12px; border-left: 5px solid #dc2626; margin-bottom: 12px;">
+            <strong style="font-size: 0.85rem; color: #b91c1c; display: block; margin-bottom: 8px;">🚨 Consequências em Flagrante:</strong>
+            <ul style="font-size: 0.8rem; color: #450a0a; margin-left: 20px; line-height: 1.5; font-weight: 600;">
+              <li>Prisão do condutor (1 a 3 anos).</li>
+              <li>Apreensão do carro, barco, motor e tralha.</li>
+              <li>Multas de R$ 700 a R$ 100.000 + R$ 20/kg.</li>
+            </ul>
+          </div>
+          
+          <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; padding: 10px; font-size: 0.75rem; color: #166534; line-height: 1.4;">
+            <strong>🟢 Exceção (Consumo no Barco):</strong> É permitido abater 1 exemplar na medida + 5 piranhas <strong>apenas para preparo e consumo imediato</strong> no próprio local ou rancho.
+          </div>
         </div>
         
         <p style="font-size: 0.85rem; color: #475569;">
@@ -327,6 +302,30 @@
       </div>
     </div>
   </div>
+
+  <!-- Bottom Navigation Bar (Android) & Sidebar (Desktop) -->
+  <nav class="android-bottom-bar">
+    <div class="nav-item" id="nav-gps">
+      <span class="nav-icon">📍</span>
+      <span>Onde Estou</span>
+    </div>
+    <div class="nav-item" id="nav-especies">
+      <span class="nav-icon">🐟</span>
+      <span>Peixes MS</span>
+    </div>
+    <div class="nav-item" id="nav-apoio">
+      <span class="nav-icon">⚓</span>
+      <span>Rampas</span>
+    </div>
+    <div class="nav-item" id="nav-busca">
+      <span class="nav-icon">🔍</span>
+      <span>Busca</span>
+    </div>
+    <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="nav-item" style="text-decoration: none; color: inherit;">
+      <span class="nav-icon" style="font-size: 1.3rem;">🪪</span>
+      <span>Licença</span>
+    </a>
+  </nav>
 
   <!-- Botão Flutuante de Emergência S.O.S (Área do Polegar) -->
   <button id="btn-sos" class="btn-sos" title="Emergência e Utilidade Pública" aria-label="Botão de emergência S.O.S">
