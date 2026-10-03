@@ -926,13 +926,63 @@ function obterLocalizacao() {
       showToast('Posição obtida com sucesso via GPS!');
     },
     (erro) => {
+      // Se falhar o GPS fino no Pantanal, tenta uma segunda leitura resiliente com antenas/redes (timeout 15s)
+      if (erro.code === erro.TIMEOUT || erro.code === erro.POSITION_UNAVAILABLE) {
+        console.warn('[GeoFish MS] Sinal de GPS fino não respondeu em 25s. Tentando leitura resiliente por redes/antenas...');
+        navigator.geolocation.getCurrentPosition(
+          (posicaoFallback) => {
+            const lat = posicaoFallback.coords.latitude;
+            const lng = posicaoFallback.coords.longitude;
+            const precisao = Math.round(posicaoFallback.coords.accuracy || 0);
+
+            if (marcadorPosicao) map.removeLayer(marcadorPosicao);
+            if (circuloPrecisao) map.removeLayer(circuloPrecisao);
+
+            circuloPrecisao = L.circle([lat, lng], {
+              pane: 'posicaoPane',
+              radius: Math.max(precisao, 20),
+              color: '#f57c00',
+              fillColor: '#ffe082',
+              fillOpacity: 0.22,
+              weight: 1.5
+            }).addTo(map);
+
+            marcadorPosicao = L.circleMarker([lat, lng], {
+              pane: 'posicaoPane',
+              radius: 11,
+              fillColor: '#f57c00',
+              color: '#ffffff',
+              weight: 3.5,
+              fillOpacity: 1
+            }).addTo(map);
+
+            map.flyTo([lat, lng], 13, { duration: 1.2 });
+            showToast(`Localização estimada via redes (~${precisao}m)`, 'warn');
+
+            if (btnLocalizacao) {
+              btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
+              btnLocalizacao.disabled = false;
+            }
+          },
+          (erroFinal) => {
+            let msg = 'Não foi possível obter a sua localização a céu aberto.';
+            if (erroFinal.code === erroFinal.PERMISSION_DENIED) {
+              msg = 'Permissão de GPS negada. Por favor, ative a localização no seu celular.';
+            }
+            showToast(msg, 'warn');
+            if (btnLocalizacao) {
+              btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
+              btnLocalizacao.disabled = false;
+            }
+          },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+        );
+        return;
+      }
+
       let mensagem = 'Não foi possível obter a sua localização.';
       if (erro.code === erro.PERMISSION_DENIED) {
         mensagem = 'Permissão de GPS negada. Por favor, ative a localização no seu navegador ou celular.';
-      } else if (erro.code === erro.POSITION_UNAVAILABLE) {
-        mensagem = 'Sinal de GPS indisponível no momento. Tente novamente em campo aberto.';
-      } else if (erro.code === erro.TIMEOUT) {
-        mensagem = 'Tempo esgotado para obter o sinal de satélite GPS.';
       }
       showToast(mensagem, 'warn');
       if (btnLocalizacao) {
@@ -2235,5 +2285,46 @@ const footerBtnReplicar = document.getElementById('footer-btn-replicar');
 if (footerBtnReplicar) {
   footerBtnReplicar.addEventListener('click', () => {
     abrirModalSobre();
+  });
+}
+
+// ========================================================
+// 19. COMPATIBILIDADE GLOBAL E INTEGRAÇÕES ADICIONAIS DO PORTAL
+// ========================================================
+
+// Aliases para chamadas inline e módulos externos
+window.obterPosicaoRio = obterLocalizacao;
+window.mostrarToast = showToast;
+window.abrirModalSos = abrirModalSos;
+window.abrirModalEspecies = abrirModalEspecies;
+window.abrirModalSobre = abrirModalSobre;
+window.abrirConfirmacaoSos = abrirConfirmacaoSos;
+window.abrirModalParceiros = abrirModalParceiros;
+window.abrirModalPix = abrirModalPix;
+
+// Botão adicional na seção de espécies que abre o verificador de medidas oficial
+const btnPortalOpenSpecies = document.getElementById('btn-portal-open-species');
+if (btnPortalOpenSpecies) {
+  btnPortalOpenSpecies.addEventListener('click', () => {
+    vibrar(25);
+    abrirModalEspecies();
+  });
+}
+
+// Botão de SOS na barra de polegar móvel
+const navBtnSosTrigger = document.getElementById('nav-btn-sos-trigger');
+if (navBtnSosTrigger) {
+  navBtnSosTrigger.addEventListener('click', () => {
+    vibrar(35);
+    abrirModalSos();
+  });
+}
+
+// Ação rápida do SOS na barra de utilitários
+const btnQuickSos = document.getElementById('btn-quick-sos');
+if (btnQuickSos) {
+  btnQuickSos.addEventListener('click', () => {
+    vibrar(35);
+    abrirModalSos();
   });
 }
