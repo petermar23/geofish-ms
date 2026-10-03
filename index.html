@@ -32,20 +32,52 @@
 </head>
 <body>
 
-  <!-- Cabeçalho Principal -->
+  <!-- 1. Barra de Autenticidade e Cidadania Comunitária (Estilo Texas TPWD) -->
+  <div class="gov-auth-bar" role="banner" aria-label="Identificação Territorial Comunitária">
+    <div class="gov-auth-inner">
+      <div class="gov-auth-flag">
+        <span class="flag-pantanal" aria-hidden="true">🌿💧</span>
+        <span>Iniciativa Cidadã Independente &bull; <strong>Bacia do Rio Miranda / Pantanal MS</strong></span>
+      </div>
+      <div class="gov-auth-badge">
+        <span>Apoio Comunitário: Ribeirinhos, Piloteiros &bull; Colônias Z-1 e Z-7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Faixa de Alerta Oficial (Cota Zero Rodoviária e Defeso) -->
+  <aside class="tpwd-alert-bar" role="alert" aria-label="Aviso Legal e Normativo">
+    <div class="tpwd-alert-inner">
+      <div class="tpwd-alert-content">
+        <span class="alert-icon" aria-hidden="true">⚠️</span>
+        <div class="alert-text">
+          <strong>ALERTA AMBIENTAL (Decreto 15.166/MS):</strong> Transporte de pescado é <strong>COTA ZERO (0 kg)</strong> nas rodovias. Consumo permitido apenas no barco/rancho.
+        </div>
+      </div>
+      <button id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Regras &rarr;</button>
+    </div>
+  </aside>
+
+  <!-- Cabeçalho Principal do Hub -->
   <header id="header">
     <div class="brand-wrapper">
       <img src="icons/favicon-32.png" alt="GeoFish MS" class="brand-logo" width="32" height="32">
       <div>
         <h1 class="brand-title">GeoFish MS</h1>
-        <span class="brand-subtitle">Bacia do Rio Miranda &bull; Pantanal MS</span>
+        <span class="brand-subtitle">Guia Comunitário &bull; Inteligência Náutica</span>
       </div>
     </div>
     
     <div class="header-actions">
       <span id="status-rede"><span class="status-dot"></span> Online</span>
+      <button id="btn-parceiros-topo" class="btn-header" title="Rede de parceiros locais e pousadas">
+        🤝 Parceiros
+      </button>
+      <button id="btn-apoie-pix-topo" class="btn-header btn-pix-highlight" title="Apoie esta iniciativa independente">
+        ☕ Apoie
+      </button>
       <button id="btn-install-pwa" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo no Android ou computador">
-        📲 Instalar App
+        📲 App
       </button>
       <button id="btn-sobre" class="btn-header" title="Informações e legislação de pesca">
         ℹ️ Sobre
@@ -84,6 +116,14 @@
   <div id="loading-indicator" aria-live="polite">
     <span class="spinner"></span>
     <span id="loading-text">Carregando camadas…</span>
+  </div>
+
+  <!-- 3. Core Central WebGIS (Leaflet 100% Nativo com Modo Barco) -->
+  <div class="map-toolbar-top">
+    <span class="map-status-pill">🗺️ Bacia do Rio Miranda &bull; SIRGAS 2000</span>
+    <button id="btn-toggle-fullscreen" class="btn-map-fullscreen" title="Alternar entre visualização do Portal e Modo Barco em tela cheia">
+      ⛶ Modo Barco (Tela Cheia)
+    </button>
   </div>
 
   <!-- Contêiner do Mapa Interativo -->
@@ -495,6 +535,114 @@
       </div>
     </div>
   </div>
+
+  <!-- 4. Modais de Parcerias Locais e Apoio Comunitário (Monetização Cidadã) -->
+  <div id="modal-parceiros" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog">
+      <div class="modal-header" style="background-color: #0b4f6c;">
+        <h2 style="font-size: 1.15rem; color: #ffffff;">🤝 Rede de Parceiros & Pousadas</h2>
+        <button id="btn-fechar-parceiros" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 14px; line-height: 1.4;">
+          O <strong>GeoFish MS</strong> conecta o turista diretamente com quem faz o turismo pantaneiro acontecer na beira do rio, sem intermediários.
+        </p>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <h4 style="color: #166534; font-size: 0.95rem; margin-bottom: 6px;">🚤 Para Piloteiros e Guias Nativos</h4>
+          <p style="font-size: 0.8rem; color: #15803d; line-height: 1.35; margin-bottom: 8px;">
+            Piloteiros das Colônias Z-1 (Miranda/Corumbá) e Z-7 (Aquidauana/Bonito) têm cadastro <strong>100% gratuito</strong> no mapa com link para seu WhatsApp direto.
+          </p>
+          <a href="https://wa.me/5567999999999?text=Ol%C3%A1%2C%20sou%20piloteiro%2Fguia%20e%20gostaria%20de%20cadastrar%20meu%20ponto%20no%20GeoFish%20MS" target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #16a34a; font-size: 0.85rem; padding: 10px; margin-top: 4px;">
+            📲 Cadastrar como Piloteiro
+          </a>
+        </div>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px;">
+          <h4 style="color: #1e40af; font-size: 0.95rem; margin-bottom: 6px;">🏨 Para Pousadas, Ranchos e Lojas Náuticas</h4>
+          <p style="font-size: 0.8rem; color: #1d4ed8; line-height: 1.35; margin-bottom: 8px;">
+            Destaque seu rancho, porto de descida ou loja de isca no WebGIS da Bacia do Miranda com selo de <strong>Parceiro Verificado</strong> e botão de reserva direta.
+          </p>
+          <a href="https://wa.me/5567999999999?text=Ol%C3%A1%2C%20tenho%20um%20rancho%2Fpousada%2Fcom%C3%A9rcio%20e%20gostaria%20de%20anunciar%20no%20GeoFish%20MS" target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #2563eb; font-size: 0.85rem; padding: 10px; margin-top: 4px;">
+            ⭐ Seja um Rancho / Parceiro Verificado
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Apoio Comunitário (Chave PIX) -->
+  <div id="modal-apoie-pix" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header" style="background-color: #047857;">
+        <h2 style="font-size: 1.15rem; color: #ffffff;">☕ Apoie esta Iniciativa Cidadã</h2>
+        <button id="btn-fechar-pix" class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <p style="font-size: 0.85rem; color: #334155; margin-bottom: 12px; line-height: 1.4;">
+          O <strong>GeoFish MS</strong> é um projeto independente de código aberto mantido sem verba pública, criado para proteger o Pantanal e apoiar os pescadores no rio.
+        </p>
+        <div style="background: #ecfdf5; border: 1px dashed #059669; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+          <div style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Chave PIX (Apoio Voluntário)</div>
+          <div id="pix-chave-texto" style="font-size: 0.95rem; font-weight: 800; color: #047857; letter-spacing: 0.5px;">geofishms@pantanal.org</div>
+          <button id="btn-copiar-chave-pix" class="btn-cta" style="background: #059669; font-size: 0.8rem; padding: 8px 12px; margin-top: 8px;">
+            📋 Copiar Chave PIX
+          </button>
+        </div>
+        <small style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block;">
+          Qualquer valor contribui para manter a infraestrutura de satélites e mapas atualizada para toda a comunidade!
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Rodapé Institucional Nobre do Portal (Padrão Texas TPWD & Comunidade) -->
+  <footer id="portal-footer" class="portal-footer" role="contentinfo">
+    <div class="portal-footer-inner">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-brand">
+            <span style="font-size: 1.3rem;">🌿</span>
+            <strong style="color: #ffffff; font-size: 1.05rem;">GeoFish MS</strong>
+          </div>
+          <p class="footer-desc">
+            Iniciativa Cidadã Independente (Civic Tech) em defesa da Bacia Hidrográfica do Rio Miranda, da sustentabilidade pantaneira e dos trabalhadores das águas.
+          </p>
+          <div class="footer-tagline">
+            Operação 100% gratuita &bull; Funciona sem sinal de internet no barco.
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Governança & Parcerias</h4>
+          <ul class="footer-links">
+            <li><button class="footer-link-btn" id="footer-btn-parceiros">🤝 Guia de Pousadas e Ranchos</button></li>
+            <li><button class="footer-link-btn" id="footer-btn-piloteiros">🚤 Piloteiros Locais (Colônias Z-1 e Z-7)</button></li>
+            <li><a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="footer-link-btn">🪪 Emitir Licença no IMASUL</a></li>
+            <li><button class="footer-link-btn" id="footer-btn-defeso">⚠️ Tabela de Defeso & Piracema</button></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-col-title">Sustentabilidade & Replicação</h4>
+          <ul class="footer-links">
+            <li><button class="footer-link-btn" id="footer-btn-pix">☕ Contribuir com a Iniciativa (PIX)</button></li>
+            <li><a href="https://github.com/petermar23/geofish-ms" target="_blank" rel="noopener noreferrer" class="footer-link-btn">💻 Código Aberto no GitHub</a></li>
+            <li><button class="footer-link-btn" id="footer-btn-replicar">🗺️ Replicar na sua Bacia Hidrográfica</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-disclaimer">
+          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma plataforma cívica colaborativa. As informações legislativas têm caráter orientativo com base nas publicações oficiais da SEMADESC, IMASUL e ANA.
+        </div>
+        <div class="footer-copy">
+          &copy; 2026 GeoFish MS &bull; Feito por quem vive e respeita o Pantanal.
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- Contêiner de Mensagens Toast Acessíveis -->
   <div id="toast-container" aria-live="polite"></div>

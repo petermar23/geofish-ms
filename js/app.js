@@ -106,13 +106,21 @@ function showToast(message, type = 'info') {
   }, 4000);
 }
 
+// Limites geográficos estritos da Bacia Hidrográfica do Rio Miranda (Pantanal MS)
+const BOUNDS_BACIA = L.latLngBounds(
+  L.latLng(-21.80, -57.90), // Sudoeste (Porto Murtinho / Foz no Rio Paraguai)
+  L.latLng(-19.30, -54.70)  // Nordeste (Cabeceiras de Aquidauana / Corguinho)
+);
+
 // 3. Inicialização do Mapa Leaflet com Esri Satélite
 const map = L.map('map', {
-  center: [-20.50, -56.50],
+  center: [-20.24, -56.38], // Centroide na região de Miranda - MS
   zoom: 9,
+  minZoom: 7,
+  maxZoom: 18,
+  maxBounds: BOUNDS_BACIA,
+  maxBoundsViscosity: 0.8,
   zoomControl: false, // Ocultado para posicionar no canto superior direito
-  // Desempenho: rios_principais (~9 MB) e areas_restritas (~5 MB) são desenhados em Canvas
-  // (um canvas por pane) em vez de milhares de nós SVG no DOM — essencial em celulares modestos.
   preferCanvas: true
 });
 
@@ -824,9 +832,24 @@ function obterLocalizacao() {
 
       const latFmt = lat.toFixed(5);
       const lngFmt = lng.toFixed(5);
+      const pontoPescador = L.latLng(lat, lng);
+
+      // Verificação se está nos limites da Bacia do Miranda
+      const dentroDaBacia = BOUNDS_BACIA.contains(pontoPescador);
       const conformidade = avaliarConformidadePosicao(lat, lng);
 
+      if (!dentroDaBacia) {
+        showToast('Aviso: Você está fora da calha da Bacia do Rio Miranda.', 'warn');
+      }
+
       let radarHtml = '';
+      if (precisao > 100) {
+        radarHtml += `
+          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; font-size: 0.75rem; color: #92400e;">
+            ⚠️ <strong>Sinal GPS aproximado (~${precisao}m):</strong> Em áreas de mata ou serra fechada, o radar de regras é orientativo.
+          </div>
+        `;
+      }
       if (conformidade.trecho) {
         const corRegra = obterCorPorRegra(conformidade.trecho.regra);
         const distFmt = conformidade.distanciaTrechoKm < 1 
@@ -919,8 +942,8 @@ function obterLocalizacao() {
     },
     {
       enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 5000
+      timeout: 25000,
+      maximumAge: 30000
     }
   );
 }
@@ -2107,3 +2130,110 @@ function simularEnvioAoServidor(dados, destino) {
 
 // Carga inicial
 setTimeout(renderizarTrofeusNoMapa, 1000);
+
+// ========================================================
+// 18. CONTROLES DO PORTAL COMUNITÁRIO, MODO BARCO E PARCERIAS
+// ========================================================
+
+// Alternância do Modo Barco (Tela Cheia Náutica)
+const btnToggleFullscreen = document.getElementById('btn-toggle-fullscreen');
+if (btnToggleFullscreen) {
+  btnToggleFullscreen.addEventListener('click', () => {
+    vibrar(30);
+    const isFullscreen = document.body.classList.toggle('map-fullscreen');
+    btnToggleFullscreen.innerHTML = isFullscreen 
+      ? '✕ Sair do Modo Barco' 
+      : '⛶ Modo Barco (Tela Cheia)';
+    
+    // Invalida o tamanho do contêiner Leaflet para renderizar tiles sem falhas
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 180);
+
+    showToast(isFullscreen ? 'Modo Barco Ativado (Tela Cheia)' : 'Retornando ao Portal Hub');
+  });
+}
+
+// Botão de Ver Regras na Faixa de Alerta
+const btnVerAlertaRegras = document.getElementById('btn-ver-alerta-regras');
+if (btnVerAlertaRegras) {
+  btnVerAlertaRegras.addEventListener('click', () => {
+    abrirModalEspecies();
+  });
+}
+
+// Modal de Parceiros & Pousadas
+const modalParceiros = document.getElementById('modal-parceiros');
+const btnParceirosTopo = document.getElementById('btn-parceiros-topo');
+const btnFecharParceiros = document.getElementById('btn-fechar-parceiros');
+const footerBtnParceiros = document.getElementById('footer-btn-parceiros');
+const footerBtnPiloteiros = document.getElementById('footer-btn-piloteiros');
+
+function abrirModalParceiros() {
+  if (modalParceiros) {
+    vibrar(25);
+    modalParceiros.classList.remove('hidden');
+  }
+}
+function fecharModalParceiros() {
+  if (modalParceiros) modalParceiros.classList.add('hidden');
+}
+
+if (btnParceirosTopo) btnParceirosTopo.addEventListener('click', abrirModalParceiros);
+if (footerBtnParceiros) footerBtnParceiros.addEventListener('click', abrirModalParceiros);
+if (footerBtnPiloteiros) footerBtnPiloteiros.addEventListener('click', abrirModalParceiros);
+if (btnFecharParceiros) btnFecharParceiros.addEventListener('click', fecharModalParceiros);
+
+// Modal de Apoio PIX
+const modalApoiePix = document.getElementById('modal-apoie-pix');
+const btnApoiePixTopo = document.getElementById('btn-apoie-pix-topo');
+const btnFecharPix = document.getElementById('btn-fechar-pix');
+const footerBtnPix = document.getElementById('footer-btn-pix');
+const btnCopiarChavePix = document.getElementById('btn-copiar-chave-pix');
+const pixChaveTexto = document.getElementById('pix-chave-texto');
+
+function abrirModalPix() {
+  if (modalApoiePix) {
+    vibrar(25);
+    modalApoiePix.classList.remove('hidden');
+  }
+}
+function fecharModalPix() {
+  if (modalApoiePix) modalApoiePix.classList.add('hidden');
+}
+
+if (btnApoiePixTopo) btnApoiePixTopo.addEventListener('click', abrirModalPix);
+if (footerBtnPix) footerBtnPix.addEventListener('click', abrirModalPix);
+if (btnFecharPix) btnFecharPix.addEventListener('click', fecharModalPix);
+
+if (btnCopiarChavePix && pixChaveTexto) {
+  btnCopiarChavePix.addEventListener('click', async () => {
+    vibrar(20);
+    const chave = pixChaveTexto.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(chave);
+      btnCopiarChavePix.innerHTML = '✅ Chave Copiada!';
+      showToast('Chave PIX copiada para a área de transferência!');
+      setTimeout(() => {
+        btnCopiarChavePix.innerHTML = '📋 Copiar Chave PIX';
+      }, 3000);
+    } catch (_) {
+      showToast(`Chave PIX: ${chave}`);
+    }
+  });
+}
+
+// Botões do Rodapé para Modais Existentes
+const footerBtnDefeso = document.getElementById('footer-btn-defeso');
+if (footerBtnDefeso) {
+  footerBtnDefeso.addEventListener('click', () => {
+    abrirModalEspecies();
+  });
+}
+
+const footerBtnReplicar = document.getElementById('footer-btn-replicar');
+if (footerBtnReplicar) {
+  footerBtnReplicar.addEventListener('click', () => {
+    abrirModalSobre();
+  });
+}
