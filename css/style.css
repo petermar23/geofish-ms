@@ -1302,3 +1302,147 @@ body.sheet-open .btn-gps {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ========================================================
+   ESTILOS DO CARTÃO COLAPSÁVEL DE COTA ZERO (Decreto 15.166)
+   ======================================================== */
+.cota-warning-details {
+  background: #fef2f2;
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  transition: box-shadow 0.2s;
+}
+.cota-warning-details[open] {
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+.cota-summary-header {
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none; /* remove seta padrão do Chrome */
+  user-select: none;
+  background: #fef2f2;
+  transition: background 0.2s;
+}
+/* Esconde seta de detalhe do Safari/Firefox */
+.cota-summary-header::-webkit-details-marker {
+  display: none;
+}
+.cota-summary-header:hover {
+  background: #fee2e2;
+}
+.cota-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cota-summary-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b91c1c;
+  font-size: 0.95rem;
+}
+.cota-summary-icon {
+  font-size: 1.2rem;
+}
+.cota-summary-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  flex: 1;
+}
+.cota-toggle-hint {
+  font-size: 0.72rem;
+  color: #7f1d1d;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+.cota-warning-details[open] .cota-toggle-hint {
+  display: none;
+}
+.cota-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cota-mini-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+.badge-barco {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+.badge-estrada {
+  background: #ffffff;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+.cota-details-body {
+  padding: 14px;
+  border-top: 1px dashed #fca5a5;
+  background: #ffffff;
+  animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cota-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+@media (min-width: 500px) {
+  .cota-comparison-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.cota-box {
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.cota-permitido {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+.cota-proibido {
+  background: #ffffff;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+.cota-box-title {
+  font-weight: 800;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+.cota-penalties-box {
+  background: #fef2f2;
+  border-radius: 6px;
+  padding: 12px;
+  border-left: 4px solid #b91c1c;
+}
+.penalties-title {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.penalties-list {
+  font-size: 0.78rem;
+  color: #450a0a;
+  margin-left: 18px;
+  line-height: 1.5;
+}
