@@ -51,7 +51,7 @@
       <div class="tpwd-alert-content">
         <span class="alert-icon" aria-hidden="true">⚠️</span>
         <div class="alert-text">
-          <strong>ALERTA AMBIENTAL (Decreto 15.166/MS):</strong> Transporte de pescado é <strong>COTA ZERO (0 kg)</strong> nas rodovias. Consumo permitido apenas no barco/rancho.
+          <strong>Vai levar peixe na estrada?</strong> A fiscalização é rigorosa. Confira as regras de cota e transporte com a PMA ou o IMASUL antes de viajar.
         </div>
       </div>
       <button id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Regras &rarr;</button>
@@ -64,7 +64,7 @@
       <img src="icons/favicon-32.png" alt="GeoFish MS" class="brand-logo" width="32" height="32">
       <div>
         <h1 class="brand-title">GeoFish MS</h1>
-        <span class="brand-subtitle">Guia Comunitário &bull; Inteligência Náutica</span>
+        <span class="brand-subtitle">Guia do pescador &bull; Funciona sem sinal</span>
       </div>
     </div>
     
@@ -72,9 +72,6 @@
       <span id="status-rede"><span class="status-dot"></span> Online</span>
       <button id="btn-parceiros-topo" class="btn-header" title="Rede de parceiros locais e pousadas">
         🤝 Parceiros
-      </button>
-      <button id="btn-apoie-pix-topo" class="btn-header btn-pix-highlight" title="Apoie esta iniciativa independente">
-        ☕ Apoie
       </button>
       <button id="btn-install-pwa" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo no Android ou computador">
         📲 App
@@ -121,7 +118,7 @@
   <!-- 3. Core Central WebGIS (Leaflet 100% Nativo com Modo Barco) -->
   <section class="portal-map-section" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
     <div class="map-toolbar-top">
-      <span class="map-status-pill">🗺️ Bacia do Rio Miranda &bull; SIRGAS 2000</span>
+      <span class="map-status-pill">🗺️ Bacia do Rio Miranda</span>
       <button id="btn-toggle-fullscreen" class="btn-map-fullscreen" title="Alternar entre visualização do Portal e Modo Barco em tela cheia">
         ⛶ Modo Barco (Tela Cheia)
       </button>
@@ -175,7 +172,7 @@
   <aside id="bottom-sheet" class="bottom-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Painel de detalhes da feição selecionada">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header-row">
-      <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Informações Oficiais</span>
+      <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Detalhes</span>
       <button id="close-sheet" class="close-btn" aria-label="Fechar painel de detalhes">&times;</button>
     </div>
     <div id="sheet-content"></div>
@@ -205,17 +202,17 @@
         <div>
           <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Bases Normativas de Referência</h3>
           <ul style="padding-left: 20px; font-size: 0.86rem; color: #334155; display: flex; flex-direction: column; gap: 8px;">
-            <li><strong>Decreto Estadual nº 15.166/2019:</strong> Institui a política de Cota Zero para transporte rodoviário de pescado nativo e define limite para consumo no barco (1 exemplar + 5 piranhas).</li>
+            <li><strong>Decreto Estadual nº 15.166/2019:</strong> Define cotas de captura, tamanhos mínimos/máximos e regras de transporte de pescado. Confira sempre o texto vigente.</li>
             <li><strong>Lei Estadual nº 5.321 (prorrogada até 2029):</strong> Proíbe expressamente a captura e o abate do Dourado em todo o Mato Grosso do Sul.</li>
             <li><strong>Licença Ambiental do IMASUL:</strong> Obrigatório o porte da Autorização Ambiental para Pesca Desportiva (carteirinha do IMASUL) acompanhada de documento oficial com foto.</li>
-            <li><strong>Resoluções SEMADESC / IMASUL:</strong> Regulamentam o defeso anual da piracema (05/nov a 28/fev) e os trechos de Pesque e Solte exclusivo (ex: Rio Salobra).</li>
+            <li><strong>Resoluções SEMADESC / IMASUL:</strong> Regulamentam o defeso anual da piracema e os trechos com regras especiais de pesca.</li>
           </ul>
         </div>
 
         <div>
           <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Governança Participativa e Colônias</h3>
           <p style="font-size: 0.86rem; color: #334155; line-height: 1.4;">
-            Dados oficiais da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda) e Z-7 (Aquidauana)</strong>.
+            Dados públicos da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda) e Z-7 (Aquidauana)</strong>.
           </p>
         </div>
       </div>
@@ -223,7 +220,7 @@
   </div>
 
   <!-- Modal "Tabela Oficial de Espécies e Medidas (IMASUL MS)" -->
-  <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
+  <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela de Espécies e Medidas Permitidas">
     <div class="modal-dialog">
       <div class="modal-header">
         <h2>🐟 Espécies & Tamanhos Permitidos (MS)</h2>
@@ -231,35 +228,19 @@
       </div>
       <div class="modal-body">
         
-        <!-- Alerta Máximo Estático e Expandido -->
-        <div style="background-color: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 2px solid #fca5a5; padding-bottom: 10px;">
-            <span style="font-size: 2rem;">🚨</span>
-            <div>
-              <h3 style="color: #991b1b; font-size: 1.1rem; margin: 0; font-weight: 900; text-transform: uppercase;">Atenção: Crime Ambiental</h3>
-              <div style="font-size: 0.75rem; color: #b91c1c; font-weight: 700; margin-top: 2px;">Decreto Estadual nº 15.166 / PMA MS</div>
-            </div>
-          </div>
-          <p style="font-size: 0.85rem; color: #7f1d1d; font-weight: 800; margin-bottom: 14px; line-height: 1.4;">
-            O transporte de qualquer peixe nativo em rodovias (BR/MS) é <span style="background: #991b1b; color: white; padding: 2px 6px; border-radius: 4px;">COTA ZERO (0 kg)</span>.
+        <!-- Aviso de transporte (texto neutro até confirmação da regra vigente) -->
+        <div style="background-color: #fffbeb; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
+          <h3 style="color: #92400e; font-size: 1rem; margin: 0 0 8px 0; font-weight: 800;">🚗 Vai levar peixe para casa?</h3>
+          <p style="font-size: 0.85rem; color: #78350f; line-height: 1.45; margin: 0 0 8px 0;">
+            As regras de <strong>cota e transporte de pescado</strong> em MS são rígidas e a fiscalização nas rodovias é frequente. Antes de pegar a estrada com peixe, <strong>confirme o procedimento com a PMA ou o IMASUL</strong> (telefones na Cartilha, aba "Telefones da PMA").
           </p>
-          
-          <div style="background: white; border-radius: 6px; padding: 12px; border-left: 5px solid #dc2626; margin-bottom: 12px;">
-            <strong style="font-size: 0.85rem; color: #b91c1c; display: block; margin-bottom: 8px;">🚨 Consequências em Flagrante:</strong>
-            <ul style="font-size: 0.8rem; color: #450a0a; margin-left: 20px; line-height: 1.5; font-weight: 600;">
-              <li>Prisão do condutor (1 a 3 anos).</li>
-              <li>Apreensão do carro, barco, motor e tralha.</li>
-              <li>Multas de R$ 700 a R$ 100.000 + R$ 20/kg.</li>
-            </ul>
-          </div>
-          
-          <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; padding: 10px; font-size: 0.75rem; color: #166534; line-height: 1.4;">
-            <strong>🟢 Exceção (Consumo no Barco):</strong> É permitido abater 1 exemplar na medida + 5 piranhas <strong>apenas para preparo e consumo imediato</strong> no próprio local ou rancho.
-          </div>
+          <p style="font-size: 0.85rem; color: #78350f; line-height: 1.45; margin: 0;">
+            Em qualquer caso: <strong>peixe inteiro</strong> (com cabeça e escamas/couro) e <strong>licença do IMASUL</strong> em mãos.
+          </p>
         </div>
-        
+
         <p style="font-size: 0.85rem; color: #475569;">
-          Tabela oficial com base no <strong>Decreto 15.166/2019</strong> e na <strong>Lei 5.321</strong> (Dourado Proibido).
+          Tabela de referência com base no <strong>Decreto 15.166/2019</strong> e na <strong>Lei 5.321</strong> (Dourado Proibido).
         </p>
 
         <!-- Calculadora / Verificador de Medida Rápido no Barco -->
@@ -672,7 +653,7 @@
                 <input type="checkbox" name="pousada-amenity" value="Wi-Fi Beira Rio"> 📶 Wi-Fi Beira Rio
               </label>
               <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Piloteiros Credenciados"> 🎣 Piloteiros Nativos
+                <input type="checkbox" name="pousada-amenity" value="Piloteiros Nativos"> 🎣 Piloteiros Nativos
               </label>
             </div>
 
@@ -754,14 +735,14 @@
   </div>
 
   <!-- Modal Cartilha Oficial do Pescador PMA-MS (Leitor Interativo das 24 Páginas) -->
-  <div id="modal-cartilha" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Cartilha Oficial do Pescador PMA-MS" style="z-index: 2650;">
+  <div id="modal-cartilha" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Cartilha do Pescador (resumo comunitário)" style="z-index: 2650;">
     <div class="modal-dialog modal-dialog-lg">
       <div class="modal-header cartilha-modal-header" style="background-color: #14532d;">
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 1.6rem;">🛡️</span>
           <div>
-            <h2 style="margin: 0; font-size: 1.15rem; color: #ffffff;">Cartilha Oficial do Pescador — PMA/MS</h2>
-            <span style="font-size: 0.78rem; color: #86efac;">Batalhão de Polícia Militar Ambiental (BPMA/MS)</span>
+            <h2 style="margin: 0; font-size: 1.15rem; color: #ffffff;">Cartilha do Pescador — resumo comunitário</h2>
+            <span style="font-size: 0.78rem; color: #86efac;">Baseado na cartilha da PMA/MS &bull; não é publicação oficial</span>
           </div>
         </div>
         <button id="btn-fechar-cartilha" class="modal-close-btn" aria-label="Fechar cartilha" onclick="fecharModalCartilha()">&times;</button>
@@ -793,7 +774,7 @@
             <h4>🚫 Rios Onde a Pesca é Proibida em Qualquer Período (Pág. 16)</h4>
             <p><strong>A pesca nestes rios é CRIME AMBIENTAL com detenção de 1 a 3 anos e apreensão do barco e motor:</strong></p>
             <ul class="cartilha-list">
-              <li><strong>Rio Salobra (Miranda e Bodoquena):</strong> Proibida qualquer pesca. Navegação permitida <strong>exclusivamente com motor de 4 tempos de potência até 15hp</strong>.</li>
+              <li><strong>Rio Salobra (Miranda e Bodoquena):</strong> ⚠️ Rio com regras especiais de proteção para pesca e navegação. <strong>Informação em conferência: confirme com a PMA de Miranda antes de pescar.</strong></li>
               <li><strong>Córrego Azul:</strong> Município de Bodoquena.</li>
               <li><strong>Rio da Prata:</strong> Municípios de Bonito e Jardim.</li>
               <li><strong>Rio Nioaque:</strong> Municípios de Nioaque e Anastácio.</li>
@@ -898,6 +879,7 @@
         <div id="panel-cartilha-transporte" class="cartilha-tab-panel">
           <div class="cartilha-box notice-blue-box">
             <h4>📋 Guia de Controle de Pescado (GCP) &amp; Selo Turismo (Pág. 6 e 15)</h4>
+            <p style="background:#fffbeb; border:1px solid #f59e0b; border-radius:6px; padding:8px; color:#78350f; margin-bottom:8px;">⚠️ <strong>Antes de viajar com peixe, confirme este procedimento com a PMA</strong> — as regras de cota e transporte são atualizadas por decreto.</p>
             <p>Obrigatoriamente o pescador deve se dirigir a um <strong>Posto da Polícia Militar Ambiental</strong> para <strong>lacrar e declarar seu pescado</strong> e pagar o Selo Turismo, onde receberá a <strong>Guia de Controle de Pescado (GCP)</strong>.</p>
             <p style="color: #b91c1c; font-weight: 700; margin-top: 6px;">⚠️ A falta da Guia (GCP) implica em multa imediata e apreensão do pescado!</p>
           </div>
@@ -944,7 +926,7 @@
         <div id="panel-cartilha-contatos" class="cartilha-tab-panel">
           <div class="cartilha-box notice-blue-box">
             <h4>📞 Telefones e E-mails do Batalhão de Polícia Militar Ambiental (BPMA/MS)</h4>
-            <p>Toque no botão para ligar diretamente em caso de dúvidas, denúncias ou emergências na calha do rio:</p>
+            <p>Toque no botão para ligar em caso de dúvidas ou denúncias. Os números foram transcritos da cartilha e podem mudar; <strong>em emergência, ligue 190</strong>.</p>
           </div>
 
           <div class="pma-contacts-grid" style="margin-top: 14px;">
@@ -1001,9 +983,6 @@
       </div>
 
       <div class="modal-footer cartilha-modal-footer" style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid #cbd5e1; text-align: center;">
-        <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-cta" style="background: #15803d; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;" target="_blank" rel="noopener noreferrer">
-          📥 Baixar Cartilha Oficial Completa em PDF (PMA-MS)
-        </a>
       </div>
     </div>
   </div>
@@ -1021,13 +1000,13 @@
         </p>
         <div style="background: #ecfdf5; border: 1px dashed #059669; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
           <div style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Chave PIX (Apoio Voluntário)</div>
-          <div id="pix-chave-texto" style="font-size: 0.95rem; font-weight: 800; color: #047857; letter-spacing: 0.5px;">geofishms@pantanal.org</div>
+          <div id="pix-chave-texto" style="font-size: 0.95rem; font-weight: 800; color: #047857; letter-spacing: 0.5px;">Em breve</div>
           <button id="btn-copiar-chave-pix" class="btn-cta" style="background: #059669; font-size: 0.8rem; padding: 8px 12px; margin-top: 8px;">
             📋 Copiar Chave PIX
           </button>
         </div>
         <small style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block;">
-          Qualquer valor contribui para manter a infraestrutura de satélites e mapas atualizada para toda a comunidade!
+          Qualquer valor ajuda a manter o projeto no ar e os dados atualizados para toda a comunidade.
         </small>
       </div>
     </div>
@@ -1037,83 +1016,30 @@
        CONTEÚDO DO PORTAL HUB (ABAIXO DO WEBGIS)
        ======================================================== -->
 
-  <!-- SEÇÃO A: MONITORAMENTO HIDROLÓGICO EM TEMPO REAL (RÉGUAS ANA / CPRM / IMASUL) -->
-  <section id="secao-hidrologia" class="portal-section" aria-label="Monitoramento Hidrológico da Bacia">
+  <!-- SEÇÃO A: NÍVEL DOS RIOS (consulta às fontes oficiais; leitura automática ainda não implementada) -->
+  <section id="secao-hidrologia" class="portal-section" aria-label="Nível dos rios da Bacia">
     <div class="portal-section-header">
-      <div class="section-tag">HIDROLOGIA & COTAS EM TEMPO REAL</div>
+      <div class="section-tag">NÍVEL DOS RIOS</div>
       <h2 class="portal-section-title">🌊 Nível das Águas na Bacia do Rio Miranda</h2>
       <p class="portal-section-desc">
-        Leituras e tendências fluviométricas das estações oficiais da Rede Hidrometeorológica Nacional (IMASUL / ANA / CPRM).
+        Antes de sair, consulte o nível atual dos rios nas estações oficiais da Agência Nacional de Águas (ANA). Rio subindo rápido muda a navegação e a pesca.
       </p>
     </div>
-
     <div class="hydro-grid">
-      <!-- Estação 1: Miranda Cidade -->
       <article class="hydro-card">
         <div class="hydro-card-header">
           <div>
-            <span class="hydro-river">Rio Miranda</span>
-            <h3 class="hydro-station">Estação Miranda (Cidade)</h3>
+            <span class="hydro-river">Rio Miranda &bull; Rio Aquidauana</span>
+            <h3 class="hydro-station">Réguas oficiais (ANA / HidroWeb)</h3>
           </div>
-          <span class="hydro-status status-normal">🟢 Normal</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">2,42 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Estável (±2 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>6,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>7,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>112 m³/s</strong></div>
         </div>
         <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Calha estável com água limpa nos afluentes. Excelente para pesca de ceva de pacu e rodada no canal principal.
+          ℹ️ A leitura automática das réguas dentro do app ainda não está ativa. Até lá, consulte as estações de Miranda, Aquidauana e Passo do Lontra no portal oficial.
         </div>
-      </article>
-
-      <!-- Estação 2: Aquidauana Ponte Velha -->
-      <article class="hydro-card">
-        <div class="hydro-card-header">
-          <div>
-            <span class="hydro-river">Rio Aquidauana</span>
-            <h3 class="hydro-station">Estação Ponte Velha</h3>
-          </div>
-          <span class="hydro-status status-normal">🟢 Normal</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">2,15 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Em declive (-4 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>7,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>8,00 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>74 m³/s</strong></div>
-        </div>
-        <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Rio baixando; cardumes de pintado e cachara concentrando nas bocas de corixos e poços de corredeira.
-        </div>
-      </article>
-
-      <!-- Estação 3: Passo do Lontra -->
-      <article class="hydro-card">
-        <div class="hydro-card-header">
-          <div>
-            <span class="hydro-river">Rio Miranda / Foz Vermelho</span>
-            <h3 class="hydro-station">Estação Passo do Lontra</h3>
-          </div>
-          <span class="hydro-status status-atencao">🔵 Águas Médias</span>
-        </div>
-        <div class="hydro-gauge-box">
-          <div class="hydro-gauge-value">4,18 <span class="gauge-unit">m</span></div>
-          <div class="hydro-gauge-trend">Tendência: <strong>Subindo lento (+3 cm/dia)</strong></div>
-        </div>
-        <div class="hydro-meta-list">
-          <div class="hydro-meta-item"><span>Cota de Alerta:</span> <strong>5,50 m</strong></div>
-          <div class="hydro-meta-item"><span>Cota de Inundação:</span> <strong>6,20 m</strong></div>
-          <div class="hydro-meta-item"><span>Vazão Estimada:</span> <strong>185 m³/s</strong></div>
-        </div>
-        <div class="hydro-fishing-hint">
-          🎣 <strong>Condição de Pesca:</strong> Confluência pantaneira com ótima circulação náutica; alta atividade de peixes de couro nos remansos.
+        <div class="showcase-footer" style="margin-top: 12px;">
+          <a href="https://www.snirh.gov.br/hidroweb/" target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
+            🌊 Abrir HidroWeb (ANA)
+          </a>
         </div>
       </article>
     </div>
@@ -1142,7 +1068,7 @@
           </li>
           <li>
             <a href="javascript:void(0)" onclick="abrirModalEspecies()" class="resource-item-link">
-              <div class="item-title">Regulamentos e Cota Zero Rodoviária &rarr;</div>
+              <div class="item-title">Regulamentos, Medidas e Transporte &rarr;</div>
               <div class="item-sub">Decreto nº 15.166/19 e tabela de tamanhos mínimos e máximos</div>
             </a>
           </li>
@@ -1155,7 +1081,7 @@
           <li>
             <a href="#secao-hidrologia" class="resource-item-link">
               <div class="item-title">Boletins de Nível e Condições das Águas &rarr;</div>
-              <div class="item-sub">Monitoramento das réguas de Miranda, Aquidauana e Lontra</div>
+              <div class="item-sub">Onde consultar o nível oficial dos rios (ANA)</div>
             </a>
           </li>
         </ul>
@@ -1168,7 +1094,7 @@
           <h2 class="column-title">Passeios de Barco &amp; Náutica</h2>
         </div>
         <p class="column-summary">
-          Infraestrutura portuária, segurança da navegação e diretório de serviços credenciados ao longo da bacia.
+          Infraestrutura portuária, segurança da navegação e diretório de serviços locais ao longo da bacia.
         </p>
 
         <ul class="column-resource-list">
@@ -1180,7 +1106,7 @@
           </li>
           <li>
             <a href="javascript:void(0)" onclick="abrirModalParceiros()" class="resource-item-link">
-              <div class="item-title">Guias Nativos Credenciados (Colônias Z-1 e Z-7) &rarr;</div>
+              <div class="item-title">Guias Nativos (Colônias Z-1 e Z-7) &rarr;</div>
               <div class="item-sub">Piloteiros experientes para condução segura nos labirintos do Pantanal</div>
             </a>
           </li>
@@ -1206,9 +1132,9 @@
   <section id="secao-servicos" class="portal-section" aria-label="Operadores Locais e Pousadas">
     <div class="portal-section-header">
       <div class="section-tag">ECOTURISMO & SERVIÇOS NÁUTICOS</div>
-      <h2 class="portal-section-title">⚓ Pousadas, Ranchos & Piloteiros Nativos Credenciados</h2>
+      <h2 class="portal-section-title">⚓ Pousadas, Ranchos & Piloteiros Nativos</h2>
       <p class="portal-section-desc">
-        Infraestrutura verificada e condutores das Colônias Z-1 (Miranda) e Z-7 (Aquidauana) para uma pescaria segura no Pantanal.
+        Pousadas, ranchos e condutores das Colônias Z-1 (Miranda) e Z-7 (Aquidauana). Os contatos só são publicados depois de conferidos.
       </p>
     </div>
 
@@ -1253,94 +1179,16 @@
     </div>
 
     <div class="showcase-grid">
-      <!-- Parceiro 1 -->
+      <!-- Vitrine: só entram estabelecimentos e piloteiros com contato conferido -->
       <article class="showcase-card">
         <div class="showcase-card-header">
-          <span class="showcase-type">POUSADA PESQUEIRA</span>
-          <h3 class="showcase-name">Pousada & Pesca Beira Rio</h3>
-          <span class="showcase-location">📍 Miranda, MS — Margem do Rio Miranda</span>
+          <span class="showcase-type">EM BREVE</span>
+          <h3 class="showcase-name">Pousadas e piloteiros conferidos</h3>
+          <span class="showcase-location">📍 Miranda, Aquidauana e Passo do Lontra</span>
         </div>
         <p class="showcase-desc">
-          Rampa de concreto homologada para barcos de grande porte, aluguel de voadeiras 40hp, apartamentos climatizados, restaurante típico e piloteiros pantaneiros nativos.
+          Estamos conferindo os primeiros cadastros. Aqui vão aparecer pousadas, ranchos e piloteiros com contato verificado, fotos e estrutura de cada um.
         </p>
-        <div class="showcase-amenities">
-          <span>⚓ Rampa Concreto</span>
-          <span>🚤 Barcos 40hp</span>
-          <span>🧊 Isca Viva</span>
-          <span>📶 Wi-Fi</span>
-        </div>
-        <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Vi%20sua%20pousada%20no%20GeoFish%20MS%20e%20gostaria%20de%20informa%C3%A7%C3%B5es%20de%20reserva." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contatar via WhatsApp
-          </a>
-        </div>
-      </article>
-
-      <!-- Parceiro 2 -->
-      <article class="showcase-card">
-        <div class="showcase-card-header">
-          <span class="showcase-type">HOTEL PANTANEIRO</span>
-          <h3 class="showcase-name">Hotel Passo do Lontra</h3>
-          <span class="showcase-location">📍 Estrada Parque MS-184 — Foz do Rio Vermelho</span>
-        </div>
-        <p class="showcase-desc">
-          Localização estratégica na foz do Rio Vermelho no Rio Miranda. Píer flutuante, posto de combustível náutico, venda de tuvira e barcos de borda alta homologados.
-        </p>
-        <div class="showcase-amenities">
-          <span>⛽ Gasolina Náutica</span>
-          <span>🛥️ Píer Flutuante</span>
-          <span>🎣 Guia Local</span>
-          <span>🍽️ Pensão Completa</span>
-        </div>
-        <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990002&text=Ol%C3%A1!%20Vi%20o%20Passo%20do%20Lontra%20no%20GeoFish%20MS%20e%20gostaria%20de%20reservar." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contatar via WhatsApp
-          </a>
-        </div>
-      </article>
-
-      <!-- Piloteiro 1: Colônia Z-1 -->
-      <article class="showcase-card card-guide">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-z1">COLÔNIA Z-1 MIRANDA</span>
-          <h3 class="showcase-name">Mestre Dico (Piloteiro Nativo)</h3>
-          <span class="showcase-location">📍 Porto Geral de Miranda</span>
-        </div>
-        <p class="showcase-desc">
-          28 anos de navegação profissional na Bacia do Miranda e Rio Salobra. Especialista em rodada de pintado, pesca esportiva de ceva e leitura de rebojos do rio.
-        </p>
-        <div class="showcase-amenities">
-          <span>📜 Credenciado Z-1</span>
-          <span>🦺 Coletes Homologados</span>
-          <span>🎯 Conhecimento do Rio</span>
-        </div>
-        <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990003&text=Ol%C3%A1%20Mestre%20Dico!%20Vi%20seu%20contato%20na%20Col%C3%B4nia%20Z-1%20do%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contratar Piloteiro
-          </a>
-        </div>
-      </article>
-
-      <!-- Piloteiro 2: Colônia Z-7 -->
-      <article class="showcase-card card-guide">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-z7">COLÔNIA Z-7 AQUIDAUANA</span>
-          <h3 class="showcase-name">Capitão Zé Maria (Piloteiro Nativo)</h3>
-          <span class="showcase-location">📍 Aquidauana / Corredor das Corredeiras</span>
-        </div>
-        <p class="showcase-desc">
-          Condutor ribeirinho experiente em trechos de corredeiras e restingas do Rio Aquidauana. Condução segura, pesca com anzol sem farpa e boas práticas de soltura.
-        </p>
-        <div class="showcase-amenities">
-          <span>📜 Credenciado Z-7</span>
-          <span>🚤 Voadeira 25hp</span>
-          <span>🐟 Pesque & Solte</span>
-        </div>
-        <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990004&text=Ol%C3%A1%20Capit%C3%A3o%20Z%C3%A9%20Maria!%20Vi%20seu%20contato%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contratar Piloteiro
-          </a>
-        </div>
       </article>
 
       <!-- Card de Monetização e Apoio Comunitário -->
@@ -1368,28 +1216,24 @@
   </section>
 
   <!-- SEÇÃO D: CARTILHA OFICIAL DO PESCADOR DA POLÍCIA MILITAR AMBIENTAL (PMA-MS) -->
-  <section id="secao-cartilha" class="portal-section" aria-label="Cartilha Oficial do Pescador PMA-MS">
+  <section id="secao-cartilha" class="portal-section" aria-label="Cartilha do Pescador (resumo comunitário)">
     <div class="cartilha-banner-card">
       <div class="cartilha-banner-header">
-        <div class="section-tag" style="background: #14532d; color: #86efac;">DOCUMENTO OFICIAL DA POLÍCIA MILITAR AMBIENTAL (BPMA/MS)</div>
+        <div class="section-tag" style="background: #14532d; color: #86efac;">RESUMO COMUNITÁRIO &bull; BASEADO NA CARTILHA DA PMA-MS</div>
       </div>
       <div class="cartilha-banner-content">
         <div class="cartilha-text-col">
-          <h3 class="cartilha-title">📖 Cartilha Oficial do Pescador de Mato Grosso do Sul</h3>
+          <h3 class="cartilha-title">📖 Cartilha do Pescador de MS (resumo)</h3>
           <p class="cartilha-desc">
-            Manual de bolso oficial elaborado pelo Batalhão de Polícia Militar Ambiental (BPMA/MS) contendo as normas de pesca, tamanhos mínimos de iscas vivas (tuvira, mussum, lambari), rios proibidos (Salobra com motor 4 tempos 15hp, Prata, Formoso), áreas de pesque e solte, guia de controle de pescado (GCP), exigência de peixe inteiro e telefones de todos os pelotões pantaneiros.
+            Resumo feito pela comunidade a partir da cartilha da Polícia Militar Ambiental (PMA-MS): iscas vivas, rios com restrição, pesque e solte, guia de controle de pescado (GCP), peixe inteiro e telefones da PMA. <strong>Não é publicação oficial</strong>: em caso de dúvida, vale a orientação da PMA/IMASUL.
           </p>
           <div class="cartilha-features-pills">
-            <span>📄 PDF Oficial Completo</span>
-            <span>🐛 Medidas de Iscas Vivas</span>
+                        <span>🐛 Medidas de Iscas Vivas</span>
             <span>🚫 Rios Proibidos &amp; Reservas</span>
             <span>📞 Contatos dos Pelotões PMA</span>
           </div>
         </div>
         <div class="cartilha-action-col">
-          <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-cartilha-download" target="_blank" rel="noopener noreferrer">
-            📥 Baixar Cartilha (PDF)
-          </a>
           <button type="button" class="btn-cartilha-read" onclick="abrirModalCartilha()">
             👁️ Consultar Cartilha Online
           </button>
@@ -1438,7 +1282,7 @@
 
       <div class="footer-bottom">
         <div class="footer-disclaimer">
-          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma plataforma cívica colaborativa. As informações legislativas têm caráter orientativo com base nas publicações oficiais da SEMADESC, IMASUL e ANA.
+          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma plataforma cívica colaborativa. As informações legislativas têm caráter orientativo e não substituem as normas oficiais da SEMADESC, IMASUL e PMA-MS.
         </div>
         <div class="footer-copy">
           &copy; 2026 GeoFish MS &bull; Feito por quem vive e respeita o Pantanal.

@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v17';
+const CACHE_VERSION = 'geofish-shell-v18';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -35,8 +35,7 @@ const SHELL_ASSETS = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
-  './icons/favicon-32.png',
-  './docs/cartilha_do_pescador_pma_ms.pdf'
+  './icons/favicon-32.png'
 ];
 
 // Helper to trim cache size (FIFO LRU)

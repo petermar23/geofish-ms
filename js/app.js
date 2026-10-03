@@ -16,6 +16,10 @@ function escapeHTML(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Contatos do projeto: deixe vazio até ter o número/chave real (a interface se adapta)
+const CONTATO_CENTRAL_WPP = '';
+const CHAVE_PIX = '';
+
 function sanitizeDigits(val) {
   if (!val) return '';
   return String(val).replace(/\D/g, '');
@@ -142,7 +146,7 @@ const relevoEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/serv
 });
 
 // Atribuição oficial dos dados geoespaciais e governança (SEMADESC / IMASUL / Colônias Z-1 e Z-7)
-map.attributionControl.addAttribution('Dados Oficiais: <a href="https://www.imasul.ms.gov.br" target="_blank" rel="noopener noreferrer">SEMADESC / IMASUL / Colônias Z-1 e Z-7</a>');
+map.attributionControl.addAttribution('Dados: <a href="https://www.imasul.ms.gov.br" target="_blank" rel="noopener noreferrer">SEMADESC / IMASUL</a>');
 
 // 4. Criação dos Panes do Leaflet com zIndex estrito (Regras de Empilhamento)
 const PANES = [
@@ -282,7 +286,7 @@ function verificarPeriodoDefeso() {
   if (banner && bannerText) {
     if (emDefeso) {
       banner.classList.remove('hidden');
-      bannerText.innerHTML = `<strong>⚠️ ALERTA OFICIAL: Período de Defeso da Piracema em vigor na Bacia do Miranda (05/Nov a 28/Fev).</strong> Pesca amadora e profissional de espécies nativas suspensa por lei estadual.`;
+      bannerText.innerHTML = `<strong>⚠️ ATENÇÃO: Período de Defeso da Piracema em vigor na Bacia do Miranda (05/Nov a 28/Fev).</strong> Pesca amadora e profissional de espécies nativas suspensa por lei estadual.`;
     } else {
       banner.classList.add('hidden');
     }
@@ -428,7 +432,7 @@ async function carregarTodasCamadas() {
 
   const definicoesCamadas = [
     { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: '🎣 Trechos de Pesca (Regras)', ativa: true },
-    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias Credenciados', ativa: true },
+    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias Cadastrados', ativa: true },
     { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: '🏥 Apoio e Emergência', ativa: true },
     { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: '⚠️ Áreas Restritas (UCs)', ativa: true },
     { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: '🌊 Rios Principais', ativa: true },
@@ -515,7 +519,7 @@ async function carregarTodasCamadas() {
                 const g = feature.properties;
                 const waUrl = normalizeWhatsApp(g.contato_wa);
                 abrirPainel(`
-                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca Credenciado</span>
+                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca Cadastrado</span>
                   <h2 class="sheet-title">${escapeHTML(g.nome_operacional)}</h2>
                   <div class="data-group">
                     <div class="data-item">
@@ -1035,7 +1039,7 @@ function abrirModalSobre() {
     layerStatusList.innerHTML = '';
     const nomes = {
       trechos_pesca: 'Regras de Pesca por Trecho',
-      guias_credenciados: 'Guias de Pesca Credenciados',
+      guias_credenciados: 'Guias de Pesca Cadastrados',
       pontos_emergencia: 'Pontos de Apoio e Emergência',
       areas_restritas: 'Áreas Restritas (Unidades de Conservação)',
       rios_principais: 'Rios Principais do Estado',
@@ -1351,7 +1355,7 @@ function aplicarFiltroRapido(tipo) {
       const bounds = camadasInstanciadas['guias_credenciados'].getBounds();
       if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
     }
-    showToast('Filtro: Guias Credenciados Z-1 e Z-7.');
+    showToast('Filtro: Guias Z-1 e Z-7.');
   } else if (tipo === 'apoio') {
     if (camadasInstanciadas['pontos_emergencia']) {
       map.addLayer(camadasInstanciadas['pontos_emergencia']);
@@ -1390,7 +1394,7 @@ const ESPECIES_MS = [
     statusTexto: '1 Exemplar no Barco',
     min: 85,
     max: 125,
-    regra: 'Permitida a captura e o transporte de 1 exemplar por pescador licenciado, dentro da faixa de 85 a 125 cm (Art. 4º e Art. 9º). Peixe DEVE estar inteiro no transporte (Art. 14).'
+    regra: 'Faixa permitida de 85 a 125 cm para pescador licenciado (Art. 4º e Art. 9º). Peixe deve estar inteiro (Art. 14). Para levar na estrada, confirme a regra de transporte com a PMA.'
   },
   {
     id: 'pacu',
@@ -1400,7 +1404,7 @@ const ESPECIES_MS = [
     statusTexto: 'Faixa 45 a 65 cm',
     min: 45,
     max: 65,
-    regra: 'Permitida a captura e o transporte de 1 exemplar entre 45 e 65 cm. Exemplares acima de 65 cm são matrizes protegidas por lei e devem ser soltos vivos imediatamente (Art. 9º, § 3º).'
+    regra: 'Faixa permitida de 45 a 65 cm. Exemplares acima de 65 cm são matrizes protegidas por lei e devem ser soltos vivos imediatamente (Art. 9º, § 3º).'
   },
   {
     id: 'cachara',
@@ -1420,7 +1424,7 @@ const ESPECIES_MS = [
     statusTexto: 'Faixa 95 a 130 cm',
     min: 95,
     max: 130,
-    regra: 'Permitida a captura e o transporte de 1 exemplar entre 95 e 130 cm. Exemplares gigantes acima de 130 cm são reprodutores protegidos por lei (Art. 9º).'
+    regra: 'Faixa permitida de 95 a 130 cm. Exemplares gigantes acima de 130 cm são reprodutores protegidos por lei (Art. 9º).'
   },
   {
     id: 'piraputanga',
@@ -1430,7 +1434,7 @@ const ESPECIES_MS = [
     statusTexto: 'Mínimo 30 cm',
     min: 30,
     max: null,
-    regra: 'Tamanho mínimo de 30 cm (Art. 9º). Atenção: na calha do Rio Salobra e afluentes é modalidade exclusivamente Pesque e Solte.'
+    regra: 'Tamanho mínimo de 30 cm (Art. 9º). Atenção: o Rio Salobra tem regras especiais de proteção; confirme com a PMA antes de pescar nele.'
   },
   {
     id: 'curimbata',
@@ -1692,7 +1696,7 @@ function verificarMedidaPescado() {
   if (esp.min && esp.max) {
     if (valor >= esp.min && valor <= esp.max) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL) ou consumo no local. O peixe transportado deve estar inteiro com cabeça e escamas/couro!`;
+      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Medida dentro da faixa legal. Para levar na estrada, confirme a regra de cota e transporte com a PMA. O peixe deve ficar inteiro, com cabeça e escamas/couro!`;
     } else if (valor < esp.min) {
       measureResult.className = 'measure-result-box forbidden';
       measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave. <strong>Solte imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
@@ -1703,7 +1707,7 @@ function verificarMedidaPescado() {
   } else if (esp.min) {
     if (valor >= esp.min) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Permitido para captura e transporte (1 exemplar nativo) ou consumo local.`;
+      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Medida dentro do mínimo legal. Para levar na estrada, confirme a regra de cota e transporte com a PMA.`;
     } else {
       measureResult.className = 'measure-result-box forbidden';
       measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
@@ -1844,7 +1848,7 @@ function inicializarBuscaLocal() {
             tipoIcone: '🚤',
             titulo: p.nome_operacional || p.nome_completo,
             subtitulo: `${p.colonia || 'Guia de Pesca'} • Base: ${p.porto_base || 'Pantanal'}`,
-            categoria: 'Guia Credenciado',
+            categoria: 'Guia Cadastrado',
             coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
             propriedades: p
           });
@@ -1869,7 +1873,7 @@ function inicializarBuscaLocal() {
           correspondencias.push({
             tipoIcone: '🎣',
             titulo: `${p.rio || 'Trecho'} - ${p.regra || 'Regra de Pesca'}`,
-            subtitulo: p.descricao || `Regra oficial: ${p.regra}`,
+            subtitulo: p.descricao || `Regra do trecho: ${p.regra}`,
             categoria: 'Trecho de Pesca',
             coords: coordsCentro,
             feature: feat
@@ -2040,7 +2044,7 @@ function abrirConfirmacaoSos(acao) {
       `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
     if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
   } else if (acao.tipo === 'copy') {
-    confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
+    confirmSosText.innerHTML = `Deseja copiar o texto de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
     if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
   } else if (acao.tipo === 'wpp') {
     confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
@@ -2285,7 +2289,7 @@ async function analisarFotoComIA() {
     const mimeMatch = metaPart.match(/:(.*?);/);
     const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
 
-    const systemPrompt = `Você é um ictiólogo e fiscal ambiental de referência na Bacia do Rio Miranda e Pantanal de Mato Grosso do Sul, especialista no Decreto Estadual nº 15.166/MS (Cota Zero para transporte rodoviário, consumo local, medidas mínimas e máximas de captura) e Lei Estadual de Proteção ao Dourado.
+    const systemPrompt = `Você é um ictiólogo e fiscal ambiental de referência na Bacia do Rio Miranda e Pantanal de Mato Grosso do Sul, especialista no Decreto Estadual nº 15.166/MS (cotas de captura e transporte, medidas mínimas e máximas de captura) e Lei Estadual de Proteção ao Dourado.
 Analise a imagem deste peixe e responda EXCLUSIVAMENTE em formato JSON puro, sem crases de markdown e sem texto antes ou depois:
 {
   "especie": "Nome Comum (ex: Pintado, Pacu, Cachara, Jaú, Dourado, Piraputanga, Curimbatá, Piavuçu, Barbado)",
@@ -2294,7 +2298,7 @@ Analise a imagem deste peixe e responda EXCLUSIVAMENTE em formato JSON puro, sem
   "tamanhoEstimadoCm": null,
   "medidaMinima": 85,
   "medidaMaxima": 125,
-  "statusLegal": "PERMITIDO CONSUMO LOCAL | PROIBIDO TOTAL (COTA ZERO) | ATENÇÃO À FAIXA LEGAL",
+  "statusLegal": "DENTRO DA FAIXA LEGAL | PROIBIDO | ATENÇÃO À FAIXA LEGAL",
   "regraTexto": "Explicação resumida das regras do IMASUL MS para a espécie",
   "dicaPantaneira": "Dica prática pantaneira sobre soltura, manuseio seguro ou biologia do peixe"
 }`;
@@ -2703,7 +2707,11 @@ if (btnEnviarPropostaPousada) {
       `✨ *Comodidades:* ${comodidades.length > 0 ? comodidades.join(', ') : 'Padrão'}\n\n` +
       `Olá! Tenho interesse no plano comercial de divulgação da temporada para destacar meu estabelecimento no WebGIS da Bacia do Miranda!`;
 
-    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+    if (!CONTATO_CENTRAL_WPP) {
+      vibrar(30);
+      return showToast('O canal de cadastro ainda não está ativo. Tente novamente em breve.');
+    }
+    const urlWpp = `https://api.whatsapp.com/send?phone=${CONTATO_CENTRAL_WPP}&text=${encodeURIComponent(texto)}`;
     window.open(urlWpp, '_blank');
     vibrar(30);
     showToast('Abrindo WhatsApp para enviar proposta comercial...');
@@ -2746,7 +2754,11 @@ if (btnEnviarCadastroGuia) {
       `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
       `Olá! Sou piloteiro da região e gostaria de ativar meu ponto e contato GRATUITAMENTE no mapa do GeoFish MS!`;
 
-    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+    if (!CONTATO_CENTRAL_WPP) {
+      vibrar(30);
+      return showToast('O canal de cadastro ainda não está ativo. Tente novamente em breve.');
+    }
+    const urlWpp = `https://api.whatsapp.com/send?phone=${CONTATO_CENTRAL_WPP}&text=${encodeURIComponent(texto)}`;
     window.open(urlWpp, '_blank');
     vibrar(30);
     showToast('Abrindo WhatsApp para ativação gratuita do guia...');
@@ -2775,7 +2787,12 @@ if (btnApoiePixTopo) btnApoiePixTopo.addEventListener('click', abrirModalPix);
 if (footerBtnPix) footerBtnPix.addEventListener('click', abrirModalPix);
 if (btnFecharPix) btnFecharPix.addEventListener('click', fecharModalPix);
 
-if (btnCopiarChavePix && pixChaveTexto) {
+if (pixChaveTexto) {
+  pixChaveTexto.textContent = CHAVE_PIX || 'Em breve';
+  if (!CHAVE_PIX && btnCopiarChavePix) btnCopiarChavePix.style.display = 'none';
+}
+
+if (btnCopiarChavePix && pixChaveTexto && CHAVE_PIX) {
   btnCopiarChavePix.addEventListener('click', async () => {
     vibrar(20);
     const chave = pixChaveTexto.textContent.trim();
