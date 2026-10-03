@@ -1,163 +1,1304 @@
+/* GeoFish MS - Estilos Oficiais Mobile-First e Acessíveis */
+:root {
+  --primary-color: #0b4f6c;
+  --primary-dark: #073448;
+  --primary-light: #e6f1f5;
+  --accent-green: #2e7d32;
+  --accent-orange: #f57c00;
+  --accent-red: #d32f2f;
+  --accent-blue: #0288d1;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --bg-surface: #ffffff;
+  --bg-card: #f8fafc;
+  --border-color: #cbd5e1;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.22);
+  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body, html {
+html, body {
   height: 100%;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-main);
+  background-color: #e2e8f0;
   display: flex;
   flex-direction: column;
 }
 
+/* Foco Visível para Teclado (Acessibilidade WCAG) */
+:focus-visible {
+  outline: 3px solid #ffb300;
+  outline-offset: 2px;
+}
+
+/* Cabeçalho */
 #header {
-  background-color: #0b4f6c;
+  background-color: var(--primary-color);
   color: #ffffff;
-  padding: 12px 16px;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  gap: 12px;
+  min-height: 56px;
 }
 
-#header h1 {
-  font-size: 1.1rem;
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  object-fit: cover;
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 0.72rem;
+  color: #b0d4e3;
+  display: block;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Indicador de Status da Rede */
 #status-rede {
   font-size: 0.75rem;
-  padding: 2px 8px;
+  font-weight: 600;
+  padding: 4px 10px;
   border-radius: 12px;
-  background-color: #2e7d32;
+  background-color: #1b5e20;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 #status-rede.offline {
-  background-color: #f57c00;
+  background-color: #e65100;
 }
 
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #69f0ae;
+}
+
+#status-rede.offline .status-dot {
+  background-color: #ffd180;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Botões do Topo */
+.btn-header {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  transition: background var(--transition-fast);
+}
+
+.btn-header:hover, .btn-header:focus {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.btn-install {
+  background: #ffb300;
+  color: #073448;
+  border: none;
+}
+
+/* Alerta Oficial do Período de Defeso / Piracema */
+.banner-defeso {
+  background: linear-gradient(90deg, #b71c1c, #d32f2f);
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.banner-defeso.hidden {
+  display: none !important;
+}
+
+.banner-defeso-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 1200px;
+  text-align: center;
+}
+
+.banner-defeso-icon {
+  font-size: 1.1rem;
+}
+
+.btn-install:hover {
+  background: #ffc107;
+}
+
+/* Indicador Flutuante de Carregamento de Camadas */
+#loading-indicator {
+  position: absolute;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(11, 79, 108, 0.94);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#loading-indicator.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Área do Mapa */
 #map {
   flex: 1;
   width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
-/* Bottom Sheet retrátil */
+/* Ajustes visuais do Leaflet */
+.leaflet-top.leaflet-left {
+  top: 10px;
+  left: 10px;
+}
+
+.leaflet-top.leaflet-right {
+  top: 10px;
+  right: 10px;
+}
+
+.leaflet-control-layers {
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 0.88rem !important;
+  max-width: 280px;
+}
+
+.leaflet-control-layers-toggle {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.leaflet-control-layers label {
+  padding: 6px 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaflet-control-layers input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.leaflet-control-zoom a {
+  width: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 1.1rem !important;
+  color: var(--primary-color) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Botão Flutuante de Localização (Minha Posição - Área do Polegar) */
+.btn-gps {
+  position: absolute;
+  bottom: calc(72px + max(12px, env(safe-area-inset-bottom)));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 999;
+  background-color: #ffffff;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  min-height: 48px;
+  min-width: 48px;
+  transition: transform var(--transition-fast), bottom var(--transition-fast), background-color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-gps:hover {
+  background-color: var(--primary-light);
+}
+
+.btn-gps:active {
+  transform: scale(0.94);
+  background-color: #e0f2fe;
+}
+
+.btn-gps:disabled {
+  opacity: 0.75;
+  cursor: wait;
+}
+
+/* Elevação dinâmica do botão GPS quando o painel inferior está aberto */
+body.sheet-open .btn-gps {
+  bottom: calc(50dvh + 16px);
+}
+
+/* Barra Inferior de Polegar para Celulares Android (Samsung One UI / Motorola) */
+.android-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-top: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 998;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px;
+}
+
+.bottom-nav-item:active,
+.bottom-nav-item.active {
+  color: var(--primary-color);
+  background: rgba(11, 79, 108, 0.08);
+}
+
+.bottom-nav-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.bottom-nav-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+/* Banner Flutuante de Instalação no Android */
+.android-install-banner {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+  max-width: 460px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  padding: 12px 14px;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideUpBanner 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpBanner {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.android-install-banner.hidden {
+  display: none !important;
+}
+
+.android-install-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.android-install-icon {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.android-install-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.android-install-text strong {
+  font-size: 0.95rem;
+  color: #0b4f6c;
+}
+
+.android-install-text span {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.android-install-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-android-dismiss {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-android-install {
+  background: #0b4f6c;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(11, 79, 108, 0.3);
+  min-height: 44px;
+}
+
+.btn-android-install:active {
+  background: #073448;
+}
+
+/* Cards do Guia de Instalação (Android & iOS) */
+.install-guide-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.guide-badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.guide-badge.ios {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #334155;
+}
+
+.guide-num {
+  background: #0b4f6c;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Painel Inferior Retrátil (Bottom Sheet) */
 .bottom-sheet {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #ffffff;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  padding: 20px 16px 24px 16px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  background-color: var(--bg-surface);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   z-index: 1001;
-  transition: transform 0.25s ease-in-out;
-  max-height: 50vh;
-  overflow-y: auto;
+  transform: translateY(0);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 50dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
 
 .bottom-sheet.hidden {
-  transform: translateY(100%);
+  transform: translateY(105%);
+  pointer-events: none;
+}
+
+.sheet-handle-bar {
+  width: 44px;
+  height: 5px;
+  background-color: #cbd5e1;
+  border-radius: 3px;
+  margin: 10px auto 4px auto;
+}
+
+.sheet-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px 10px 16px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .close-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: none;
+  background: #f1f5f9;
   border: none;
-  font-size: 1.8rem;
-  color: #666;
+  font-size: 1.5rem;
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 15px; /* Acessibilidade para dedos grandes */
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.badge {
+.close-btn:hover, .close-btn:focus {
+  background: #e2e8f0;
+  color: var(--text-main);
+}
+
+#sheet-content {
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Elementos do Painel de Detalhes */
+.badge-tag {
   color: #ffffff;
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 3px 8px;
-  border-radius: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
   display: inline-block;
-  margin-bottom: 8px;
+  letter-spacing: 0.02em;
 }
 
-.btn-contato {
-  display: block;
-  text-align: center;
-  background-color: #25d366;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-weight: bold;
+.sheet-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 8px 0 12px 0;
+  line-height: 1.3;
+}
+
+.data-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 12px;
 }
 
+.data-item {
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #edf2f7;
+}
 
-/* Botão de Localização Flutuante */
-.btn-gps {
-  position: absolute;
-  bottom: 24px;
-  right: 16px;
-  z-index: 1000;
-  background-color: #ffffff;
-  border: 2px solid #0b4f6c;
-  color: #0b4f6c;
-  font-weight: bold;
+.data-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.data-value {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.legal-note-box {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffb300;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #5d4037;
+  margin-top: 14px;
+  line-height: 1.4;
+}
+
+/* Botões de Ação no Painel */
+.btn-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
   padding: 12px 18px;
-  border-radius: 24px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 14px;
+  border: none;
+  transition: opacity var(--transition-fast), transform 0.1s ease;
+}
+
+.btn-cta:active {
+  transform: scale(0.98);
+}
+
+.btn-whatsapp {
+  background-color: #128c7e;
+  color: #ffffff;
+}
+
+.btn-whatsapp:hover {
+  background-color: #075e54;
+}
+
+.btn-emergency {
+  background-color: var(--accent-red);
+  color: #ffffff;
+}
+
+.btn-emergency:hover {
+  background-color: #b71c1c;
+}
+
+.btn-copy {
+  background-color: #e2e8f0;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  min-height: 40px;
+}
+
+.btn-copy:hover {
+  background-color: #cbd5e1;
+}
+
+/* Modal "Sobre os Dados" */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(3px);
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.modal-dialog {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  max-width: 560px;
+  width: 100%;
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #ffffff;
+  font-size: 1.4rem;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legal-alert {
+  background-color: #fff3e0;
+  border: 1px solid #ffe082;
+  border-left: 5px solid #f57c00;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  color: #795548;
+  font-weight: 500;
+}
+
+.layer-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.layer-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.status-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.status-online {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-cached {
+  background: #e3f2fd;
+  color: #0288d1;
+}
+
+.status-unavailable {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 90vw;
+}
+
+.toast {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: toast-in 0.3s forwards, toast-out 0.3s forwards 3.7s;
+}
+
+@keyframes toast-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Modal Guia iOS */
+.ios-install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.ios-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   font-size: 0.9rem;
-  transition: background-color 0.2s, transform 0.1s;
 }
 
-.btn-gps:active {
-  transform: scale(0.95);
-  background-color: #f0f0f0;
+.ios-step-number {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.btn-gps:disabled {
-  opacity: 0.7;
-  cursor: wait;
+/* Barra de Filtros Rápidos no Topo do Mapa */
+.quick-filters-bar {
+  position: absolute;
+  top: 66px;
+  left: 0;
+  right: 0;
+  z-index: 998;
+  display: flex;
+  gap: 8px;
+  padding: 6px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  pointer-events: auto;
 }
 
-/* Ajuste para telas maiores (Desktop) */
-@media (min-width: 768px) {
-  .bottom-sheet {
-    width: 400px;
-    left: 20px;
-    right: auto;
-    bottom: 20px;
-    border-radius: 12px;
-    max-height: 80vh;
-  }
-  
-  #header h1 {
-    font-size: 1.5rem;
-  }
+.quick-filters-bar::-webkit-scrollbar {
+  display: none;
 }
 
-.bottom-sheet h3 {
+.filter-chip {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--primary-color);
+  border: 1px solid rgba(11, 79, 108, 0.25);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(4px);
+  transition: all var(--transition-fast);
+}
+
+.filter-chip:hover {
+  background: #ffffff;
+  border-color: var(--primary-color);
+}
+
+.filter-chip.active {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 3px 8px rgba(11, 79, 108, 0.35);
+}
+
+/* Modal de Espécies e Régua do IMASUL */
+.species-search-box {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.species-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.species-search-input:focus {
+  outline: 2px solid var(--primary-color);
+}
+
+/* Verificador Rápido de Medida */
+.measure-checker-card {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.checker-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a8a;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.bottom-sheet p {
+.checker-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.checker-select, .checker-input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #93c5fd;
+  font-size: 0.88rem;
+  background: #ffffff;
+}
+
+.checker-select {
+  flex: 2;
+  min-width: 140px;
+}
+
+.checker-input {
+  flex: 1;
+  min-width: 80px;
+}
+
+.btn-check-measure {
+  background: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.measure-result-box {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: none;
+}
+
+.measure-result-box.allowed {
+  display: block;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.measure-result-box.forbidden {
+  display: block;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* Cartões de Espécies */
+.species-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 500px) {
+  .species-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.species-card {
+  background: var(--bg-card);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.species-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.species-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.species-sci {
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.species-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badge-cota-zero {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.badge-pesque-solte {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-proibido {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.species-measures {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.species-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Radar de Campo no Popup do Usuário */
+.radar-compliance-box {
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.radar-badge {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #ffffff;
   margin-bottom: 4px;
 }
 
-.nota {
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px solid #e0e0e0;
-  color: #555555;
+.radar-detail {
+  color: #334155;
+  margin-top: 2px;
+}
+
+/* Barra de Busca Rápida na Bacia (Portos, Ranchos, Rios, Guias) */
+.local-search-container {
+  position: absolute;
+  top: 114px;
+  left: 16px;
+  width: 320px;
+  max-width: calc(100vw - 80px);
+  z-index: 997;
+  pointer-events: auto;
+}
+
+/* Posicionamento dos controles do Leaflet para eliminar sobreposições */
+.leaflet-top.leaflet-right {
+  top: 114px !important;
+  right: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.leaflet-control-layers {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+  border: 1px solid rgba(11, 79, 108, 0.25) !important;
+}
+
+.leaflet-top.leaflet-left {
+  top: 170px !important;
+}
+
+.local-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(11, 79, 108, 0.25);
+  border-radius: 24px;
+  padding: 4px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.local-search-icon {
+  font-size: 0.9rem;
+  margin-right: 8px;
+  color: #64748b;
+}
+
+.local-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  padding: 6px 0;
+  background: transparent;
+  color: var(--text-main);
+}
+
+.local-clear-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.local-search-results {
+  margin-top: 6px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid #e2e8f0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.local-search-result-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+
+.local-search-result-item:hover {
+  background: #f8fafc;
+}
+
+.local-result-icon {
+  font-size: 1.15rem;
+}
+
+.local-result-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--primary-color);
+}
+
+.local-result-subtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.btn-streetview:hover {
+  background: #0277bd;
+}
+
+/* Responsividade e Telas Maiores (Desktop / Tablet) */
+@media (min-width: 768px) {
+  .brand-title {
+    font-size: 1.35rem;
+  }
+  
+  .bottom-sheet {
+    width: 420px;
+    left: 20px;
+    right: auto;
+    bottom: 24px;
+    border-radius: var(--radius-md);
+    max-height: calc(100vh - 120px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sheet-handle-bar {
+    display: none;
+  }
+
+  body.sheet-open .btn-gps {
+    bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Redução de Movimento (Acessibilidade) */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,23 +1,80 @@
-// 1. Inicializar o mapa centrado na Bacia do Rio Miranda
-const map = L.map('map', {
-  center: [-20.50, -56.50],
-  zoom: 9,
-  zoomControl: false // Ocultado para reposicionar na interface móvel
-});
+/**
+ * GeoFish MS - Bacia do Rio Miranda (Mato Grosso do Sul)
+ * Aplicação WebGIS PWA para Governança Territorial e Pesca Sustentável
+ */
 
-// Reposiciona o controlo de zoom para o canto superior direito
-L.control.zoom({ position: 'topright' }).addTo(map);
+// 1. Funções de Segurança e Sanitização de Dados
+function escapeHTML(str) {
+  if (str === null || str === undefined || String(str).trim() === '') {
+    return 'Não informado';
+  }
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-// 2. Camada base de azulejos (Tiles) - Mudamos para a Esri (Robusto, sem API key)
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 16,
-  attribution: '© Esri & GeoFish MS'
-}).addTo(map);
+function sanitizeDigits(val) {
+  if (!val) return '';
+  return String(val).replace(/\D/g, '');
+}
 
-// 2.1. Adicionar Créditos Oficiais dos Dados (SEMADESC/MS)
-map.attributionControl.addAttribution('Dados Geoespaciais Oficiais: <a href="https://www.pinms.ms.gov.br/arcgis/rest/services/SEMADESC/SEMADESC_MAPAS/MapServer" target="_blank">Governo de Mato Grosso do Sul (SEMADESC/IMASUL)</a>');
+// Utilitário de Vibração Háptica para Celulares Android (Samsung / Motorola)
+function vibrar(padrao = 35) {
+  if ('vibrate' in navigator) {
+    try {
+      navigator.vibrate(padrao);
+    } catch (_) {}
+  }
+}
 
-// 3. Regras de cores para os segmentos
+// Utilitário Screen Wake Lock (mantém a tela do celular acesa durante a navegação no barco)
+let wakeLockAtivo = null;
+async function manterTelaAtiva() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLockAtivo = await navigator.wakeLock.request('screen');
+      wakeLockAtivo.addEventListener('release', () => {
+        wakeLockAtivo = null;
+      });
+    } catch (_) {}
+  }
+}
+
+function normalizeWhatsApp(contato, nome = '') {
+  if (!contato) return null;
+  const digits = sanitizeDigits(contato);
+  if (!digits) return null;
+  // Se não começar com código do país (55), adiciona 55
+  const fullNumber = digits.startsWith('55') ? digits : '55' + digits;
+  const textoMsg = encodeURIComponent(`Olá! Vi seu contato no aplicativo GeoFish MS (Bacia do Rio Miranda) e gostaria de informações sobre serviços e pesca.`);
+  return `https://api.whatsapp.com/send?phone=${fullNumber}&text=${textoMsg}`;
+}
+
+function sanitizeTel(tel) {
+  if (!tel) return null;
+  const clean = String(tel).trim().replace(/[^\d+]/g, '');
+  if (!/^\+?[0-9]{3,15}$/.test(clean)) return null;
+  return `tel:${clean}`;
+}
+
+function formatPossuiRampa(val) {
+  if (val === true || val === 1) return 'Sim (Possui rampa pública/apoio)';
+  if (val === false || val === 0) return 'Não informado / Sem rampa';
+  if (typeof val === 'string') {
+    const lower = val.trim().toLowerCase();
+    if (lower === 'sim' || lower === 's' || lower === 'true') {
+      return 'Sim (Possui rampa pública/apoio)';
+    }
+    if (lower === 'não' || lower === 'nao' || lower === 'n' || lower === 'false') {
+      return 'Não';
+    }
+  }
+  return 'Não informado';
+}
+
 function obterCorPorRegra(regra) {
   switch (regra) {
     case 'Pesque e Solte':
@@ -31,365 +88,1647 @@ function obterCorPorRegra(regra) {
   }
 }
 
-// 4. Elementos da interface para a Bottom Sheet
+// 2. Sistema de Notificações Toast
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.setAttribute('role', 'alert');
+  toast.textContent = message;
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 4000);
+}
+
+// 3. Inicialização do Mapa Leaflet com Esri Satélite
+const map = L.map('map', {
+  center: [-20.50, -56.50],
+  zoom: 9,
+  zoomControl: false // Ocultado para posicionar no canto superior direito
+});
+
+// Reposiciona o controle de zoom para o canto superior direito
+L.control.zoom({ position: 'topright' }).addTo(map);
+
+// 1. Camada Base Principal: Imagens de Satélite de Alta Resolução (Esri World Imagery)
+const sateliteEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 18,
+  attribution: 'Imagens: Tiles &copy; Esri &mdash; Satélite Pantanal MS',
+  crossOrigin: true
+}).addTo(map);
+
+// 2. Camada Base Secundária: Relevo e Topografia (Esri World Topo)
+const relevoEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 16,
+  attribution: 'Tiles &copy; Esri &mdash; Relevo Topográfico',
+  crossOrigin: true
+});
+
+// Atribuição oficial dos dados geoespaciais e governança (SEMADESC / IMASUL / Colônias Z-1 e Z-7)
+map.attributionControl.addAttribution('Dados Oficiais: <a href="https://www.imasul.ms.gov.br" target="_blank" rel="noopener noreferrer">SEMADESC / IMASUL / Colônias Z-1 e Z-7</a>');
+
+// 4. Criação dos Panes do Leaflet com zIndex estrito (Regras de Empilhamento)
+const PANES = [
+  { name: 'baciasPane', zIndex: 410 },
+  { name: 'especiaisPane', zIndex: 420 },
+  { name: 'aglomeradosPane', zIndex: 430 },
+  { name: 'restritasPane', zIndex: 440 },
+  { name: 'riosPane', zIndex: 450 },
+  { name: 'apoioPane', zIndex: 460 },
+  { name: 'guiasPane', zIndex: 465 },
+  { name: 'posicaoPane', zIndex: 470 }
+];
+
+PANES.forEach(p => {
+  map.createPane(p.name);
+  map.getPane(p.name).style.zIndex = String(p.zIndex);
+});
+
+// 5. Gerenciamento do Painel Inferior (Bottom Sheet)
 const bottomSheet = document.getElementById('bottom-sheet');
 const sheetContent = document.getElementById('sheet-content');
 const closeSheetBtn = document.getElementById('close-sheet');
 
+function abrirPainel(htmlContent) {
+  if (!sheetContent || !bottomSheet) return;
+  sheetContent.innerHTML = htmlContent;
+  bottomSheet.classList.remove('hidden');
+  bottomSheet.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('sheet-open');
+  vibrar(25);
+  try {
+    history.pushState({ painelAberto: true }, '');
+  } catch (_) {}
+  if (closeSheetBtn) {
+    closeSheetBtn.focus();
+  }
+}
+
+function fecharPainel() {
+  if (!bottomSheet) return;
+  bottomSheet.classList.add('hidden');
+  bottomSheet.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('sheet-open');
+}
+
 if (closeSheetBtn) {
-  closeSheetBtn.addEventListener('click', () => {
-    bottomSheet.classList.add('hidden');
+  closeSheetBtn.addEventListener('click', fecharPainel);
+}
+
+// Fecha o painel ao clicar em área vazia do mapa
+map.on('click', () => {
+  fecharPainel();
+});
+
+// Fecha o painel com a tecla Escape
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    fecharPainel();
+    fecharModalSobre();
+  }
+});
+
+// 6. Controle de Camadas no Canto Superior Direito
+const controleCamadas = L.control.layers(null, null, {
+  collapsed: true,
+  position: 'topright'
+}).addTo(map);
+
+// Adiciona opções de mapa base no controle
+controleCamadas.addBaseLayer(sateliteEsri, '🛰️ Esri Satélite (Alta Resolução)');
+controleCamadas.addBaseLayer(relevoEsri, '⛰️ Esri Relevo / Topografia');
+
+// Registro de status das camadas para a janela "Sobre os dados" e dados espaciais carregados
+const statusCamadas = {};
+const dadosCarregados = {};
+const camadasInstanciadas = {};
+
+// 7. Funções de Cálculo Espacial Avançado e Radar de Conformidade
+function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+// Distância perpendicular ponto-a-segmento de rio
+function distanciaPontoSegmentoKm(pLat, pLng, aLat, aLng, bLat, bLng) {
+  const dAB2 = (bLat - aLat) * (bLat - aLat) + (bLng - aLng) * (bLng - aLng);
+  if (dAB2 === 0) {
+    return calcularDistanciaKm(pLat, pLng, aLat, aLng);
+  }
+  let t = ((pLat - aLat) * (bLat - aLat) + (pLng - aLng) * (bLng - aLng)) / dAB2;
+  t = Math.max(0, Math.min(1, t));
+  const projLat = aLat + t * (bLat - aLat);
+  const projLng = aLng + t * (bLng - aLng);
+  return calcularDistanciaKm(pLat, pLng, projLat, projLng);
+}
+
+// Ray-casting otimizado com verificação prévia de Bounding Box O(1)
+function pontoEmPoligono(lat, lng, coords) {
+  let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+  for (let i = 0; i < coords.length; i++) {
+    const pt = coords[i];
+    if (pt[0] < minLng) minLng = pt[0];
+    if (pt[0] > maxLng) maxLng = pt[0];
+    if (pt[1] < minLat) minLat = pt[1];
+    if (pt[1] > maxLat) maxLat = pt[1];
+  }
+  // Se estiver fora da caixa delimitadora, descarta imediatamente
+  if (lng < minLng || lng > maxLng || lat < minLat || lat > maxLat) {
+    return false;
+  }
+
+  let inside = false;
+  for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+    const xi = coords[i][0], yi = coords[i][1];
+    const xj = coords[j][0], yj = coords[j][1];
+    const intersect = ((yi > lat) !== (yj > lat)) &&
+        (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// Verificação do Período Anual de Defeso da Piracema no Pantanal (05/Nov a 28/Fev)
+function verificarPeriodoDefeso() {
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const dia = hoje.getDate();
+  const emDefeso = (mes === 11 && dia >= 5) || (mes === 12) || (mes === 1) || (mes === 2 && dia <= 28);
+  const banner = document.getElementById('banner-defeso');
+  const bannerText = document.getElementById('banner-defeso-text');
+  if (banner && bannerText) {
+    if (emDefeso) {
+      banner.classList.remove('hidden');
+      bannerText.innerHTML = `<strong>⚠️ ALERTA OFICIAL: Período de Defeso da Piracema em vigor na Bacia do Miranda (05/Nov a 28/Fev).</strong> Pesca amadora e profissional de espécies nativas suspensa por lei estadual.`;
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
+  return emDefeso;
+}
+
+function avaliarConformidadePosicao(userLat, userLng) {
+  let trechoMaisProximo = null;
+  let menorDistanciaTrecho = Infinity;
+
+  const dadosTrechos = dadosCarregados['trechos_pesca'];
+  if (dadosTrechos && dadosTrechos.features) {
+    for (const feat of dadosTrechos.features) {
+      const geom = feat.geometry;
+      let lineCoords = [];
+      if (geom.type === 'LineString') {
+        lineCoords = [geom.coordinates];
+      } else if (geom.type === 'MultiLineString') {
+        lineCoords = geom.coordinates;
+      }
+      for (const line of lineCoords) {
+        for (let i = 0; i < line.length - 1; i++) {
+          const p1 = line[i];
+          const p2 = line[i + 1];
+          const d = distanciaPontoSegmentoKm(userLat, userLng, p1[1], p1[0], p2[1], p2[0]);
+          if (d < menorDistanciaTrecho) {
+            menorDistanciaTrecho = d;
+            trechoMaisProximo = feat.properties;
+          }
+        }
+      }
+    }
+  }
+
+  let ucAtual = null;
+  const dadosUcs = dadosCarregados['areas_restritas'];
+  if (dadosUcs && dadosUcs.features) {
+    for (const feat of dadosUcs.features) {
+      const geom = feat.geometry;
+      let polyList = [];
+      if (geom.type === 'Polygon') {
+        polyList = [geom.coordinates[0]];
+      } else if (geom.type === 'MultiPolygon') {
+        polyList = geom.coordinates.map(p => p[0]);
+      }
+      for (const ring of polyList) {
+        if (pontoEmPoligono(userLat, userLng, ring)) {
+          ucAtual = feat.properties;
+          break;
+        }
+      }
+      if (ucAtual) break;
+    }
+  }
+
+  let apoioMaisProximo = null;
+  let menorDistApoio = Infinity;
+  const dadosApoio = dadosCarregados['pontos_emergencia'];
+  if (dadosApoio && dadosApoio.features) {
+    for (const feat of dadosApoio.features) {
+      const coords = feat.geometry.coordinates;
+      const d = calcularDistanciaKm(userLat, userLng, coords[1], coords[0]);
+      if (d < menorDistApoio) {
+        menorDistApoio = d;
+        apoioMaisProximo = { ...feat.properties, distanciaKm: d };
+      }
+    }
+  }
+
+  return {
+    trecho: trechoMaisProximo,
+    distanciaTrechoKm: menorDistanciaTrecho,
+    uc: ucAtual,
+    apoio: apoioMaisProximo
+  };
+}
+
+/**
+ * Carrega a camada GeoJSON com estratégia Rede Primeiro e fallback IndexedDB com timeout de 5s
+ */
+async function carregarCamada(layerKey, url) {
+  const cached = window.GeoFishDB ? await window.GeoFishDB.obterCamada(layerKey) : null;
+  let dados = null;
+  let origem = 'offline';
+  let dataAtualizacao = cached ? cached.atualizado_em : null;
+
+  const controller = new AbortController();
+  let timeoutId = null;
+
+  // Se já temos cache, dá até 5 segundos para a rede responder antes de recorrer ao cache
+  if (cached) {
+    timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 5000);
+  }
+
+  try {
+    const response = await fetch(url, {
+      cache: 'no-cache',
+      signal: controller.signal
+    });
+
+    if (timeoutId) clearTimeout(timeoutId);
+
+    if (response.ok) {
+      dados = await response.json();
+      origem = 'rede';
+      dataAtualizacao = new Date().toISOString();
+
+      // Salva no IndexedDB apenas se houve alteração
+      if (window.GeoFishDB) {
+        await window.GeoFishDB.salvarCamada(layerKey, dados, response.headers.get('ETag') || '1.0');
+      }
+    } else {
+      throw new Error(`HTTP ${response.status}`);
+    }
+  } catch (err) {
+    if (timeoutId) clearTimeout(timeoutId);
+    if (cached && cached.data) {
+      dados = cached.data;
+      origem = 'offline';
+      dataAtualizacao = cached.atualizado_em;
+    } else {
+      console.warn(`Falha ao obter dados da camada [${layerKey}]:`, err);
+      dados = null;
+      origem = 'indisponivel';
+    }
+  }
+
+  statusCamadas[layerKey] = {
+    origem: origem,
+    atualizado_em: dataAtualizacao
+  };
+
+  return dados;
+}
+
+// 7. Inicialização de Todas as Camadas em Paralelo
+async function carregarTodasCamadas() {
+  const loadingIndicator = document.getElementById('loading-indicator');
+  const loadingText = document.getElementById('loading-text');
+
+  const definicoesCamadas = [
+    { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: '🎣 Trechos de Pesca (Regras)', ativa: true },
+    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias Credenciados', ativa: true },
+    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: '🏥 Apoio e Emergência', ativa: true },
+    { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: '⚠️ Áreas Restritas (UCs)', ativa: true },
+    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: '🌊 Rios Principais', ativa: true },
+    { key: 'bacias_uepgrh', url: 'data/processed/bacias_uepgrh.geojson', nome: '🗺️ Bacias Hidrográficas (UEPGRH)', ativa: false },
+    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: '🎯 Bacias Especiais (Manejo)', ativa: false },
+    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: '🏘️ Aglomerados Rurais', ativa: false }
+  ];
+
+  let carregadas = 0;
+  const total = definicoesCamadas.length;
+
+  const promises = definicoesCamadas.map(async (def) => {
+    try {
+      const dados = await carregarCamada(def.key, def.url);
+      carregadas++;
+      if (loadingText) {
+        loadingText.textContent = `Carregando camadas… ${carregadas}/${total}`;
+      }
+
+      if (!dados) {
+        console.warn(`Camada [${def.nome}] indisponível no momento.`);
+        return;
+      }
+
+      let camadaLeaflet = null;
+
+      // Montagem de cada camada com o pane correto
+      switch (def.key) {
+        case 'trechos_pesca':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'riosPane',
+            style: (feature) => ({
+              color: obterCorPorRegra(feature.properties.regra),
+              weight: 8,
+              opacity: 0.95
+            }),
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const p = feature.properties;
+                const cor = obterCorPorRegra(p.regra);
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: ${cor};">Regra: ${escapeHTML(p.regra)}</span>
+                  <h2 class="sheet-title">${escapeHTML(p.rio)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Cota Permitida</div>
+                      <div class="data-value">${escapeHTML(p.cota)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Petrechos Autorizados</div>
+                      <div class="data-value">${escapeHTML(p.petrechos)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Norma de Referência</div>
+                      <div class="data-value">${escapeHTML(p.norma_ref)}</div>
+                    </div>
+                  </div>
+                  <div class="legal-note-box">
+                    <strong>Atenção:</strong> As regras apresentadas são orientativas e baseadas nas normativas do IMASUL/SEMADESC. Consulte sempre a legislação vigente antes da pescaria.
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'guias_credenciados':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'guiasPane',
+            pointToLayer: (feature, latlng) => {
+              return L.circleMarker(latlng, {
+                pane: 'guiasPane',
+                radius: 8,
+                fillColor: '#0b4f6c',
+                color: '#ffffff',
+                weight: 2.5,
+                fillOpacity: 1
+              });
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const g = feature.properties;
+                const waUrl = normalizeWhatsApp(g.contato_wa);
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca Credenciado</span>
+                  <h2 class="sheet-title">${escapeHTML(g.nome_operacional)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Colônia de Pescadores</div>
+                      <div class="data-value">${escapeHTML(g.colonia)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Porto / Base de Saída</div>
+                      <div class="data-value">${escapeHTML(g.porto_base)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Embarcação / Motor</div>
+                      <div class="data-value">${escapeHTML(g.tipo_barco)}</div>
+                    </div>
+                  </div>
+                  ${waUrl ? `
+                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp">
+                      💬 Chamar no WhatsApp
+                    </a>
+                  ` : ''}
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'pontos_emergencia':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'apoioPane',
+            pointToLayer: (feature, latlng) => {
+              return L.circleMarker(latlng, {
+                pane: 'apoioPane',
+                radius: 7,
+                fillColor: '#d32f2f',
+                color: '#ffffff',
+                weight: 2,
+                fillOpacity: 1
+              });
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const a = feature.properties;
+                const telUrl = sanitizeTel(a.telefone_emergencia);
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #d32f2f;">Apoio e Emergência</span>
+                  <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Tipo de Ponto</div>
+                      <div class="data-value">${escapeHTML(a.tipo)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Rampa de Barco</div>
+                      <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
+                    </div>
+                    ${a.telefone_emergencia ? `
+                      <div class="data-item">
+                        <div class="data-label">Telefone de Emergência</div>
+                        <div class="data-value">${escapeHTML(a.telefone_emergencia)}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                  ${telUrl ? `
+                    <a href="${telUrl}" class="btn-cta btn-emergency">
+                      📞 Ligar para Emergência
+                    </a>
+                  ` : ''}
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'areas_restritas':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'restritasPane',
+            style: {
+              color: '#f57c00',
+              fillColor: '#f57c00',
+              weight: 2,
+              fillOpacity: 0.25,
+              dashArray: '5, 5'
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const u = feature.properties;
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #f57c00;">Unidade de Conservação (${escapeHTML(u.esfera)})</span>
+                  <h2 class="sheet-title">${escapeHTML(u.nome)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Categoria de Manejo</div>
+                      <div class="data-value">${escapeHTML(u.categoria)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Município(s)</div>
+                      <div class="data-value">${escapeHTML(u.municipio)}</div>
+                    </div>
+                  </div>
+                  <div class="legal-note-box">
+                    <strong>Alerta Ambiental:</strong> Unidades de Conservação possuem planos de manejo próprios. A atividade pesqueira pode ser restrita ou totalmente vedada.
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'rios_principais':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'riosPane',
+            style: {
+              color: '#0288d1',
+              weight: 5,
+              opacity: 0.6,
+              dashArray: '3, 6'
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const r = feature.properties;
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #0288d1;">Hidrografia Principal</span>
+                  <h2 class="sheet-title">${escapeHTML(r.rio)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Extensão Mapeada</div>
+                      <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Não informado'}</div>
+                    </div>
+                  </div>
+                  <div class="legal-note-box">
+                    Toque nos trechos destacados com cores vivas para visualizar as regras específicas de pesca (Cota Zero, Pesque e Solte, Defeso).
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'bacias_uepgrh':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'baciasPane',
+            style: {
+              color: '#1976d2',
+              fillColor: '#90caf9',
+              weight: 1.5,
+              fillOpacity: 0.15,
+              dashArray: '4, 4'
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const b = feature.properties;
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #1976d2;">Bacia Hidrográfica UEPGRH</span>
+                  <h2 class="sheet-title">${escapeHTML(b.nome_bacia)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Rio Principal</div>
+                      <div class="data-value">${escapeHTML(b.rio_principal)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Área de Drenagem</div>
+                      <div class="data-value">${b.area_km2 ? Number(b.area_km2).toLocaleString('pt-BR') + ' km²' : 'Não informado'}</div>
+                    </div>
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'bacias_especiais':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'especiaisPane',
+            style: {
+              color: '#9c27b0',
+              fillColor: '#ce93d8',
+              weight: 1.5,
+              fillOpacity: 0.2,
+              dashArray: '6, 6'
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const s = feature.properties;
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #9c27b0;">Área Especial de Manejo</span>
+                  <h2 class="sheet-title">${escapeHTML(s.nome_bacia)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Área Total</div>
+                      <div class="data-value">${s.area_ha ? Number(s.area_ha).toLocaleString('pt-BR') + ' ha' : 'Não informado'}</div>
+                    </div>
+                  </div>
+                  <div class="legal-note-box">
+                    Áreas de preservação especial sujeitas a zoneamento ambiental específico e normas restritivas de pesca.
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+
+        case 'aglomerados_rurais':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'aglomeradosPane',
+            style: {
+              color: '#795548',
+              fillColor: '#bcaaa4',
+              weight: 1.5,
+              fillOpacity: 0.35,
+              dashArray: '3, 3'
+            },
+            onEachFeature: (feature, layer) => {
+              layer.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                const a = feature.properties;
+                abrirPainel(`
+                  <span class="badge-tag" style="background-color: #795548;">Comunidade / Aglomerado Rural</span>
+                  <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
+                  <div class="data-group">
+                    <div class="data-item">
+                      <div class="data-label">Tipo</div>
+                      <div class="data-value">${escapeHTML(a.tipo)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Zona Territorial</div>
+                      <div class="data-value">${escapeHTML(a.zona)}</div>
+                    </div>
+                    <div class="data-item">
+                      <div class="data-label">Município</div>
+                      <div class="data-value">${escapeHTML(a.municipio)}</div>
+                    </div>
+                  </div>
+                `);
+              });
+            }
+          });
+          break;
+      }
+
+      if (camadaLeaflet) {
+        dadosCarregados[def.key] = dados;
+        camadasInstanciadas[def.key] = camadaLeaflet;
+        controleCamadas.addOverlay(camadaLeaflet, def.nome);
+        if (def.ativa) {
+          camadaLeaflet.addTo(map);
+        }
+      }
+    } catch (err) {
+      console.warn(`Erro no processamento da camada [${def.nome}]:`, err);
+      showToast(`Aviso: Camada ${def.nome} não pôde ser carregada.`, 'warn');
+    }
+  });
+
+  await Promise.allSettled(promises);
+
+  // Oculta indicador de progresso
+  if (loadingIndicator) {
+    loadingIndicator.classList.add('hidden');
+  }
+}
+
+// 8. Botão Flutuante de Localização GPS (Minha Posição no Barco)
+let marcadorPosicao = null;
+let circuloPrecisao = null;
+const btnLocalizacao = document.getElementById('btn-localizacao');
+
+function obterLocalizacao() {
+  if (!('geolocation' in navigator)) {
+    showToast('O seu dispositivo não possui suporte a geolocalização.', 'warn');
+    return;
+  }
+
+  vibrar(35);
+  manterTelaAtiva();
+
+  if (btnLocalizacao) {
+    btnLocalizacao.innerHTML = '<span class="spinner"></span> <span>Buscando GPS…</span>';
+    btnLocalizacao.disabled = true;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (posicao) => {
+      const lat = posicao.coords.latitude;
+      const lng = posicao.coords.longitude;
+      const precisao = Math.round(posicao.coords.accuracy);
+
+      if (marcadorPosicao) map.removeLayer(marcadorPosicao);
+      if (circuloPrecisao) map.removeLayer(circuloPrecisao);
+
+      // Círculo de precisão
+      circuloPrecisao = L.circle([lat, lng], {
+        pane: 'posicaoPane',
+        radius: precisao,
+        color: '#1976d2',
+        fillColor: '#64b5f6',
+        fillOpacity: 0.2,
+        weight: 1.5
+      }).addTo(map);
+
+      // Marcador do usuário (pulsação)
+      marcadorPosicao = L.circleMarker([lat, lng], {
+        pane: 'posicaoPane',
+        radius: 11,
+        fillColor: '#0288d1',
+        color: '#ffffff',
+        weight: 3.5,
+        fillOpacity: 1
+      }).addTo(map);
+
+      const latFmt = lat.toFixed(5);
+      const lngFmt = lng.toFixed(5);
+      const conformidade = avaliarConformidadePosicao(lat, lng);
+
+      let radarHtml = '';
+      if (conformidade.trecho) {
+        const corRegra = obterCorPorRegra(conformidade.trecho.regra);
+        const distFmt = conformidade.distanciaTrechoKm < 1 
+          ? `${Math.round(conformidade.distanciaTrechoKm * 1000)} m`
+          : `${conformidade.distanciaTrechoKm.toFixed(1)} km`;
+
+        radarHtml += `
+          <div class="radar-compliance-box">
+            <span class="radar-badge" style="background-color: ${corRegra};">Regra: ${escapeHTML(conformidade.trecho.regra)}</span>
+            <div style="font-weight: 700; color: #0b4f6c; margin-top: 2px;">${escapeHTML(conformidade.trecho.rio)}</div>
+            <div class="radar-detail"><small>Distância estimada à calha: ~${distFmt}</small></div>
+            <div class="radar-detail"><strong>Cota:</strong> ${escapeHTML(conformidade.trecho.cota)}</div>
+          </div>
+        `;
+      }
+
+      if (conformidade.uc) {
+        vibrar([100, 60, 100]); // Alerta háptico duplo no celular ao detectar área de reserva
+        radarHtml += `
+          <div class="radar-compliance-box" style="border-left: 4px solid #f57c00; background: #fff8e1;">
+            <strong style="color: #b45309;">⚠️ Atenção: Área Protegida</strong>
+            <div style="font-size: 0.8rem; color: #78350f;">Você está nos limites de: <strong>${escapeHTML(conformidade.uc.nome)}</strong> (${escapeHTML(conformidade.uc.categoria)}). Normas restritivas se aplicam.</div>
+          </div>
+        `;
+      }
+
+      if (conformidade.apoio) {
+        const telUrl = sanitizeTel(conformidade.apoio.telefone_emergencia);
+        radarHtml += `
+          <div style="font-size: 0.78rem; color: #475569; margin-top: 6px;">
+            🏥 <strong>Apoio mais próximo:</strong> ${escapeHTML(conformidade.apoio.nome)} (~${conformidade.apoio.distanciaKm.toFixed(1)} km)
+            ${telUrl ? ` &bull; <a href="${telUrl}" style="color: #d32f2f; font-weight: 700;">Ligar</a>` : ''}
+          </div>
+        `;
+      }
+
+      const popupDiv = document.createElement('div');
+      popupDiv.innerHTML = `
+        <div style="min-width: 220px; max-width: 280px;">
+          <strong style="color: #0b4f6c; font-size: 0.95rem;">📍 Você está aqui</strong><br>
+          <span style="font-size: 0.82rem;">Lat: <strong>${latFmt}</strong>, Long: <strong>${lngFmt}</strong></span><br>
+          <small style="color: #64748b;">Precisão do sinal: ~${precisao} m</small>
+          ${radarHtml}
+          <button id="btn-copiar-coords" class="btn-copy" style="margin-top: 8px; width: 100%; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; min-height: 40px;">
+            📋 Copiar coordenadas
+          </button>
+        </div>
+      `;
+
+      const copyBtn = popupDiv.querySelector('#btn-copiar-coords');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          vibrar(20);
+          const texto = `${latFmt}, ${lngFmt}`;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto).then(() => {
+              showToast('Coordenadas copiadas para a área de transferência!');
+            }).catch(() => {
+              showToast(`Coordenadas: ${texto}`);
+            });
+          } else {
+            showToast(`Coordenadas: ${texto}`);
+          }
+        });
+      }
+
+      marcadorPosicao.bindPopup(popupDiv).openPopup();
+      map.flyTo([lat, lng], 14, { duration: 1.2 });
+
+      if (btnLocalizacao) {
+        btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
+        btnLocalizacao.disabled = false;
+      }
+      showToast('Posição obtida com sucesso via GPS!');
+    },
+    (erro) => {
+      let mensagem = 'Não foi possível obter a sua localização.';
+      if (erro.code === erro.PERMISSION_DENIED) {
+        mensagem = 'Permissão de GPS negada. Por favor, ative a localização no seu navegador ou celular.';
+      } else if (erro.code === erro.POSITION_UNAVAILABLE) {
+        mensagem = 'Sinal de GPS indisponível no momento. Tente novamente em campo aberto.';
+      } else if (erro.code === erro.TIMEOUT) {
+        mensagem = 'Tempo esgotado para obter o sinal de satélite GPS.';
+      }
+      showToast(mensagem, 'warn');
+      if (btnLocalizacao) {
+        btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
+        btnLocalizacao.disabled = false;
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 5000
+    }
+  );
+}
+
+if (btnLocalizacao) {
+  btnLocalizacao.addEventListener('click', obterLocalizacao);
+}
+
+// 9. Modal "Sobre os Dados" e Governança Territorial
+const modalSobre = document.getElementById('modal-sobre');
+const btnAbrirSobre = document.getElementById('btn-sobre');
+const btnFecharSobre = document.getElementById('btn-fechar-sobre');
+const layerStatusList = document.getElementById('layer-status-list');
+
+function formatarDataBR(isoString) {
+  if (!isoString) return 'Data não disponível';
+  try {
+    const d = new Date(isoString);
+    return d.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return isoString;
+  }
+}
+
+function abrirModalSobre() {
+  if (!modalSobre) return;
+
+  // Atualiza a listagem de status das camadas
+  if (layerStatusList) {
+    layerStatusList.innerHTML = '';
+    const nomes = {
+      trechos_pesca: 'Regras de Pesca por Trecho',
+      guias_credenciados: 'Guias de Pesca Credenciados',
+      pontos_emergencia: 'Pontos de Apoio e Emergência',
+      areas_restritas: 'Áreas Restritas (Unidades de Conservação)',
+      rios_principais: 'Rios Principais do Estado',
+      bacias_uepgrh: 'Bacias Hidrográficas (UEPGRH)',
+      bacias_especiais: 'Bacias Especiais de Manejo',
+      aglomerados_rurais: 'Aglomerados e Comunidades Rurais'
+    };
+
+    for (const [key, nome] of Object.entries(nomes)) {
+      const status = statusCamadas[key] || { origem: 'indisponivel', atualizado_em: null };
+      const row = document.createElement('div');
+      row.className = 'layer-status-row';
+
+      let tagClass = 'status-unavailable';
+      let tagTexto = 'Indisponível';
+
+      if (status.origem === 'rede') {
+        tagClass = 'status-online';
+        tagTexto = 'Atualizada na sessão';
+      } else if (status.origem === 'offline') {
+        tagClass = 'status-cached';
+        tagTexto = `Offline (${formatarDataBR(status.atualizado_em)})`;
+      }
+
+      row.innerHTML = `
+        <span><strong>${escapeHTML(nome)}</strong></span>
+        <span class="status-tag ${tagClass}">${tagTexto}</span>
+      `;
+      layerStatusList.appendChild(row);
+    }
+  }
+
+  modalSobre.classList.remove('hidden');
+  modalSobre.setAttribute('aria-hidden', 'false');
+  vibrar(25);
+  try {
+    history.pushState({ modal: 'sobre' }, '');
+  } catch (_) {}
+  if (btnFecharSobre) btnFecharSobre.focus();
+}
+
+function fecharModalSobre() {
+  if (!modalSobre) return;
+  modalSobre.classList.add('hidden');
+  modalSobre.setAttribute('aria-hidden', 'true');
+}
+
+if (btnAbrirSobre) {
+  btnAbrirSobre.addEventListener('click', abrirModalSobre);
+}
+
+if (btnFecharSobre) {
+  btnFecharSobre.addEventListener('click', fecharModalSobre);
+}
+
+if (modalSobre) {
+  modalSobre.addEventListener('click', (e) => {
+    if (e.target === modalSobre) {
+      fecharModalSobre();
+    }
   });
 }
 
-function exibirDetalhes(html) {
-  sheetContent.innerHTML = html;
-  bottomSheet.classList.remove('hidden');
-}
+// 10. Indicador de Rede Online / Modo Offline
+const statusRedeEl = document.getElementById('status-rede');
 
-// Panes para ordem de desenho (evitar bugs de z-index)
-map.createPane('areas'); map.getPane('areas').style.zIndex = 410;
-map.createPane('linhas'); map.getPane('linhas').style.zIndex = 420;
-map.createPane('pontos'); map.getPane('pontos').style.zIndex = 430;
-
-// Lógica de Cache Inteligente (Stale-while-revalidate / Offline-First)
-async function carregarCamadaComCache(layerKey, url) {
-    let dados = await GeoFishDB.obterCamada(layerKey);
-    
-    // Dispara a atualização em plano de fundo sem travar a interface
-    fetch(url, { cache: 'no-cache' })
-      .then(r => r.json())
-      .then(d => GeoFishDB.salvarCamada(layerKey, d))
-      .catch(e => console.log('Sincronização em bg falhou, mantendo dados offline.', e));
-
-    if (!dados) {
-        // Se for a primeira vez e o IndexedDB estiver vazio, espera a rede.
-        try {
-            const response = await fetch(url, { cache: 'no-cache' });
-            if (response.ok) dados = await response.json();
-        } catch (e) {
-            console.error('Falha crítica: Sem rede e banco vazio.', e);
-        }
-    }
-    return dados;
-}
-
-// 5. Inicialização e carregamento das camadas com suporte offline
-const controleCamadas = L.control.layers(null, null, { collapsed: true, position: 'topleft' }).addTo(map);
-
-async function inicializarCamadas() {
-  // A. Trechos de Pesca (Linhas com regras de restrição)
-  const dadosTrechos = await carregarCamadaComCache('trechos_pesca', 'data/processed/trechos_pesca.geojson');
-  if (dadosTrechos) {
-    const layerTrechos = L.geoJSON(dadosTrechos, {
-      style: (feature) => {
-        return {
-          color: obterCorPorRegra((feature.properties || {}).regra),
-          weight: 8, // Aumentado para acessibilidade de toque
-          opacity: 0.8
-        };
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', (e) => {
-          L.DomEvent.stopPropagation(e); // Evita cliques em camadas sobrepostas
-          const t = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: ${obterCorPorRegra(t.regra)};">Regra: ${t.regra}</span>
-            <h3>${t.rio || 'Trecho de Rio'}</h3>
-            <p><strong>Normativa:</strong> ${t.normativa || 'Consulte o IMASUL'}</p>
-            <p><strong>Período:</strong> ${t.periodo || 'Ano todo'}</p>
-            <hr>
-            <p><small>${t.observacao || 'Respeite a sinalização local.'}</small></p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerTrechos, "🎣 Regras de Pesca (Trechos)");
-  }
-
-  // B. Guias e Condutores Credenciados (Pontos)
-  const dadosGuias = await carregarCamadaComCache('guias_colonia', 'data/processed/guias_credenciados.geojson');
-  if (dadosGuias) {
-    const layerGuias = L.geoJSON(dadosGuias, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          pane: 'pontos',
-          radius: 7,
-          fillColor: '#0b4f6c',
-          color: '#ffffff',
-          weight: 2,
-          fillOpacity: 0.9
-        });
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const g = feature.properties || {};
-          const linkWhatsapp = g.contato_wa ? `https://wa.me/${g.contato_wa.replace(/\D/g, '')}` : '#';
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #0b4f6c;">Guia Credenciado</span>
-            <h3>${g.nome_operacional || 'Condutor de Pesca'}</h3>
-            <p><strong>Colónia:</strong> ${g.colonia || 'Z-1 / Z-7'}</p>
-            <p><strong>Base Habitual:</strong> ${g.porto_base || 'Não informado'}</p>
-            <p><strong>Embarcação:</strong> ${g.tipo_barco || 'Barco a motor'}</p>
-            ${g.contato_wa ? `<a href="${linkWhatsapp}" target="_blank" class="btn-contato">Contactar via WhatsApp</a>` : ''}
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerGuias, "🚤 Guias Credenciados");
-  }
-
-  // C. Infraestrutura de Apoio e Emergência (Pontos)
-  const dadosApoio = await carregarCamadaComCache('pontos_emergencia', 'data/processed/pontos_emergencia.geojson');
-  if (dadosApoio) {
-    const layerApoio = L.geoJSON(dadosApoio, {
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          pane: 'pontos',
-          radius: 6,
-          fillColor: '#d32f2f',
-          color: '#ffffff',
-          weight: 2,
-          fillOpacity: 0.9
-        });
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const a = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #d32f2f;">Apoio / Emergência</span>
-            <h3>${a.nome || 'Ponto de Apoio'}</h3>
-            <p><strong>Tipo:</strong> ${a.tipo || 'Utilidade Pública'}</p>
-            ${a.telefone_emergencia ? `<p><strong>Contato:</strong> <a href="tel:${a.telefone_emergencia}">${a.telefone_emergencia}</a></p>` : ''}
-            <p><strong>Rampa para Barcos:</strong> ${a.possui_rampa ? 'Sim' : 'Não'}</p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerApoio, "🏥 Apoio e Emergência");
-  }
-
-  // D. Áreas Restritas (Polígonos de Unidades de Conservação)
-  const dadosRestritos = await carregarCamadaComCache('areas_restritas', 'data/processed/areas_restritas.geojson');
-  if (dadosRestritos) {
-    const layerRestritas = L.geoJSON(dadosRestritos, {
-      pane: 'areas',
-      style: {
-        color: '#ff9800',
-        fillColor: '#ff9800',
-        weight: 2,
-        fillOpacity: 0.2,
-        dashArray: '5, 5'
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const u = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #ff9800;">Área de Preservação (${u.esfera})</span>
-            <h3>${u.nome || 'Unidade de Conservação'}</h3>
-            <p><strong>Categoria:</strong> ${u.categoria}</p>
-            <p><strong>Município:</strong> ${u.municipio}</p>
-            <p><small><strong>Atenção:</strong> Verifique as normativas específicas desta área. A pesca pode ser proibida ou restrita à Cota Zero.</small></p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerRestritas, "⚠️ Áreas Restritas / UCs");
-  }
-
-  // E. Limites de Bacias UEPGRH (Polígonos de Fundo)
-  const dadosBacias = await carregarCamadaComCache('bacias_uepgrh', 'data/processed/bacias_uepgrh.geojson');
-  if (dadosBacias) {
-    const layerBacias = L.geoJSON(dadosBacias, {
-      style: {
-        color: '#1976d2',
-        fillColor: '#64b5f6',
-        weight: 1,
-        fillOpacity: 0.1,
-        dashArray: '4, 4'
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const b = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #1976d2;">Bacia Hidrográfica</span>
-            <h3>${b.nome_bacia || 'Bacia Desconhecida'}</h3>
-            <p><strong>Rio Principal:</strong> ${b.rio_principal || 'Não informado'}</p>
-            <p><strong>Área:</strong> ${Number(b.area_km2).toLocaleString('pt-BR')} km²</p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerBacias, "🗺️ Bacias Hidrográficas (UEPGRH)");
-  }
-
-  // F. Rios Principais do Estado (Linhas Globais)
-  const dadosRios = await carregarCamadaComCache('rios_principais', 'data/processed/rios_principais.geojson');
-  if (dadosRios) {
-    const layerRios = L.geoJSON(dadosRios, {
-      style: {
-        color: '#0288d1',
-        weight: 8, // Aumentado para acessibilidade de toque
-        opacity: 0.5,
-        dashArray: '2, 6'
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const r = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #0288d1;">Rio Principal (Macro)</span>
-            <h3>${r.rio || 'Rio Desconhecido'}</h3>
-            <p><strong>Extensão Mapeada:</strong> ${r.extensao_km > 0 ? r.extensao_km + ' km' : 'Não informada'}</p>
-            <p><small>Nota: Para regras de pesca específicas, consulte a hidrografia oficial aproximando o mapa.</small></p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerRios, "🌊 Rios Principais (Estado)");
-  }
-
-  // G. Bacias Especiais (Manejo/Zoneamento)
-  const dadosEspeciais = await carregarCamadaComCache('bacias_especiais', 'data/processed/bacias_especiais.geojson');
-  if (dadosEspeciais) {
-    const layerEspeciais = L.geoJSON(dadosEspeciais, {
-      style: {
-        color: '#9c27b0', // Roxo
-        fillColor: '#ce93d8',
-        weight: 2,
-        fillOpacity: 0.15,
-        dashArray: '6, 6'
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const e = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #9c27b0;">Área Especial de Manejo</span>
-            <h3>${e.nome_bacia || 'Bacia Especial'}</h3>
-            <p><strong>Área Coberta:</strong> ${Number(e.area_ha).toLocaleString('pt-BR')} Hectares</p>
-            <p><small>Atenção: Esta bacia possui regulamentações pesqueiras exclusivas ou de zoneamento ambiental.</small></p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerEspeciais, "🎯 Bacias Especiais (Manejo)");
-  }
-
-  // H. Aglomerados Rurais (Polígonos)
-  const dadosAglomerados = await carregarCamadaComCache('aglomerados_rurais', 'data/processed/aglomerados_rurais.geojson');
-  if (dadosAglomerados) {
-    const layerAglomerados = L.geoJSON(dadosAglomerados, {
-      style: {
-        color: '#795548', // Marrom terra
-        fillColor: '#8d6e63',
-        weight: 1,
-        fillOpacity: 0.4,
-        dashArray: '3, 3'
-      },
-      onEachFeature: (feature, layer) => {
-        layer.on('click', () => {
-          const a = feature.properties || {};
-          exibirDetalhes(`
-            <span class="badge" style="background-color: #795548;">Aglomerado Rural</span>
-            <h3>${a.nome || 'Comunidade'}</h3>
-            <p><strong>Tipo:</strong> ${a.tipo || 'Rural'}</p>
-            <p><strong>Município:</strong> ${a.municipio || 'Não informado'}</p>
-            <p><small>Comunidades ribeirinhas ou aglomerados rurais mapeados.</small></p>
-          `);
-        });
-      }
-    }).addTo(map);
-    controleCamadas.addOverlay(layerAglomerados, "🏘️ Aglomerados Rurais");
+function atualizarStatusRede() {
+  if (!statusRedeEl) return;
+  if (navigator.onLine) {
+    statusRedeEl.innerHTML = '<span class="status-dot"></span> Online';
+    statusRedeEl.className = '';
+  } else {
+    statusRedeEl.innerHTML = '<span class="status-dot"></span> Modo Offline';
+    statusRedeEl.className = 'offline';
   }
 }
 
-// Inicia as camadas após o carregamento da página
-window.addEventListener('DOMContentLoaded', inicializarCamadas);
+window.addEventListener('online', () => {
+  atualizarStatusRede();
+  showToast('Conexão restabelecida: Você está online.');
+});
 
-// 6. Registro do Service Worker (PWA Offline)
+window.addEventListener('offline', () => {
+  atualizarStatusRede();
+  showToast('Você está offline: GeoFish MS operando com dados salvos no celular.');
+});
+
+atualizarStatusRede();
+
+// 11. Registro do Service Worker (PWA)
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('PWA: Service Worker registrado com sucesso!', reg.scope))
-            .catch(err => console.error('PWA: Erro ao registrar Service Worker:', err));
-    });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        // Service worker registrado
+      })
+      .catch((err) => {
+        console.warn('Erro ao registrar Service Worker do PWA:', err);
+      });
+  });
 }
 
-// 7. Lógica de Localização sob demanda (Onde estou agora?)
-let marcadorPosicao = null;
-let circuloPrecisao = null;
+// 12. Instalação do PWA Otimizada para Celulares Android (Samsung / Motorola)
+let deferredInstallPrompt = null;
+const btnInstallPWA = document.getElementById('btn-install-pwa');
+const modalInstall = document.getElementById('modal-install');
+const btnFecharInstall = document.getElementById('btn-fechar-install');
+const androidBanner = document.getElementById('android-install-banner');
+const btnAndroidInstall = document.getElementById('btn-android-install');
+const btnAndroidDismiss = document.getElementById('btn-android-dismiss');
 
-const btnLocalizacao = document.getElementById('btn-localizacao');
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
 
-if (btnLocalizacao) {
-  btnLocalizacao.addEventListener('click', () => {
-    if (!('geolocation' in navigator)) {
-      alert('O seu telemóvel/navegador não suporta geolocalização.');
+function abrirModalInstall() {
+  if (!modalInstall) return;
+  modalInstall.classList.remove('hidden');
+  modalInstall.setAttribute('aria-hidden', 'false');
+  vibrar(25);
+  try {
+    history.pushState({ modal: 'install' }, '');
+  } catch (_) {}
+}
+
+function fecharModalInstall() {
+  if (!modalInstall) return;
+  modalInstall.classList.add('hidden');
+  modalInstall.setAttribute('aria-hidden', 'true');
+}
+
+if (btnFecharInstall) {
+  btnFecharInstall.addEventListener('click', fecharModalInstall);
+}
+
+if (modalInstall) {
+  modalInstall.addEventListener('click', (e) => {
+    if (e.target === modalInstall) fecharModalInstall();
+  });
+}
+
+// Captura o evento nativo de instalação no Android (Google Chrome & Samsung Internet)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+
+  if (btnInstallPWA && !isStandalone) {
+    btnInstallPWA.style.display = 'inline-flex';
+  }
+
+  // Exibe banner nativo de instalação no Android se não tiver sido dispensado
+  const bannerDispensado = localStorage.getItem('geofish_android_banner_dismiss');
+  if (androidBanner && !isStandalone && !bannerDispensado) {
+    androidBanner.classList.remove('hidden');
+  }
+});
+
+if (btnInstallPWA) {
+  btnInstallPWA.addEventListener('click', async () => {
+    vibrar(25);
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        showToast('GeoFish MS instalado no seu celular!');
+        btnInstallPWA.style.display = 'none';
+        if (androidBanner) androidBanner.classList.add('hidden');
+      }
+      deferredInstallPrompt = null;
+    } else {
+      abrirModalInstall();
+    }
+  });
+}
+
+if (btnAndroidInstall) {
+  btnAndroidInstall.addEventListener('click', async () => {
+    vibrar(30);
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        showToast('GeoFish MS instalado com sucesso!');
+        if (androidBanner) androidBanner.classList.add('hidden');
+        if (btnInstallPWA) btnInstallPWA.style.display = 'none';
+      }
+      deferredInstallPrompt = null;
+    } else {
+      abrirModalInstall();
+    }
+  });
+}
+
+if (btnAndroidDismiss) {
+  btnAndroidDismiss.addEventListener('click', () => {
+    vibrar(20);
+    if (androidBanner) androidBanner.classList.add('hidden');
+    localStorage.setItem('geofish_android_banner_dismiss', 'true');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  showToast('Aplicativo instalado no celular! Agora você pode usar sem internet no rio.');
+  if (btnInstallPWA) btnInstallPWA.style.display = 'none';
+  if (androidBanner) androidBanner.classList.add('hidden');
+});
+
+// Suporte ao Botão Físico/Gesto de Voltar do Android (Samsung / Motorola)
+window.addEventListener('popstate', () => {
+  if (bottomSheet && !bottomSheet.classList.contains('hidden')) {
+    bottomSheet.classList.add('hidden');
+    document.body.classList.remove('sheet-open');
+    return;
+  }
+  if (modalEspecies && !modalEspecies.classList.contains('hidden')) {
+    modalEspecies.classList.add('hidden');
+    return;
+  }
+  if (modalSobre && !modalSobre.classList.contains('hidden')) {
+    modalSobre.classList.add('hidden');
+    return;
+  }
+  if (modalInstall && !modalInstall.classList.contains('hidden')) {
+    modalInstall.classList.add('hidden');
+    return;
+  }
+  const searchResults = document.getElementById('local-search-results');
+  if (searchResults && !searchResults.classList.contains('hidden')) {
+    searchResults.classList.add('hidden');
+  }
+});
+
+// Barra de Navegação Inferior de Polegar para Android
+const navBtnGps = document.getElementById('nav-btn-gps');
+const navBtnEspecies = document.getElementById('nav-btn-especies');
+const navBtnRampas = document.getElementById('nav-btn-rampas');
+const navBtnBusca = document.getElementById('nav-btn-busca');
+
+if (navBtnGps) {
+  navBtnGps.addEventListener('click', () => {
+    vibrar(30);
+    obterLocalizacao();
+  });
+}
+
+if (navBtnEspecies) {
+  navBtnEspecies.addEventListener('click', () => {
+    vibrar(25);
+    abrirModalEspecies();
+  });
+}
+
+if (navBtnRampas) {
+  navBtnRampas.addEventListener('click', () => {
+    vibrar(25);
+    aplicarFiltroRapido('apoio');
+    const chipApoio = document.querySelector('.filter-chip[data-filter="apoio"]');
+    if (chipApoio) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chipApoio.classList.add('active');
+    }
+  });
+}
+
+if (navBtnBusca) {
+  navBtnBusca.addEventListener('click', () => {
+    vibrar(25);
+    const searchInput = document.getElementById('local-search-input');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
+
+// Inicialização do aplicativo: carrega camadas, verifica defeso, atalhos do Android e busca local
+window.addEventListener('DOMContentLoaded', () => {
+  verificarPeriodoDefeso();
+  carregarTodasCamadas().then(() => {
+    // Processamento de atalhos rápidos do Android (URL shortcuts do manifest)
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    if (action === 'gps') {
+      setTimeout(obterLocalizacao, 800);
+    } else if (action === 'especies') {
+      setTimeout(abrirModalEspecies, 500);
+    } else if (action === 'apoio') {
+      setTimeout(() => aplicarFiltroRapido('apoio'), 500);
+    }
+  });
+  inicializarBuscaLocal();
+});
+
+// 13. Barra de Filtros Rápidos (Chips com 1 Toque)
+function aplicarFiltroRapido(tipo) {
+  for (const [key, layer] of Object.entries(camadasInstanciadas)) {
+    map.removeLayer(layer);
+  }
+
+  if (tipo === 'all') {
+    if (camadasInstanciadas['trechos_pesca']) map.addLayer(camadasInstanciadas['trechos_pesca']);
+    if (camadasInstanciadas['guias_credenciados']) map.addLayer(camadasInstanciadas['guias_credenciados']);
+    if (camadasInstanciadas['pontos_emergencia']) map.addLayer(camadasInstanciadas['pontos_emergencia']);
+    if (camadasInstanciadas['areas_restritas']) map.addLayer(camadasInstanciadas['areas_restritas']);
+    if (camadasInstanciadas['rios_principais']) map.addLayer(camadasInstanciadas['rios_principais']);
+    showToast('Exibindo todas as camadas ativas.');
+  } else if (tipo === 'regras') {
+    if (camadasInstanciadas['trechos_pesca']) map.addLayer(camadasInstanciadas['trechos_pesca']);
+    if (camadasInstanciadas['rios_principais']) map.addLayer(camadasInstanciadas['rios_principais']);
+    showToast('Filtro: Regras de Pesca por Trecho.');
+  } else if (tipo === 'guias') {
+    if (camadasInstanciadas['guias_credenciados']) {
+      map.addLayer(camadasInstanciadas['guias_credenciados']);
+      const bounds = camadasInstanciadas['guias_credenciados'].getBounds();
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    }
+    showToast('Filtro: Guias Credenciados Z-1 e Z-7.');
+  } else if (tipo === 'apoio') {
+    if (camadasInstanciadas['pontos_emergencia']) {
+      map.addLayer(camadasInstanciadas['pontos_emergencia']);
+      const bounds = camadasInstanciadas['pontos_emergencia'].getBounds();
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    }
+    showToast('Filtro: Pontos de Apoio, Rampas e Emergência.');
+  } else if (tipo === 'restritas') {
+    if (camadasInstanciadas['areas_restritas']) {
+      map.addLayer(camadasInstanciadas['areas_restritas']);
+      const bounds = camadasInstanciadas['areas_restritas'].getBounds();
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+    }
+    showToast('Filtro: Unidades de Conservação e Áreas Restritas.');
+  }
+}
+
+const chipsFiltro = document.querySelectorAll('.filter-chip');
+chipsFiltro.forEach(chip => {
+  chip.addEventListener('click', () => {
+    chipsFiltro.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const filtro = chip.getAttribute('data-filter');
+    aplicarFiltroRapido(filtro);
+  });
+});
+
+// 14. Tabela Oficial de Espécies e Régua de Medidas (IMASUL MS)
+const ESPECIES_MS = [
+  {
+    id: 'pintado',
+    nome: 'Pintado / Surubim',
+    nomeCientifico: 'Pseudoplatystoma corruscans',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 85,
+    max: 125,
+    regra: 'Permitido capturar e consumir no barco até 1 exemplar dentro da faixa de 85 a 125 cm. Transporte rodoviário é Cota 0 kg.'
+  },
+  {
+    id: 'pacu',
+    nome: 'Pacu',
+    nomeCientifico: 'Piaractus mesopotamicus',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 45,
+    max: null,
+    regra: 'Mínimo de 45 cm. Proibido abate de exemplares abaixo da medida legal. Transporte interestadual proibido.'
+  },
+  {
+    id: 'cachara',
+    nome: 'Cachara',
+    nomeCientifico: 'Pseudoplatystoma reticulatum',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 80,
+    max: 120,
+    regra: 'Faixa permitida de 80 a 120 cm. Fora dessa faixa (menor que 80 ou maior que 120 cm) a soltura é obrigatória.'
+  },
+  {
+    id: 'jau',
+    nome: 'Jaú',
+    nomeCientifico: 'Zungaro jahu',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 95,
+    max: null,
+    regra: 'Tamanho mínimo de 95 cm. Espécie de grande porte com proteção rigorosa para reprodução.'
+  },
+  {
+    id: 'dourado',
+    nome: 'Dourado',
+    nomeCientifico: 'Salminus brasiliensis',
+    status: 'proibido',
+    statusTexto: 'PROIBIDO / Moratória',
+    min: null,
+    max: null,
+    regra: 'PROIBIDA a captura, abate, transporte e comercialização em todo o MS (Lei Estadual nº 5.321 e 6.190). Permitido apenas Pesque e Solte esportivo.'
+  },
+  {
+    id: 'piraputanga',
+    nome: 'Piraputanga',
+    nomeCientifico: 'Brycon hilarii',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 30,
+    max: null,
+    regra: 'Tamanho mínimo de 30 cm. Muito comum no Rio Salobra e Miranda; no Rio Salobra é exclusivamente Pesque e Solte.'
+  },
+  {
+    id: 'curimbata',
+    nome: 'Curimbatá',
+    nomeCientifico: 'Prochilodus lineatus',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 38,
+    max: null,
+    regra: 'Tamanho mínimo de 38 cm para consumo local.'
+  },
+  {
+    id: 'piavucu',
+    nome: 'Piavuçu',
+    nomeCientifico: 'Megaleporinus macrocephalus',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 38,
+    max: null,
+    regra: 'Tamanho mínimo de 38 cm.'
+  },
+  {
+    id: 'barbado',
+    nome: 'Barbado',
+    nomeCientifico: 'Pinirampus pirinampu',
+    status: 'cota-zero',
+    statusTexto: 'Cota Zero Transporte',
+    min: 60,
+    max: null,
+    regra: 'Tamanho mínimo de 60 cm.'
+  }
+];
+
+const modalEspecies = document.getElementById('modal-especies');
+const btnAbrirEspecies = document.getElementById('btn-especies');
+const btnFecharEspecies = document.getElementById('btn-fechar-especies');
+const speciesGrid = document.getElementById('species-grid');
+const speciesSearchInput = document.getElementById('species-search-input');
+const btnRunCheck = document.getElementById('btn-run-check');
+const checkerSpecies = document.getElementById('checker-species');
+const checkerLength = document.getElementById('checker-length');
+const measureResult = document.getElementById('measure-result');
+
+function renderizarEspécies(termo = '') {
+  if (!speciesGrid) return;
+  speciesGrid.innerHTML = '';
+
+  const termoLimpo = termo.toLowerCase().trim();
+  const filtradas = ESPECIES_MS.filter(e => 
+    e.nome.toLowerCase().includes(termoLimpo) || 
+    e.nomeCientifico.toLowerCase().includes(termoLimpo)
+  );
+
+  if (filtradas.length === 0) {
+    speciesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 20px;">Nenhuma espécie encontrada para a busca.</p>';
+    return;
+  }
+
+  filtradas.forEach(esp => {
+    let badgeClass = 'badge-cota-zero';
+    if (esp.status === 'proibido') badgeClass = 'badge-proibido';
+    else if (esp.status === 'pesque-solte') badgeClass = 'badge-pesque-solte';
+
+    let medidasTexto = '';
+    if (esp.min && esp.max) {
+      medidasTexto = `<span>Mín: <strong>${esp.min} cm</strong></span> <span>Máx: <strong>${esp.max} cm</strong></span>`;
+    } else if (esp.min) {
+      medidasTexto = `<span>Mínimo: <strong>${esp.min} cm</strong></span> <span>Sem limite máx.</span>`;
+    } else {
+      medidasTexto = `<span style="color: #b91c1c; font-weight: 700;">Moratória: Captura 0 cm</span>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'species-card';
+    card.innerHTML = `
+      <div class="species-header">
+        <div>
+          <div class="species-name">${escapeHTML(esp.nome)}</div>
+          <div class="species-sci">${escapeHTML(esp.nomeCientifico)}</div>
+        </div>
+        <span class="species-badge ${badgeClass}">${escapeHTML(esp.statusTexto)}</span>
+      </div>
+      <div class="species-measures">
+        ${medidasTexto}
+      </div>
+      <div class="species-desc">${escapeHTML(esp.regra)}</div>
+    `;
+    speciesGrid.appendChild(card);
+  });
+}
+
+function verificarMedidaPescado() {
+  if (!checkerSpecies || !checkerLength || !measureResult) return;
+  const espId = checkerSpecies.value;
+  const valor = parseFloat(checkerLength.value);
+
+  if (isNaN(valor) || valor <= 0) {
+    measureResult.className = 'measure-result-box forbidden';
+    measureResult.textContent = 'Por favor, informe o tamanho do peixe em centímetros (ex: 88).';
+    return;
+  }
+
+  const esp = ESPECIES_MS.find(e => e.id === espId);
+  if (!esp) return;
+
+  if (esp.status === 'proibido') {
+    measureResult.className = 'measure-result-box forbidden';
+    measureResult.innerHTML = `🚫 <strong>Dourado Proibido!</strong> Em Mato Grosso do Sul, a captura e o abate do Dourado são proibidos por lei (Lei Estadual 5.321). <strong>Soltura imediata e obrigatória!</strong>`;
+    return;
+  }
+
+  if (esp.min && esp.max) {
+    if (valor >= esp.min && valor <= esp.max) {
+      measureResult.className = 'measure-result-box allowed';
+      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido apenas para <strong>consumo no barco/rancho (limite de 1 exemplar)</strong>. Transporte rodoviário é Cota Zero!`;
+    } else if (valor < esp.min) {
+      measureResult.className = 'measure-result-box forbidden';
+      measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave. <strong>Solte imediatamente!</strong>`;
+    } else {
+      measureResult.className = 'measure-result-box forbidden';
+      measureResult.innerHTML = `❌ <strong>Acima da Medida Máxima!</strong> O peixe tem ${valor} cm e o limite máximo de preservação de matrizes é <strong>${esp.max} cm</strong>. <strong>Solte imediatamente!</strong>`;
+    }
+  } else if (esp.min) {
+    if (valor >= esp.min) {
+      measureResult.className = 'measure-result-box allowed';
+      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Permitido para consumo no local. Transporte na estrada é proibido (Cota Zero).`;
+    } else {
+      measureResult.className = 'measure-result-box forbidden';
+      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate. <strong>Solte o peixe na água com cuidado!</strong>`;
+    }
+  }
+}
+
+if (btnRunCheck) {
+  btnRunCheck.addEventListener('click', verificarMedidaPescado);
+}
+
+if (speciesSearchInput) {
+  speciesSearchInput.addEventListener('input', (e) => {
+    renderizarEspécies(e.target.value);
+  });
+}
+
+function abrirModalEspecies() {
+  if (!modalEspecies) return;
+  renderizarEspécies();
+  modalEspecies.classList.remove('hidden');
+  modalEspecies.setAttribute('aria-hidden', 'false');
+  vibrar(25);
+  try {
+    history.pushState({ modal: 'especies' }, '');
+  } catch (_) {}
+  if (btnFecharEspecies) btnFecharEspecies.focus();
+}
+
+function fecharModalEspecies() {
+  if (!modalEspecies) return;
+  modalEspecies.classList.add('hidden');
+  modalEspecies.setAttribute('aria-hidden', 'true');
+}
+
+if (btnAbrirEspecies) {
+  btnAbrirEspecies.addEventListener('click', abrirModalEspecies);
+}
+
+if (btnFecharEspecies) {
+  btnFecharEspecies.addEventListener('click', fecharModalEspecies);
+}
+
+if (modalEspecies) {
+  modalEspecies.addEventListener('click', (e) => {
+    if (e.target === modalEspecies) {
+      fecharModalEspecies();
+    }
+  });
+}
+
+// Fechamento de todos os modais com Escape
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    fecharModalEspecies();
+    fecharModalSobre();
+    fecharPainel();
+  }
+});
+
+// 15. Busca Rápida de Feições Locais na Bacia do Rio Miranda (100% Offline e Instantânea)
+let marcadorBusca = null;
+
+function inicializarBuscaLocal() {
+  const inputBusca = document.getElementById('local-search-input');
+  const resultsContainer = document.getElementById('local-search-results');
+  const btnClear = document.getElementById('btn-clear-local-search');
+  if (!inputBusca || !resultsContainer) return;
+
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      inputBusca.value = '';
+      resultsContainer.classList.add('hidden');
+      btnClear.style.display = 'none';
+      if (marcadorBusca) {
+        map.removeLayer(marcadorBusca);
+        marcadorBusca = null;
+      }
+    });
+  }
+
+  function formatarTermo(str) {
+    return String(str || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  inputBusca.addEventListener('input', (e) => {
+    const termo = e.target.value.trim();
+    if (btnClear) {
+      btnClear.style.display = termo.length > 0 ? 'inline-block' : 'none';
+    }
+
+    if (termo.length < 2) {
+      resultsContainer.classList.add('hidden');
       return;
     }
 
-    // Feedback visual no botão enquanto obtém o sinal de satélite
-    btnLocalizacao.textContent = 'A obter GPS...';
-    btnLocalizacao.disabled = true;
+    const termoNorm = formatarTermo(termo);
+    const correspondencias = [];
 
-    navigator.geolocation.getCurrentPosition(
-      (posicao) => {
-        const lat = posicao.coords.latitude;
-        const lng = posicao.coords.longitude;
-        const precisao = Math.round(posicao.coords.accuracy); // Margem de erro em metros
-
-        // Remove marcadores anteriores de posição, se existirem
-        if (marcadorPosicao) map.removeLayer(marcadorPosicao);
-        if (circuloPrecisao) map.removeLayer(circuloPrecisao);
-
-        // 1. Círculo de precisão do GPS
-        circuloPrecisao = L.circle([lat, lng], {
-          radius: precisao,
-          color: '#1976d2',
-          fillColor: '#64b5f6',
-          fillOpacity: 0.2,
-          weight: 1
-        }).addTo(map);
-
-        // 2. Marcador da posição atual do pescador
-        marcadorPosicao = L.circleMarker([lat, lng], {
-          radius: 9,
-          fillColor: '#0288d1',
-          color: '#ffffff',
-          weight: 3,
-          fillOpacity: 1
-        }).addTo(map);
-
-        marcadorPosicao.bindPopup(`
-          <strong>Você está aqui!</strong><br>
-          Precisão do GPS: cerca de ${precisao} metros.<br>
-          <small>Toque na linha do rio ao lado para ver as regras de pesca.</small>
-        `).openPopup();
-
-        // Centra o mapa na posição obtida com zoom de detalhe
-        map.setView([lat, lng], 14);
-
-        // Restaura o botão
-        btnLocalizacao.textContent = '📍 Minha Posição';
-        btnLocalizacao.disabled = false;
-      },
-      (erro) => {
-        let mensagem = 'Não foi possível obter a sua localização.';
-        if (erro.code === erro.PERMISSION_DENIED) {
-          mensagem = 'Permissão de localização negada. Ative o GPS nas definições do telemóvel.';
-        } else if (erro.code === erro.POSITION_UNAVAILABLE) {
-          mensagem = 'Sinal de GPS indisponível no momento.';
-        } else if (erro.code === erro.TIMEOUT) {
-          mensagem = 'O tempo para obter o sinal de satélite expirou.';
+    // 1. Busca em Pontos de Apoio, Rampas e Emergência
+    const dadosApoio = dadosCarregados['pontos_emergencia'];
+    if (dadosApoio && dadosApoio.features) {
+      for (const feat of dadosApoio.features) {
+        const p = feat.properties || {};
+        const nomeNorm = formatarTermo(p.nome);
+        const tipoNorm = formatarTermo(p.tipo);
+        const municNorm = formatarTermo(p.municipio);
+        if (nomeNorm.includes(termoNorm) || tipoNorm.includes(termoNorm) || municNorm.includes(termoNorm)) {
+          correspondencias.push({
+            tipoIcone: '⚓',
+            titulo: p.nome,
+            subtitulo: `${p.tipo || 'Ponto de Apoio'} • ${p.municipio || 'Bacia do Miranda'}`,
+            categoria: 'Apoio / Rampa',
+            coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
+            propriedades: p
+          });
         }
-        alert(mensagem);
-        btnLocalizacao.textContent = '📍 Minha Posição';
-        btnLocalizacao.disabled = false;
-      },
-      {
-        enableHighAccuracy: true, // Força a utilização do chip de GPS em vez de IP/antena
-        timeout: 15000,           // Limite de 15 segundos para resposta
-        maximumAge: 0             // Garante que a leitura não vem de cache antigo
       }
-    );
+    }
+
+    // 2. Busca em Guias de Pesca Credenciados Z-1 e Z-7
+    const dadosGuias = dadosCarregados['guias_credenciados'];
+    if (dadosGuias && dadosGuias.features) {
+      for (const feat of dadosGuias.features) {
+        const p = feat.properties || {};
+        const nomeNorm = formatarTermo(p.nome_operacional || p.nome_completo);
+        const portoNorm = formatarTermo(p.porto_base);
+        const colNorm = formatarTermo(p.colonia);
+        if (nomeNorm.includes(termoNorm) || portoNorm.includes(termoNorm) || colNorm.includes(termoNorm)) {
+          correspondencias.push({
+            tipoIcone: '🚤',
+            titulo: p.nome_operacional || p.nome_completo,
+            subtitulo: `${p.colonia || 'Guia de Pesca'} • Base: ${p.porto_base || 'Pantanal'}`,
+            categoria: 'Guia Credenciado',
+            coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
+            propriedades: p
+          });
+        }
+      }
+    }
+
+    // 3. Busca em Trechos e Regras de Pesca
+    const dadosTrechos = dadosCarregados['trechos_pesca'];
+    if (dadosTrechos && dadosTrechos.features) {
+      for (const feat of dadosTrechos.features) {
+        const p = feat.properties || {};
+        const rioNorm = formatarTermo(p.rio);
+        const regraNorm = formatarTermo(p.regra);
+        const descNorm = formatarTermo(p.descricao);
+        if (rioNorm.includes(termoNorm) || regraNorm.includes(termoNorm) || descNorm.includes(termoNorm)) {
+          let coordsCentro = null;
+          if (feat.geometry.type === 'LineString' && feat.geometry.coordinates.length > 0) {
+            const mid = Math.floor(feat.geometry.coordinates.length / 2);
+            coordsCentro = [feat.geometry.coordinates[mid][1], feat.geometry.coordinates[mid][0]];
+          }
+          correspondencias.push({
+            tipoIcone: '🎣',
+            titulo: `${p.rio || 'Trecho'} - ${p.regra || 'Regra de Pesca'}`,
+            subtitulo: p.descricao || `Regra oficial: ${p.regra}`,
+            categoria: 'Trecho de Pesca',
+            coords: coordsCentro,
+            feature: feat
+          });
+        }
+      }
+    }
+
+    // 4. Busca em Unidades de Conservação e Áreas Restritas
+    const dadosUcs = dadosCarregados['areas_restritas'];
+    if (dadosUcs && dadosUcs.features) {
+      for (const feat of dadosUcs.features) {
+        const p = feat.properties || {};
+        const nomeNorm = formatarTermo(p.nome);
+        const municNorm = formatarTermo(p.municipio);
+        if (nomeNorm.includes(termoNorm) || municNorm.includes(termoNorm)) {
+          correspondencias.push({
+            tipoIcone: '⚠️',
+            titulo: p.nome,
+            subtitulo: `${p.categoria || 'Unidade de Conservação'} • ${p.municipio || 'MS'}`,
+            categoria: 'Área Restrita',
+            feature: feat
+          });
+        }
+      }
+    }
+
+    if (correspondencias.length === 0) {
+      resultsContainer.innerHTML = '<div style="padding: 10px 14px; font-size: 0.85rem; color: #64748b;">Nenhum porto, rancho, rio ou guia encontrado.</div>';
+      resultsContainer.classList.remove('hidden');
+      return;
+    }
+
+    resultsContainer.innerHTML = '';
+    correspondencias.slice(0, 7).forEach((itemData) => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'local-search-result-item';
+      itemEl.innerHTML = `
+        <span class="local-result-icon">${itemData.tipoIcone}</span>
+        <div style="flex: 1; min-width: 0;">
+          <div class="local-result-title">${escapeHTML(itemData.titulo)}</div>
+          <div class="local-result-subtitle">${escapeHTML(itemData.subtitulo)}</div>
+        </div>
+        <span class="badge-tag" style="font-size: 0.68rem; margin: 0; align-self: center;">${itemData.categoria}</span>
+      `;
+
+      itemEl.addEventListener('click', () => {
+        resultsContainer.classList.add('hidden');
+        inputBusca.value = itemData.titulo;
+
+        if (itemData.coords) {
+          if (marcadorBusca) map.removeLayer(marcadorBusca);
+          marcadorBusca = L.marker(itemData.coords, { pane: 'posicaoPane' }).addTo(map);
+          marcadorBusca.bindPopup(`
+            <strong style="color: #0b4f6c; font-size: 0.95rem;">${escapeHTML(itemData.titulo)}</strong><br>
+            <span style="color: #64748b; font-size: 0.8rem;">${escapeHTML(itemData.subtitulo)}</span>
+          `).openPopup();
+          map.flyTo(itemData.coords, 14, { duration: 1.2 });
+          showToast(`Navegando para: ${itemData.titulo}`);
+        } else if (itemData.feature) {
+          const tempLayer = L.geoJSON(itemData.feature);
+          const bounds = tempLayer.getBounds();
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            showToast(`Exibindo: ${itemData.titulo}`);
+          }
+        }
+      });
+
+      resultsContainer.appendChild(itemEl);
+    });
+
+    resultsContainer.classList.remove('hidden');
+  });
+
+  // Fecha lista ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#local-search-container')) {
+      resultsContainer.classList.add('hidden');
+    }
   });
 }

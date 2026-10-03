@@ -1,29 +1,22 @@
 {
-  "id": "/index.html",
+  "id": "/",
   "name": "GeoFish MS - Bacia do Rio Miranda",
   "short_name": "GeoFish MS",
-  "description": "Navegação e governança da pesca esportiva na Bacia do Rio Miranda",
+  "description": "Navegação náutica, regras da pesca esportiva e pontos de apoio na Bacia do Rio Miranda (MS)",
+  "lang": "pt-BR",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0b4f6c",
+  "background_color": "#073448",
   "theme_color": "#0b4f6c",
+  "categories": ["navigation", "travel", "sports", "utilities"],
   "icons": [
-    {
-      "src": "icons/favicon-32.png",
-      "sizes": "32x32",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/apple-touch-icon.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
@@ -36,6 +29,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Minha Posição no Rio",
+      "short_name": "Onde Estou",
+      "description": "Verifica radar de conformidade e rio mais próximo via GPS",
+      "url": "./index.html?action=gps",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Medidas Oficiais de Peixes",
+      "short_name": "Peixes MS",
+      "description": "Tabela de medidas mínimas e máximas do IMASUL MS",
+      "url": "./index.html?action=especies",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Rampas e Apoio Náutico",
+      "short_name": "Rampas",
+      "description": "Localizar portos, rampas de barco e emergência",
+      "url": "./index.html?action=apoio",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

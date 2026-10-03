@@ -2,55 +2,285 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoFish MS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
+
+  <title>GeoFish MS - Bacia do Rio Miranda</title>
+  <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Otimizado para celulares Android.">
   
+  <meta property="og:title" content="GeoFish MS - Bacia do Rio Miranda">
+  <meta property="og:description" content="Navegação náutica e governança da pesca esportiva na Bacia do Rio Miranda (Mato Grosso do Sul).">
+  <meta property="og:type" content="website">
+
+  <!-- PWA & Android / Samsung One UI / Motorola Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b4f6c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="GeoFish MS">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoFish MS">
 
-  <!-- Estilos Leaflet -->
-  <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="css/style.css" />
+  <!-- Ícones PWA e Favicons Oficiais -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <!-- Folhas de Estilo (Leaflet Local e Estilo do GeoFish) -->
+  <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+  <!-- Cabeçalho Principal -->
   <header id="header">
-    <h1>GeoFish MS</h1>
-    <span id="status-rede">Online</span>
+    <div class="brand-wrapper">
+      <img src="icons/favicon-32.png" alt="GeoFish MS" class="brand-logo" width="32" height="32">
+      <div>
+        <h1 class="brand-title">GeoFish MS</h1>
+        <span class="brand-subtitle">Bacia do Rio Miranda &bull; Pantanal MS</span>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <span id="status-rede"><span class="status-dot"></span> Online</span>
+      <button id="btn-install-pwa" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo no Android ou computador">
+        📲 Instalar App
+      </button>
+      <button id="btn-sobre" class="btn-header" title="Informações e legislação de pesca">
+        ℹ️ Sobre
+      </button>
+    </div>
   </header>
 
-  <div id="map"></div>
-
-  <!-- Botão flutuante de localização sob demanda -->
-  <button id="btn-localizacao" class="btn-gps" title="Onde estou agora?">
-    📍 Minha Posição
-  </button>
-
-  <!-- Gaveta inferior para detalhes de trechos e guias -->
-  <div id="bottom-sheet" class="bottom-sheet hidden">
-    <button id="close-sheet" class="close-btn" aria-label="Fechar painel">&times;</button>
-    <div id="sheet-content"></div>
+  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal -->
+  <div id="banner-defeso" class="banner-defeso hidden" role="alert" aria-live="assertive">
+    <div class="banner-defeso-content">
+      <span class="banner-defeso-icon">⚠️</span>
+      <span id="banner-defeso-text">Período de Defeso da Piracema vigente em toda a Bacia. Pesca amadora e profissional suspensa por lei estadual.</span>
+    </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Barra de Filtros Rápidos (Acesso com 1 Toque para Polegar) -->
+  <nav id="quick-filters" class="quick-filters-bar" role="toolbar" aria-label="Filtros rápidos do mapa">
+    <button class="filter-chip active" data-filter="all">🌐 Todos</button>
+    <button class="filter-chip" data-filter="regras">🎣 Regras de Pesca</button>
+    <button class="filter-chip" data-filter="guias">🚤 Guias Z-1 / Z-7</button>
+    <button class="filter-chip" data-filter="apoio">🏥 Apoio & Rampas</button>
+    <button class="filter-chip" data-filter="restritas">⚠️ Áreas Restritas</button>
+  </nav>
+
+  <!-- Barra de Busca Rápida na Bacia (Ranchos, Portos, Rios, Rampas e Guias) -->
+  <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca de locais na Bacia do Rio Miranda">
+    <div class="local-search-input-wrapper">
+      <span class="local-search-icon">🔍</span>
+      <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar porto, rancho, rio, rampa ou guia..." aria-label="Pesquisar locais na bacia">
+      <button id="btn-clear-local-search" class="local-clear-btn" aria-label="Limpar busca" style="display: none;">&times;</button>
+    </div>
+    <div id="local-search-results" class="local-search-results hidden"></div>
+  </div>
+
+  <!-- Indicador Flutuante de Carga de Camadas -->
+  <div id="loading-indicator" aria-live="polite">
+    <span class="spinner"></span>
+    <span id="loading-text">Carregando camadas…</span>
+  </div>
+
+  <!-- Contêiner do Mapa Interativo -->
+  <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
+
+  <!-- Botão Flutuante de Localização GPS (Área do Polegar para Android) -->
+  <button id="btn-localizacao" class="btn-gps" title="Onde estou agora?" aria-label="Obter minha localização GPS no rio">
+    <span class="gps-icon">📍</span>
+    <span class="gps-text">Onde Estou</span>
+  </button>
+
+  <!-- Barra Inferior de Polegar (Android Bottom Navigation Bar) -->
+  <nav id="android-bottom-bar" class="android-bottom-bar" aria-label="Navegação rápida inferior">
+    <button id="nav-btn-gps" class="bottom-nav-item" aria-label="Localização e Radar no Rio">
+      <span class="bottom-nav-icon">📍</span>
+      <span class="bottom-nav-label">Onde Estou</span>
+    </button>
+    <button id="nav-btn-especies" class="bottom-nav-item" aria-label="Medidas de Peixes IMASUL">
+      <span class="bottom-nav-icon">🐟</span>
+      <span class="bottom-nav-label">Peixes MS</span>
+    </button>
+    <button id="nav-btn-rampas" class="bottom-nav-item" aria-label="Rampas e Portos">
+      <span class="bottom-nav-icon">⚓</span>
+      <span class="bottom-nav-label">Rampas</span>
+    </button>
+    <button id="nav-btn-busca" class="bottom-nav-item" aria-label="Pesquisar na Bacia">
+      <span class="bottom-nav-icon">🔍</span>
+      <span class="bottom-nav-label">Buscar</span>
+    </button>
+  </nav>
+
+  <!-- Card Nativo de Instalação para Android (Samsung / Motorola / Chrome) -->
+  <div id="android-install-banner" class="android-install-banner hidden" role="region" aria-label="Instalação do Aplicativo Android">
+    <div class="android-install-info">
+      <img src="icons/icon-192.png" alt="GeoFish MS" class="android-install-icon" width="48" height="48">
+      <div class="android-install-text">
+        <strong>Instalar GeoFish MS</strong>
+        <span>Funciona 100% offline no barco sem sinal de celular</span>
+      </div>
+    </div>
+    <div class="android-install-actions">
+      <button id="btn-android-dismiss" class="btn-android-dismiss" aria-label="Dispensar aviso">Depois</button>
+      <button id="btn-android-install" class="btn-android-install" aria-label="Instalar aplicativo agora">📲 Instalar</button>
+    </div>
+  </div>
+
+  <!-- Painel Inferior Retrátil de Detalhes (Bottom Sheet) -->
+  <aside id="bottom-sheet" class="bottom-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Painel de detalhes da feição selecionada">
+    <div class="sheet-handle-bar"></div>
+    <div class="sheet-header-row">
+      <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Informações Oficiais</span>
+      <button id="close-sheet" class="close-btn" aria-label="Fechar painel de detalhes">&times;</button>
+    </div>
+    <div id="sheet-content"></div>
+  </aside>
+
+  <!-- Modal "Sobre os Dados" e Legislação Oficial -->
+  <div id="modal-sobre" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sobre os dados do GeoFish MS">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>ℹ️ Sobre os Dados e Governança</h2>
+        <button id="btn-fechar-sobre" class="modal-close-btn" aria-label="Fechar janela sobre os dados">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="legal-alert">
+          <strong>⚠️ Aviso Legal Importante:</strong><br>
+          As informações contidas neste aplicativo têm caráter estritamente <strong>orientativo e informativo</strong>, não substituindo em hipótese alguma os atos normativos oficiais e a legislação ambiental vigente no Estado de Mato Grosso do Sul.
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Estado Atual das Camadas no Celular</h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">
+            O GeoFish MS mantém cópias locais na memória do seu celular (IndexedDB) para funcionamento ininterrupto mesmo sem sinal de internet em campo:
+          </p>
+          <div id="layer-status-list" class="layer-status-list"></div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Bases Normativas de Referência</h3>
+          <ul style="padding-left: 20px; font-size: 0.86rem; color: #334155; display: flex; flex-direction: column; gap: 8px;">
+            <li><strong>Decreto Estadual nº 15.166/2019:</strong> Institui a política de Cota Zero para transporte rodoviário de pescado nativo e define limite para consumo no barco (1 exemplar + 5 piranhas).</li>
+            <li><strong>Lei Estadual nº 5.321 (prorrogada até 2029):</strong> Proíbe expressamente a captura e o abate do Dourado em todo o Mato Grosso do Sul.</li>
+            <li><strong>Licença Ambiental do IMASUL:</strong> Obrigatório o porte da Autorização Ambiental para Pesca Desportiva (carteirinha do IMASUL) acompanhada de documento oficial com foto.</li>
+            <li><strong>Resoluções SEMADESC / IMASUL:</strong> Regulamentam o defeso anual da piracema (05/nov a 28/fev) e os trechos de Pesque e Solte exclusivo (ex: Rio Salobra).</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Governança Participativa e Colônias</h3>
+          <p style="font-size: 0.86rem; color: #334155; line-height: 1.4;">
+            Dados oficiais da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda) e Z-7 (Aquidauana)</strong>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal "Tabela Oficial de Espécies e Medidas (IMASUL MS)" -->
+  <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>🐟 Espécies & Tamanhos Permitidos (MS)</h2>
+        <button id="btn-fechar-especies" class="modal-close-btn" aria-label="Fechar janela de espécies">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: #475569;">
+          Tabela oficial baseada no <strong>Decreto Estadual nº 15.166/2019</strong> e na <strong>Lei Estadual nº 5.321</strong> (Dourado Proibido). O transporte interestadual de espécies nativas é <strong>Cota Zero (0 kg)</strong>.
+        </p>
+
+        <!-- Calculadora / Verificador de Medida Rápido no Barco -->
+        <div class="measure-checker-card">
+          <div class="checker-title">📏 Verificador Rápido no Barco: Posso Embarcar?</div>
+          <div class="checker-form">
+            <select id="checker-species" class="checker-select" aria-label="Selecione o peixe">
+              <option value="pintado">Pintado / Surubim (85 a 125 cm)</option>
+              <option value="pacu">Pacu (Mínimo 45 cm)</option>
+              <option value="cachara">Cachara (80 a 120 cm)</option>
+              <option value="jau">Jaú (Mínimo 95 cm)</option>
+              <option value="piraputanga">Piraputanga (Mínimo 30 cm)</option>
+              <option value="curimbata">Curimbatá (Mínimo 38 cm)</option>
+              <option value="piavucu">Piavuçu (Mínimo 38 cm)</option>
+              <option value="dourado">Dourado (PROIBIDO)</option>
+            </select>
+            <input type="number" id="checker-length" class="checker-input" placeholder="Comprimento (cm)" min="1" max="250" aria-label="Comprimento em centímetros">
+            <button id="btn-run-check" class="btn-check-measure">Verificar</button>
+          </div>
+          <div id="measure-result" class="measure-result-box"></div>
+        </div>
+
+        <!-- Campo de Busca de Espécies -->
+        <div class="species-search-box">
+          <input type="text" id="species-search-input" class="species-search-input" placeholder="🔍 Buscar peixe (ex: Pintado, Dourado, Pacu)..." aria-label="Filtrar espécies">
+        </div>
+
+        <!-- Grid de Cartões de Espécies -->
+        <div id="species-grid" class="species-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Instruções de Instalação no Celular (Android Samsung / Motorola / iOS) -->
+  <div id="modal-install" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Como instalar no celular">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2>📲 Instalar o App no Celular</h2>
+        <button id="btn-fechar-install" class="modal-close-btn" aria-label="Fechar instruções">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: #334155; margin-bottom: 12px;">
+          Instale o GeoFish MS direto no seu celular para abrir como um aplicativo nativo e <strong>navegar no rio mesmo sem sinal de internet</strong>:
+        </p>
+
+        <div class="install-guide-card android-guide">
+          <div class="guide-header">
+            <span class="guide-badge">🤖 Celulares Android (Samsung, Motorola, Xiaomi)</span>
+          </div>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-num">1</span>
+              <span>No navegador (Google Chrome ou Samsung Internet), toque no menu de <strong>3 pontinhos (⋮)</strong> no canto superior ou no menu (☰) inferior.</span>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">2</span>
+              <span>Selecione a opção <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</span>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">3</span>
+              <span>Confirme em <strong>"Instalar"</strong>. O ícone aparecerá junto aos seus outros aplicativos!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="install-guide-card ios-guide" style="margin-top: 14px;">
+          <div class="guide-header">
+            <span class="guide-badge ios">🍎 iPhone / iPad (Safari)</span>
+          </div>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-num">1</span>
+              <span>No Safari, toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima) na barra inferior.</span>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">2</span>
+              <span>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contêiner de Mensagens Toast Acessíveis -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts Locais PWA & Leaflet GIS -->
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="js/db.js"></script>
   <script src="js/app.js"></script>
-  <script>
-    // Atualização simples do indicador de rede
-    const statusEl = document.getElementById('status-rede');
-    function atualizarStatus() {
-      if (navigator.onLine) {
-        statusEl.textContent = 'Online';
-        statusEl.className = 'online';
-      } else {
-        statusEl.textContent = 'Modo Offline';
-        statusEl.className = 'offline';
-      }
-    }
-    window.addEventListener('online', atualizarStatus);
-    window.addEventListener('offline', atualizarStatus);
-    atualizarStatus();
-  </script>
 </body>
 </html>
