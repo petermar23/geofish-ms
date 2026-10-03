@@ -110,7 +110,10 @@ function showToast(message, type = 'info') {
 const map = L.map('map', {
   center: [-20.50, -56.50],
   zoom: 9,
-  zoomControl: false // Ocultado para posicionar no canto superior direito
+  zoomControl: false, // Ocultado para posicionar no canto superior direito
+  // Desempenho: rios_principais (~9 MB) e areas_restritas (~5 MB) são desenhados em Canvas
+  // (um canvas por pane) em vez de milhares de nós SVG no DOM — essencial em celulares modestos.
+  preferCanvas: true
 });
 
 // Reposiciona o controle de zoom para o canto superior direito
