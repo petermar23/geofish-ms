@@ -1695,11 +1695,11 @@ body.sheet-open .btn-sos {
     z-index: 2000;
   }
 
-  .nav-item {
+  .bottom-nav-item {
     margin-bottom: 24px;
     padding: 10px 5px;
   }
-  .nav-item:hover {
+  .bottom-nav-item:hover {
     background-color: var(--primary-light);
     border-radius: 8px;
     cursor: pointer;
