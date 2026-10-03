@@ -1072,7 +1072,7 @@ window.addEventListener('popstate', () => {
 const navBtnGuias = document.getElementById('nav-btn-guias');
 const navBtnEspecies = document.getElementById('nav-btn-especies');
 const navBtnRampas = document.getElementById('nav-btn-rampas');
-const navBtnBusca = document.getElementById('nav-btn-busca');
+const navBtnPousadas = document.getElementById('nav-btn-pousadas');
 
 if (navBtnGuias) {
   navBtnGuias.addEventListener('click', () => {
@@ -1094,21 +1094,14 @@ if (navBtnRampas) {
   navBtnRampas.addEventListener('click', () => {
     vibrar(25);
     aplicarFiltroRapido('apoio');
-    const chipApoio = document.querySelector('.filter-chip[data-filter="apoio"]');
-    if (chipApoio) {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chipApoio.classList.add('active');
-    }
   });
 }
 
-if (navBtnBusca) {
-  navBtnBusca.addEventListener('click', () => {
+if (navBtnPousadas) {
+  navBtnPousadas.addEventListener('click', () => {
     vibrar(25);
-    const searchInput = document.getElementById('local-search-input');
-    if (searchInput) {
-      searchInput.focus();
-      searchInput.scrollIntoView({ behavior: 'smooth' });
+    if (typeof abrirModalParceriasTab === 'function') {
+      abrirModalParceriasTab('pousadas');
     }
   });
 }

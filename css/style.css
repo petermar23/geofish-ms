@@ -1160,13 +1160,7 @@ body.sheet-open .btn-gps {
 
 /* Barra de Busca Rápida na Bacia (Portos, Ranchos, Rios, Guias) */
 .local-search-container {
-  position: absolute;
-  top: 72px;
-  left: 16px;
-  width: 320px;
-  max-width: calc(100vw - 80px);
-  z-index: 997;
-  pointer-events: auto;
+  display: none !important;
 }
 
 /* Posicionamento dos controles do Leaflet para eliminar sobreposições */

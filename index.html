@@ -195,16 +195,6 @@
     </div>
   </div>
 
-  <!-- Barra de Busca Rápida na Bacia (Ranchos, Portos, Rios, Rampas e Guias) -->
-  <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca de locais na Bacia do Rio Miranda">
-    <div class="local-search-input-wrapper">
-      <span class="local-search-icon">🔍</span>
-      <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar porto, rancho, rio, rampa ou guia..." aria-label="Pesquisar locais na bacia">
-      <button id="btn-clear-local-search" class="local-clear-btn" aria-label="Limpar busca" style="display: none;">&times;</button>
-    </div>
-    <div id="local-search-results" class="local-search-results hidden"></div>
-  </div>
-
   <!-- Indicador Flutuante de Carga de Camadas -->
   <div id="loading-indicator" aria-live="polite">
     <span class="spinner"></span>
@@ -239,9 +229,9 @@
       <span class="bottom-nav-icon">⚓</span>
       <span class="bottom-nav-label">Rampas</span>
     </button>
-    <button id="nav-btn-busca" class="bottom-nav-item" aria-label="Pesquisar na Bacia">
-      <span class="bottom-nav-icon">🔍</span>
-      <span class="bottom-nav-label">Buscar</span>
+    <button id="nav-btn-pousadas" class="bottom-nav-item" onclick="abrirModalParceriasTab('pousadas')" aria-label="Pousadas e Ranchos">
+      <span class="bottom-nav-icon">🏨</span>
+      <span class="bottom-nav-label">Pousadas</span>
     </button>
     <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="bottom-nav-item" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;" aria-label="Emitir Licença Ambiental">
       <span class="bottom-nav-icon" style="font-size: 1.3rem;">🪪</span>
