@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v18';
+const CACHE_VERSION = 'geofish-shell-v19';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -23,6 +23,7 @@ const SHELL_ASSETS = [
   './css/style.css',
   './js/app.js',
   './js/db.js',
+  './js/firebase-service.js',
   './manifest.json',
   './lib/leaflet/leaflet.css',
   './lib/leaflet/leaflet.js',

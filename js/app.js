@@ -2685,6 +2685,17 @@ if (btnEnviarPropostaPousada) {
     const comodidades = [];
     document.querySelectorAll('input[name="pousada-amenity"]:checked').forEach(cb => comodidades.push(cb.value));
 
+    // Gravação segura no Firebase Firestore (sincroniza online ou enfileira offline)
+    if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarSolicitacaoPousada === 'function') {
+      window.GeoFishFirebase.salvarSolicitacaoPousada({
+        nome,
+        rio,
+        whatsapp: wpp,
+        rampa,
+        comodidades
+      }).catch(err => console.warn('[Firebase] Aviso Pousada:', err));
+    }
+
     const texto = `*SOLICITAÇÃO DE ANÚNCIO - GEOFISH MS (Pousadas & Ranchos)*\n\n` +
       `🏨 *Estabelecimento:* ${nome}\n` +
       `📍 *Localização:* ${rio}\n` +
@@ -2696,7 +2707,7 @@ if (btnEnviarPropostaPousada) {
     const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
     window.open(urlWpp, '_blank');
     vibrar(30);
-    showToast('Abrindo WhatsApp para enviar proposta comercial...');
+    showToast('Proposta registrada e abrindo WhatsApp para confirmação...');
   });
 }
 
@@ -2727,6 +2738,19 @@ if (btnEnviarCadastroGuia) {
     const diferenciais = [];
     document.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
 
+    // Gravação segura no Firebase Firestore (sincroniza online ou enfileira offline)
+    if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarCadastroPiloteiro === 'function') {
+      window.GeoFishFirebase.salvarCadastroPiloteiro({
+        nome,
+        apelido,
+        colonia,
+        rgp,
+        porto,
+        whatsapp: wpp,
+        diferenciais
+      }).catch(err => console.warn('[Firebase] Aviso Piloteiro:', err));
+    }
+
     const texto = `*CADASTRO GRATUITO DE PILOTEIRO - GEOFISH MS*\n\n` +
       `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
       `📜 *Colônia de Filiação:* ${colonia}\n` +
@@ -2739,7 +2763,7 @@ if (btnEnviarCadastroGuia) {
     const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
     window.open(urlWpp, '_blank');
     vibrar(30);
-    showToast('Abrindo WhatsApp para ativação gratuita do guia...');
+    showToast('Cadastro registrado e abrindo WhatsApp para homologação...');
   });
 }
 
