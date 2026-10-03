@@ -1734,23 +1734,76 @@ function inicializarBuscaLocal() {
 }
 
 
-// 16. Modal S.O.S e Utilidade Pública (Integração GPS e WhatsApp)
-const modalSos = document.getElementById('modal-sos');
-const btnAbrirSos = document.getElementById('btn-sos');
-const btnFecharSos = document.getElementById('btn-fechar-sos');
-const sosLocationText = document.getElementById('sos-location-text');
-const btnSosGps = document.getElementById('btn-sos-gps');
-const btnSosWa = document.getElementById('btn-sos-wa');
+// 16. Central de Emergência & S.O.S Fluvial com Confirmação Prévia
+let ultimaPosicaoUsuario = null;
 
-let ultimaLocalizacaoSos = null;
+const btnSos = document.getElementById('btn-sos');
+const modalSos = document.getElementById('modal-sos');
+const btnFecharSos = document.getElementById('btn-fechar-sos');
+const sosCoordsDisplay = document.getElementById('sos-coords-display');
+const btnCopiarResgate = document.getElementById('btn-copiar-resgate');
+const btnWppResgate = document.getElementById('btn-wpp-resgate');
+
+const modalConfirmSos = document.getElementById('modal-confirm-sos');
+const confirmSosText = document.getElementById('confirm-sos-text');
+const btnCancelarSosCall = document.getElementById('btn-cancelar-sos-call');
+const btnExecutarSosCall = document.getElementById('btn-executar-sos-call');
+
+let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico, texto }
+
+function atualizarDisplayCoordsSos() {
+  if (!sosCoordsDisplay) return;
+  if (ultimaPosicaoUsuario) {
+    sosCoordsDisplay.innerHTML = `Lat: <strong>${ultimaPosicaoUsuario.lat.toFixed(5)}</strong>, Long: <strong>${ultimaPosicaoUsuario.lng.toFixed(5)}</strong> <small style="color: #64748b; display: block; margin-top: 4px;">(Precisão: ~${ultimaPosicaoUsuario.precisao}m)</small>`;
+  } else {
+    sosCoordsDisplay.innerHTML = '<span class="spinner" style="display:inline-block; border-top-color:#0b4f6c; width:12px; height:12px;"></span> Aguardando sinal GPS...';
+  }
+}
+
+function gerarTextoResgate() {
+  const dataHora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  if (ultimaPosicaoUsuario) {
+    return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
+           `📍 Local: Bacia do Rio Miranda\n` +
+           `🛰️ Coordenadas GPS: Lat ${ultimaPosicaoUsuario.lat.toFixed(5)}, Long ${ultimaPosicaoUsuario.lng.toFixed(5)}\n` +
+           `🎯 Precisão do sinal: ~${ultimaPosicaoUsuario.precisao} metros\n` +
+           `⏰ Horário: ${dataHora}\n` +
+           `🆘 Solicito apoio náutico/resgate emergencial.\n\nLink Maps: https://maps.google.com/?q=${ultimaPosicaoUsuario.lat},${ultimaPosicaoUsuario.lng}`;
+  } else {
+    return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
+           `📍 Local: Bacia do Rio Miranda (Aguardando fixação de satélite GPS)\n` +
+           `⏰ Horário: ${dataHora}\n` +
+           `🆘 Solicito apoio náutico/resgate emergencial na calha do rio.`;
+  }
+}
 
 function abrirModalSos() {
   if (!modalSos) return;
+  atualizarDisplayCoordsSos();
   modalSos.classList.remove('hidden');
   modalSos.setAttribute('aria-hidden', 'false');
-  vibrar(30);
-  try { history.pushState({ modal: 'sos' }, ''); } catch (_) {}
-  atualizarLocalizacaoSos();
+  vibrar(35);
+  try {
+    history.pushState({ modal: 'sos' }, '');
+  } catch (_) {}
+
+  // Se ainda não temos posição GPS recente, tenta obter imediatamente
+  if (!ultimaPosicaoUsuario && 'geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        ultimaPosicaoUsuario = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          precisao: Math.round(pos.coords.accuracy)
+        };
+        atualizarDisplayCoordsSos();
+      },
+      () => {
+        if (sosCoordsDisplay) sosCoordsDisplay.innerHTML = '<span style="color:#d32f2f;">Falha ao obter GPS. Verifique a permissão do seu celular.</span>';
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
 }
 
 function fecharModalSos() {
@@ -1759,72 +1812,94 @@ function fecharModalSos() {
   modalSos.setAttribute('aria-hidden', 'true');
 }
 
-function atualizarLocalizacaoSos() {
-  if (!('geolocation' in navigator)) {
-    if (sosLocationText) sosLocationText.innerHTML = 'GPS não suportado neste dispositivo.';
-    return;
+function abrirConfirmacaoSos(acao) {
+  acaoPendenteSos = acao;
+  if (!modalConfirmSos || !confirmSosText) return;
+
+  if (acao.tipo === 'call') {
+    confirmSosText.innerHTML = `Você está prestes a discar para <strong>${escapeHTML(acao.servico)} (${escapeHTML(acao.numero)})</strong>.<br><br>` +
+      `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
+    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
+  } else if (acao.tipo === 'copy') {
+    confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
+    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
+  } else if (acao.tipo === 'wpp') {
+    confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
+    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `💬 Sim, Abrir WhatsApp`;
   }
-  
-  if (sosLocationText) sosLocationText.innerHTML = '<span class="spinner" style="display:inline-block; border-top-color:#0b4f6c; width:12px; height:12px;"></span> Buscando sinal de GPS...';
-  if (btnSosWa) btnSosWa.disabled = true;
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      const latFmt = lat.toFixed(5);
-      const lngFmt = lng.toFixed(5);
-      
-      const conformidade = avaliarConformidadePosicao(lat, lng);
-      let refLocal = 'Bacia do Rio Miranda / Pantanal MS';
-      
-      if (conformidade.apoio && conformidade.apoio.distanciaKm < 50) {
-         refLocal = `Aprox. ${conformidade.apoio.distanciaKm.toFixed(1)}km de ${conformidade.apoio.nome}`;
-      } else if (conformidade.trecho) {
-         refLocal = `Próximo ao ${conformidade.trecho.rio}`;
-      }
-
-      ultimaLocalizacaoSos = { lat: latFmt, lng: lngFmt, ref: refLocal };
-
-      if (sosLocationText) {
-        sosLocationText.innerHTML = `
-          Lat: <strong>${latFmt}</strong><br>
-          Long: <strong>${lngFmt}</strong><br>
-          <small style="color: #64748b; font-weight: 500; display: block; margin-top: 6px;">📍 ${escapeHTML(refLocal)}</small>
-        `;
-      }
-      if (btnSosWa) btnSosWa.disabled = false;
-    },
-    (err) => {
-      if (sosLocationText) sosLocationText.innerHTML = '<span style="color: #d32f2f;">Falha ao obter GPS. Verifique se a localização do celular está ativada e ao ar livre.</span>';
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
-  );
+  modalConfirmSos.classList.remove('hidden');
+  modalConfirmSos.setAttribute('aria-hidden', 'false');
+  vibrar(25);
 }
 
-if (btnAbrirSos) btnAbrirSos.addEventListener('click', abrirModalSos);
+function fecharConfirmacaoSos() {
+  acaoPendenteSos = null;
+  if (!modalConfirmSos) return;
+  modalConfirmSos.classList.add('hidden');
+  modalConfirmSos.setAttribute('aria-hidden', 'true');
+}
+
+if (btnSos) btnSos.addEventListener('click', abrirModalSos);
 if (btnFecharSos) btnFecharSos.addEventListener('click', fecharModalSos);
-if (btnSosGps) btnSosGps.addEventListener('click', atualizarLocalizacaoSos);
 
-if (btnSosWa) {
-  btnSosWa.addEventListener('click', () => {
-    if (!ultimaLocalizacaoSos) return;
-    vibrar(20);
-    const msg = `🚨 *S.O.S / Emergência Náutica*\n\nPreciso de apoio. Minha posição atual registrada pelo app GeoFish MS:\n\n📍 *Lat:* ${ultimaLocalizacaoSos.lat}\n📍 *Long:* ${ultimaLocalizacaoSos.lng}\n🗺️ *Referência:* ${ultimaLocalizacaoSos.ref}\n\nLink Google Maps:\nhttps://maps.google.com/?q=${ultimaLocalizacaoSos.lat},${ultimaLocalizacaoSos.lng}`;
-    const urlWa = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    window.open(urlWa, '_blank');
+if (btnCancelarSosCall) btnCancelarSosCall.addEventListener('click', fecharConfirmacaoSos);
+
+if (btnExecutarSosCall) {
+  btnExecutarSosCall.addEventListener('click', () => {
+    if (!acaoPendenteSos) return;
+    const acao = acaoPendenteSos;
+    fecharConfirmacaoSos();
+
+    if (acao.tipo === 'call') {
+      vibrar(40);
+      window.location.href = `tel:${acao.numero}`;
+    } else if (acao.tipo === 'copy') {
+      vibrar(25);
+      const texto = gerarTextoResgate();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto)
+          .then(() => showToast('Mensagem de resgate copiada com sucesso!'))
+          .catch(() => showToast('Aviso: Mensagem gerada pronta para envio manual.'));
+      } else {
+        showToast('Aviso: Dispositivo não suporta cópia automática.');
+      }
+    } else if (acao.tipo === 'wpp') {
+      vibrar(30);
+      const texto = gerarTextoResgate();
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+      window.open(url, '_blank');
+    }
   });
 }
 
-if (modalSos) {
-  modalSos.addEventListener('click', (e) => {
-    if (e.target === modalSos) fecharModalSos();
+if (btnCopiarResgate) {
+  btnCopiarResgate.addEventListener('click', () => {
+    abrirConfirmacaoSos({ tipo: 'copy' });
   });
 }
 
-// Interceptar o fechamento do Modal SOS via Tecla ESC
+if (btnWppResgate) {
+  btnWppResgate.addEventListener('click', () => {
+    abrirConfirmacaoSos({ tipo: 'wpp' });
+  });
+}
+
+// Intercepta e protege os 4 botões oficiais
+document.querySelectorAll('.sos-call-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const servico = btn.getAttribute('data-service') || 'Serviço de Emergência';
+    const numero = btn.getAttribute('data-number') || '';
+    if (numero) {
+      abrirConfirmacaoSos({ tipo: 'call', servico, numero });
+    }
+  });
+});
+
+// Interceptar o fechamento dos modais SOS via Tecla ESC
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && typeof fecharModalSos === 'function') {
-    fecharModalSos();
+  if (e.key === 'Escape') {
+    if (typeof fecharConfirmacaoSos === 'function') fecharConfirmacaoSos();
+    if (typeof fecharModalSos === 'function') fecharModalSos();
   }
 });

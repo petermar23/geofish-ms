@@ -335,14 +335,14 @@
         <!-- Bloco de Localização Dinâmica -->
         <div class="measure-checker-card" style="background: #f8fafc; border-color: #cbd5e1;">
           <div class="checker-title" style="color: #0b4f6c;">📍 Sua Localização Exata</div>
-          <p id="sos-location-text" style="font-size: 0.95rem; margin-bottom: 12px; font-weight: 600; line-height: 1.4;">
-            Aguardando sinal GPS...
+          <p id="sos-coords-display" style="font-size: 0.95rem; margin-bottom: 12px; font-weight: 600; line-height: 1.4;">
+            Aguardando sinal GPS do satélite...
           </p>
           <div style="display: flex; gap: 8px;">
-            <button id="btn-sos-gps" class="btn-cta" style="min-height: 40px; padding: 8px; font-size: 0.85rem; background: #0288d1; color: white; flex: 1; margin-top: 0;">
-              🔄 Atualizar
+            <button id="btn-copiar-resgate" class="btn-cta" style="min-height: 40px; padding: 8px; font-size: 0.85rem; background: #0288d1; color: white; flex: 1; margin-top: 0; border: none;">
+              📋 Copiar
             </button>
-            <button id="btn-sos-wa" class="btn-cta btn-whatsapp" style="min-height: 40px; padding: 8px; font-size: 0.85rem; flex: 2; margin-top: 0;" disabled>
+            <button id="btn-wpp-resgate" class="btn-cta btn-whatsapp" style="min-height: 40px; padding: 8px; font-size: 0.85rem; flex: 2; margin-top: 0; border: none;">
               📱 Enviar WhatsApp
             </button>
           </div>
@@ -352,41 +352,41 @@
         <div class="checker-title" style="color: #b71c1c; margin-top: 8px;">📞 Telefones Oficiais</div>
         <div class="species-grid" style="grid-template-columns: 1fr;">
           
-          <a href="tel:185" class="species-card" style="text-decoration: none; display: flex; flex-direction: row; align-items: center; gap: 12px;">
+          <button class="species-card sos-call-btn" data-service="Marinha do Brasil" data-number="185" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
             <div style="font-size: 2rem;">⚓</div>
             <div>
               <div class="species-name" style="color: #0b4f6c;">Marinha do Brasil</div>
               <div class="species-sci">Capitania Fluvial - Emergências</div>
               <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">Disque 185</div>
             </div>
-          </a>
+          </button>
 
-          <a href="tel:190" class="species-card" style="text-decoration: none; display: flex; flex-direction: row; align-items: center; gap: 12px;">
+          <button class="species-card sos-call-btn" data-service="Polícia Militar Ambiental" data-number="190" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
             <div style="font-size: 2rem;">🚓</div>
             <div>
               <div class="species-name" style="color: #0b4f6c;">Polícia Militar Ambiental</div>
               <div class="species-sci">PMA MS / Pelotão de Miranda</div>
               <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">190 ou (67) 3242-1464</div>
             </div>
-          </a>
+          </button>
 
-          <a href="tel:193" class="species-card" style="text-decoration: none; display: flex; flex-direction: row; align-items: center; gap: 12px;">
+          <button class="species-card sos-call-btn" data-service="Corpo de Bombeiros" data-number="193" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
             <div style="font-size: 2rem;">🚒</div>
             <div>
               <div class="species-name" style="color: #0b4f6c;">Corpo de Bombeiros</div>
               <div class="species-sci">Resgate e Salvamento</div>
               <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">Disque 193</div>
             </div>
-          </a>
+          </button>
 
-          <a href="tel:06732421222" class="species-card" style="text-decoration: none; display: flex; flex-direction: row; align-items: center; gap: 12px;">
+          <button class="species-card sos-call-btn" data-service="Hospital de Miranda" data-number="06732421222" style="border: none; text-align: left; background: white; cursor: pointer; display: flex; flex-direction: row; align-items: center; gap: 12px; width: 100%;">
             <div style="font-size: 2rem;">🏥</div>
             <div>
               <div class="species-name" style="color: #0b4f6c;">Hospital de Miranda</div>
               <div class="species-sci">Atendimento Médico Regional</div>
               <div style="color: #d32f2f; font-weight: 700; margin-top: 4px;">(67) 3242-1222</div>
             </div>
-          </a>
+          </button>
 
         </div>
 
@@ -395,6 +395,23 @@
           <strong>Aviso Legal (Isenção de Responsabilidade):</strong> Este aplicativo é um utilitário de informações públicas e não possui vínculo com os serviços citados. O app apenas organiza contatos oficiais do Estado de MS. Em caso de perigo iminente, falha técnica ou falta de sinal, procure a autoridade local.
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação de S.O.S (Prevenção de Trote e Chamada Acidental) -->
+  <div id="modal-confirm-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 3000;">
+    <div class="modal-dialog" style="max-width: 400px; padding: 24px; text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 12px;">🚨</div>
+      <h3 style="color: #b91c1c; font-size: 1.25rem; margin-bottom: 14px; font-weight: 800;">Atenção: Ação de Emergência</h3>
+      <p id="confirm-sos-text" style="font-size: 0.95rem; color: #334155; margin-bottom: 24px; line-height: 1.5;"></p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="btn-cancelar-sos-call" class="btn-cta" style="background: #e2e8f0; color: #475569; flex: 1; border: none; min-height: 48px; margin-top: 0;">
+          ❌ Cancelar
+        </button>
+        <button id="btn-executar-sos-call" class="btn-cta" style="background: #d32f2f; color: white; flex: 1; border: none; min-height: 48px; margin-top: 0;">
+          Ligar
+        </button>
       </div>
     </div>
   </div>
