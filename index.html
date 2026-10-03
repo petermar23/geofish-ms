@@ -131,7 +131,7 @@
           <span class="hero-card-kicker">INICIATIVA CIDADÃ &bull; PANTANAL SUSTENTÁVEL</span>
           <h1 class="hero-card-title">Guia Comunitário e Pesca na Bacia do Rio Miranda</h1>
           <p class="hero-card-desc">
-            Um portal independente e aberto criado para pescadores, piloteiros e comunidades pantaneiras. Acesse o WebGIS com GPS no rio, réguas de cheia, medidas legais e contato direto com trabalhadores locais sem intermediários.
+            Um portal independente e aberto criado para aproximar o turista dos piloteiros das Colônias Z-1 e Z-7 e pousadas da região. Acesse o WebGIS interativo de exploração territorial, medidas oficiais de peixes e planeje sua viagem sem intermediários.
           </p>
 
           <div class="hero-card-actions">
@@ -164,7 +164,7 @@
               <span class="highlight-icon">🛰️</span>
               <div class="highlight-info">
                 <strong>WebGIS Satélite Esri</strong>
-                <span>Navegação com GPS ativo no barco</span>
+                <span>Mapeamento Interativo de Apoio Náutico</span>
               </div>
             </div>
             <div class="hero-highlight-pill">
@@ -227,9 +227,9 @@
 
   <!-- Barra Inferior de Polegar (Android Bottom Navigation Bar) -->
   <nav id="android-bottom-bar" class="android-bottom-bar" aria-label="Navegação rápida inferior">
-    <button id="nav-btn-gps" class="bottom-nav-item" aria-label="Localização e Radar no Rio">
-      <span class="bottom-nav-icon">📍</span>
-      <span class="bottom-nav-label">Onde Estou</span>
+    <button id="nav-btn-guias" class="bottom-nav-item" onclick="abrirModalParceriasTab('piloteiros')" aria-label="Piloteiros e Guias das Colônias Z-1 e Z-7">
+      <span class="bottom-nav-icon">🚤</span>
+      <span class="bottom-nav-label">Piloteiros</span>
     </button>
     <button id="nav-btn-especies" class="bottom-nav-item" aria-label="Medidas de Peixes IMASUL">
       <span class="bottom-nav-icon">🐟</span>
@@ -484,15 +484,15 @@
 
         <div class="sos-coords-card">
           <div class="sos-coords-header">
-            <span class="sos-coords-icon">📍</span>
+            <span class="sos-coords-icon">🚨</span>
             <div>
-              <div style="font-size: 0.8rem; color: #64748b; font-weight: 700;">Localização Exata (GPS)</div>
-              <div id="sos-coords-display" class="sos-coords-text">Aguardando sinal...</div>
+              <div style="font-size: 0.85rem; color: #0b4f6c; font-weight: 800;">Plantão de Emergência &amp; Resgate Fluvial</div>
+              <div id="sos-coords-display" class="sos-coords-text" style="font-size: 0.8rem; color: #334155; margin-top: 3px;">Em caso de pane de motor, acidente náutico ou socorro médico na calha do Rio Miranda e Aquidauana, acione as forças públicas de segurança:</div>
             </div>
           </div>
           <div class="sos-coords-actions">
-            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Mensagem</button>
-            <button id="btn-wpp-resgate" class="btn-sos-action btn-wpp-action">📱 Enviar WhatsApp</button>
+            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Contatos de Socorro</button>
+            <a href="https://api.whatsapp.com/send?phone=5567999990001&text=EMERGENCIA%20NO%20RIO%20MIRANDA" target="_blank" rel="noopener noreferrer" class="btn-sos-action btn-wpp-action" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">📱 Plantão de Apoio</a>
           </div>
         </div>
 

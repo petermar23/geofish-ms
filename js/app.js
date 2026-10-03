@@ -793,225 +793,10 @@ async function carregarTodasCamadas() {
   }
 }
 
-// 8. Botão Flutuante de Localização GPS (Minha Posição no Barco)
+// 8. Navegação Territorial do WebGIS (Foco Comunitário e Exploração Livre)
 let marcadorPosicao = null;
 let circuloPrecisao = null;
-const btnLocalizacao = document.getElementById('btn-localizacao');
-
-function obterLocalizacao() {
-  if (!('geolocation' in navigator)) {
-    showToast('O seu dispositivo não possui suporte a geolocalização.', 'warn');
-    return;
-  }
-
-  vibrar(35);
-  manterTelaAtiva();
-
-  if (btnLocalizacao) {
-    btnLocalizacao.innerHTML = '<span class="spinner"></span> <span>Buscando GPS…</span>';
-    btnLocalizacao.disabled = true;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (posicao) => {
-      const lat = posicao.coords.latitude;
-      const lng = posicao.coords.longitude;
-      const precisao = Math.round(posicao.coords.accuracy);
-
-      if (marcadorPosicao) map.removeLayer(marcadorPosicao);
-      if (circuloPrecisao) map.removeLayer(circuloPrecisao);
-
-      // Círculo de precisão
-      circuloPrecisao = L.circle([lat, lng], {
-        pane: 'posicaoPane',
-        radius: precisao,
-        color: '#1976d2',
-        fillColor: '#64b5f6',
-        fillOpacity: 0.2,
-        weight: 1.5
-      }).addTo(map);
-
-      // Marcador do usuário (pulsação)
-      marcadorPosicao = L.circleMarker([lat, lng], {
-        pane: 'posicaoPane',
-        radius: 11,
-        fillColor: '#0288d1',
-        color: '#ffffff',
-        weight: 3.5,
-        fillOpacity: 1
-      }).addTo(map);
-
-      const latFmt = lat.toFixed(5);
-      const lngFmt = lng.toFixed(5);
-      const pontoPescador = L.latLng(lat, lng);
-
-      // Verificação se está nos limites da Bacia do Miranda
-      const dentroDaBacia = BOUNDS_BACIA.contains(pontoPescador);
-      const conformidade = avaliarConformidadePosicao(lat, lng);
-
-      if (!dentroDaBacia) {
-        showToast('Aviso: Você está fora da calha da Bacia do Rio Miranda.', 'warn');
-      }
-
-      let radarHtml = '';
-      if (precisao > 100) {
-        radarHtml += `
-          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; font-size: 0.75rem; color: #92400e;">
-            ⚠️ <strong>Sinal GPS aproximado (~${precisao}m):</strong> Em áreas de mata ou serra fechada, o radar de regras é orientativo.
-          </div>
-        `;
-      }
-      if (conformidade.trecho) {
-        const corRegra = obterCorPorRegra(conformidade.trecho.regra);
-        const distFmt = conformidade.distanciaTrechoKm < 1 
-          ? `${Math.round(conformidade.distanciaTrechoKm * 1000)} m`
-          : `${conformidade.distanciaTrechoKm.toFixed(1)} km`;
-
-        radarHtml += `
-          <div class="radar-compliance-box">
-            <span class="radar-badge" style="background-color: ${corRegra};">Regra: ${escapeHTML(conformidade.trecho.regra)}</span>
-            <div style="font-weight: 700; color: #0b4f6c; margin-top: 2px;">${escapeHTML(conformidade.trecho.rio)}</div>
-            <div class="radar-detail"><small>Distância estimada à calha: ~${distFmt}</small></div>
-            <div class="radar-detail"><strong>Cota:</strong> ${escapeHTML(conformidade.trecho.cota)}</div>
-          </div>
-        `;
-      }
-
-      if (conformidade.uc) {
-        vibrar([100, 60, 100]); // Alerta háptico duplo no celular ao detectar área de reserva
-        radarHtml += `
-          <div class="radar-compliance-box" style="border-left: 4px solid #f57c00; background: #fff8e1;">
-            <strong style="color: #b45309;">⚠️ Atenção: Área Protegida</strong>
-            <div style="font-size: 0.8rem; color: #78350f;">Você está nos limites de: <strong>${escapeHTML(conformidade.uc.nome)}</strong> (${escapeHTML(conformidade.uc.categoria)}). Normas restritivas se aplicam.</div>
-          </div>
-        `;
-      }
-
-      if (conformidade.apoio) {
-        const telUrl = sanitizeTel(conformidade.apoio.telefone_emergencia);
-        radarHtml += `
-          <div style="font-size: 0.78rem; color: #475569; margin-top: 6px;">
-            🏥 <strong>Apoio mais próximo:</strong> ${escapeHTML(conformidade.apoio.nome)} (~${conformidade.apoio.distanciaKm.toFixed(1)} km)
-            ${telUrl ? ` &bull; <a href="${telUrl}" style="color: #d32f2f; font-weight: 700;">Ligar</a>` : ''}
-          </div>
-        `;
-      }
-
-      const popupDiv = document.createElement('div');
-      popupDiv.innerHTML = `
-        <div style="min-width: 220px; max-width: 280px;">
-          <strong style="color: #0b4f6c; font-size: 0.95rem;">📍 Você está aqui</strong><br>
-          <span style="font-size: 0.82rem;">Lat: <strong>${latFmt}</strong>, Long: <strong>${lngFmt}</strong></span><br>
-          <small style="color: #64748b;">Precisão do sinal: ~${precisao} m</small>
-          ${radarHtml}
-          <button id="btn-copiar-coords" class="btn-copy" style="margin-top: 8px; width: 100%; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; min-height: 40px;">
-            📋 Copiar coordenadas
-          </button>
-        </div>
-      `;
-
-      const copyBtn = popupDiv.querySelector('#btn-copiar-coords');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-          vibrar(20);
-          const texto = `${latFmt}, ${lngFmt}`;
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto).then(() => {
-              showToast('Coordenadas copiadas para a área de transferência!');
-            }).catch(() => {
-              showToast(`Coordenadas: ${texto}`);
-            });
-          } else {
-            showToast(`Coordenadas: ${texto}`);
-          }
-        });
-      }
-
-      marcadorPosicao.bindPopup(popupDiv).openPopup();
-      map.flyTo([lat, lng], 14, { duration: 1.2 });
-
-      if (btnLocalizacao) {
-        btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
-        btnLocalizacao.disabled = false;
-      }
-      showToast('Posição obtida com sucesso via GPS!');
-    },
-    (erro) => {
-      // Se falhar o GPS fino no Pantanal, tenta uma segunda leitura resiliente com antenas/redes (timeout 15s)
-      if (erro.code === erro.TIMEOUT || erro.code === erro.POSITION_UNAVAILABLE) {
-        console.warn('[GeoFish MS] Sinal de GPS fino não respondeu em 25s. Tentando leitura resiliente por redes/antenas...');
-        navigator.geolocation.getCurrentPosition(
-          (posicaoFallback) => {
-            const lat = posicaoFallback.coords.latitude;
-            const lng = posicaoFallback.coords.longitude;
-            const precisao = Math.round(posicaoFallback.coords.accuracy || 0);
-
-            if (marcadorPosicao) map.removeLayer(marcadorPosicao);
-            if (circuloPrecisao) map.removeLayer(circuloPrecisao);
-
-            circuloPrecisao = L.circle([lat, lng], {
-              pane: 'posicaoPane',
-              radius: Math.max(precisao, 20),
-              color: '#f57c00',
-              fillColor: '#ffe082',
-              fillOpacity: 0.22,
-              weight: 1.5
-            }).addTo(map);
-
-            marcadorPosicao = L.circleMarker([lat, lng], {
-              pane: 'posicaoPane',
-              radius: 11,
-              fillColor: '#f57c00',
-              color: '#ffffff',
-              weight: 3.5,
-              fillOpacity: 1
-            }).addTo(map);
-
-            map.flyTo([lat, lng], 13, { duration: 1.2 });
-            showToast(`Localização estimada via redes (~${precisao}m)`, 'warn');
-
-            if (btnLocalizacao) {
-              btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
-              btnLocalizacao.disabled = false;
-            }
-          },
-          (erroFinal) => {
-            let msg = 'Não foi possível obter a sua localização a céu aberto.';
-            if (erroFinal.code === erroFinal.PERMISSION_DENIED) {
-              msg = 'Permissão de GPS negada. Por favor, ative a localização no seu celular.';
-            }
-            showToast(msg, 'warn');
-            if (btnLocalizacao) {
-              btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
-              btnLocalizacao.disabled = false;
-            }
-          },
-          { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
-        );
-        return;
-      }
-
-      let mensagem = 'Não foi possível obter a sua localização.';
-      if (erro.code === erro.PERMISSION_DENIED) {
-        mensagem = 'Permissão de GPS negada. Por favor, ative a localização no seu navegador ou celular.';
-      }
-      showToast(mensagem, 'warn');
-      if (btnLocalizacao) {
-        btnLocalizacao.innerHTML = '<span class="gps-icon">📍</span> <span class="gps-text">Onde Estou</span>';
-        btnLocalizacao.disabled = false;
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 25000,
-      maximumAge: 30000
-    }
-  );
-}
-
-if (btnLocalizacao) {
-  btnLocalizacao.addEventListener('click', obterLocalizacao);
-}
+const btnLocalizacao = null; // Sensor de GPS descontinuado em prol de economia de bateria e foco em contatos
 
 // 9. Modal "Sobre os Dados" e Governança Territorial
 const modalSobre = document.getElementById('modal-sobre');
@@ -1276,15 +1061,17 @@ window.addEventListener('popstate', () => {
 });
 
 // Barra de Navegação Inferior de Polegar para Android
-const navBtnGps = document.getElementById('nav-btn-gps');
+const navBtnGuias = document.getElementById('nav-btn-guias');
 const navBtnEspecies = document.getElementById('nav-btn-especies');
 const navBtnRampas = document.getElementById('nav-btn-rampas');
 const navBtnBusca = document.getElementById('nav-btn-busca');
 
-if (navBtnGps) {
-  navBtnGps.addEventListener('click', () => {
+if (navBtnGuias) {
+  navBtnGuias.addEventListener('click', () => {
     vibrar(30);
-    obterLocalizacao();
+    if (typeof abrirModalParceriasTab === 'function') {
+      abrirModalParceriasTab('piloteiros');
+    }
   });
 }
 
@@ -1981,28 +1768,20 @@ let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico,
 
 function atualizarDisplayCoordsSos() {
   if (!sosCoordsDisplay) return;
-  if (ultimaPosicaoUsuario) {
-    sosCoordsDisplay.innerHTML = `Lat: <strong>${ultimaPosicaoUsuario.lat.toFixed(5)}</strong>, Long: <strong>${ultimaPosicaoUsuario.lng.toFixed(5)}</strong> <small style="color: #64748b; display: block; margin-top: 4px;">(Precisão: ~${ultimaPosicaoUsuario.precisao}m)</small>`;
-  } else {
-    sosCoordsDisplay.innerHTML = '<span class="spinner" style="display:inline-block; border-top-color:#0b4f6c; width:12px; height:12px;"></span> Aguardando sinal GPS...';
-  }
+  sosCoordsDisplay.innerHTML = '🚨 <strong>Canais de Emergência Ativos:</strong> Marinha (185) | PMA (190) | Bombeiros (193)';
 }
 
 function gerarTextoResgate() {
   const dataHora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  if (ultimaPosicaoUsuario) {
-    return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
-           `📍 Local: Bacia do Rio Miranda\n` +
-           `🛰️ Coordenadas GPS: Lat ${ultimaPosicaoUsuario.lat.toFixed(5)}, Long ${ultimaPosicaoUsuario.lng.toFixed(5)}\n` +
-           `🎯 Precisão do sinal: ~${ultimaPosicaoUsuario.precisao} metros\n` +
-           `⏰ Horário: ${dataHora}\n` +
-           `🆘 Solicito apoio náutico/resgate emergencial.\n\nLink Maps: https://maps.google.com/?q=${ultimaPosicaoUsuario.lat},${ultimaPosicaoUsuario.lng}`;
-  } else {
-    return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
-           `📍 Local: Bacia do Rio Miranda (Aguardando fixação de satélite GPS)\n` +
-           `⏰ Horário: ${dataHora}\n` +
-           `🆘 Solicito apoio náutico/resgate emergencial na calha do rio.`;
-  }
+  return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
+         `📍 Região: Bacia do Rio Miranda (Pantanal/MS)\n` +
+         `⏰ Horário: ${dataHora}\n` +
+         `🆘 Solicito apoio emergencial para embarcação/pescador na calha do rio.\n\n` +
+         `Canais de Acionamento Imediato:\n` +
+         `• Marinha do Brasil (Capitania Fluvial): 185\n` +
+         `• Polícia Militar Ambiental (Pelotão Miranda): 190 / (67) 3242-1200\n` +
+         `• Corpo de Bombeiros Militar: 193\n` +
+         `• Hospital Municipal de Miranda: (67) 3242-1222`;
 }
 
 function abrirModalSos() {
@@ -2014,24 +1793,6 @@ function abrirModalSos() {
   try {
     history.pushState({ modal: 'sos' }, '');
   } catch (_) {}
-
-  // Se ainda não temos posição GPS recente, tenta obter imediatamente
-  if (!ultimaPosicaoUsuario && 'geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        ultimaPosicaoUsuario = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          precisao: Math.round(pos.coords.accuracy)
-        };
-        atualizarDisplayCoordsSos();
-      },
-      () => {
-        if (sosCoordsDisplay) sosCoordsDisplay.innerHTML = '<span style="color:#d32f2f;">Falha ao obter GPS. Verifique a permissão do seu celular.</span>';
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  }
 }
 
 function fecharModalSos() {
@@ -2437,15 +2198,13 @@ if (btnSalvarDiario) {
     if (!currentBase64Diario) return showToast('Tire uma foto do troféu primeiro!');
     if (!inputTamanhoDiario.value) return showToast('Informe o tamanho do peixe.');
     if (cbLgpdDiario && !cbLgpdDiario.checked) return showToast('Você precisa aceitar o Termo de Consentimento.');
-    if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
-
     btnSalvarDiario.disabled = true;
     btnSalvarDiario.innerText = 'Salvando...';
 
     const trofeu = {
       id: new Date().toISOString(),
-      lat: ultimaPosicaoUsuario.lat,
-      lng: ultimaPosicaoUsuario.lng,
+      lat: ultimaPosicaoUsuario?.lat || -20.24,
+      lng: ultimaPosicaoUsuario?.lng || -56.38,
       especie: selectEspecieDiario.options[selectEspecieDiario.selectedIndex].text,
       tamanho: parseFloat(inputTamanhoDiario.value),
       foto: currentBase64Diario,
@@ -2478,7 +2237,6 @@ if (btnSalvarDiario) {
 // ----- Denúncia Ambiental Offline -----
 if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', () => {
   modalDenuncia.classList.remove('hidden');
-  atualizarLocalizacaoOculta();
 });
 if (btnFecharDenuncia) btnFecharDenuncia.addEventListener('click', () => modalDenuncia.classList.add('hidden'));
 
@@ -2488,15 +2246,14 @@ if (btnSalvarDenuncia) {
   btnSalvarDenuncia.addEventListener('click', async () => {
     if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
     if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
-    if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
 
     btnSalvarDenuncia.disabled = true;
     btnSalvarDenuncia.innerText = 'Criptografando...';
 
     const denuncia = {
       id: new Date().toISOString(),
-      lat: ultimaPosicaoUsuario.lat,
-      lng: ultimaPosicaoUsuario.lng,
+      lat: ultimaPosicaoUsuario?.lat || -20.24,
+      lng: ultimaPosicaoUsuario?.lng || -56.38,
       tipo: selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex].text,
       foto: currentBase64Denuncia,
       synced: navigator.onLine ? 1 : 0
@@ -2517,19 +2274,6 @@ if (btnSalvarDenuncia) {
       if (denuncia.synced === 1) simularEnvioAoServidor(denuncia, 'Servidor da PMA-MS');
     }
   });
-}
-
-// Atualiza a global de GPS sem mexer na UI
-function atualizarLocalizacaoOculta() {
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      ultimaPosicaoUsuario = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        precisao: Math.round(pos.coords.accuracy)
-      };
-    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
-  }
 }
 
 // Renderiza troféus pessoais no mapa
