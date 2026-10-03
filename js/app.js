@@ -784,6 +784,7 @@ async function carregarTodasCamadas() {
 
 // 8. Botão Flutuante de Localização GPS (Minha Posição no Barco)
 let marcadorPosicao = null;
+let ultimaPosicaoUsuario = null;
 let circuloPrecisao = null;
 const btnLocalizacao = document.getElementById('btn-localizacao');
 
@@ -806,6 +807,7 @@ function obterLocalizacao() {
       const lat = posicao.coords.latitude;
       const lng = posicao.coords.longitude;
       const precisao = Math.round(posicao.coords.accuracy);
+      ultimaPosicaoUsuario = { lat, lng, precisao };
 
       if (marcadorPosicao) map.removeLayer(marcadorPosicao);
       if (circuloPrecisao) map.removeLayer(circuloPrecisao);
@@ -934,6 +936,7 @@ function obterLocalizacao() {
             const lat = posicaoFallback.coords.latitude;
             const lng = posicaoFallback.coords.longitude;
             const precisao = Math.round(posicaoFallback.coords.accuracy || 0);
+            ultimaPosicaoUsuario = { lat, lng, precisao };
 
             if (marcadorPosicao) map.removeLayer(marcadorPosicao);
             if (circuloPrecisao) map.removeLayer(circuloPrecisao);
@@ -1952,7 +1955,6 @@ function inicializarBuscaLocal() {
 
 
 // 16. Central de Emergência & S.O.S Fluvial com Confirmação Prévia
-let ultimaPosicaoUsuario = null;
 
 const btnSos = document.getElementById('btn-sos');
 const modalSos = document.getElementById('modal-sos');
@@ -2149,6 +2151,26 @@ let currentBase64Denuncia = null;
 let trofeusLayerGroup = L.layerGroup().addTo(map);
 
 // ----- Funções Auxiliares de Câmera -----
+// Reduz fotos do celular (3–8 MB) para JPEG de até 1280 px antes de salvar no IndexedDB ou enviar à IA
+function comprimirImagem(dataUrl, ladoMax = 1280, qualidade = 0.8) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const escala = Math.min(1, ladoMax / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(dataUrl);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const comprimida = canvas.toDataURL('image/jpeg', qualidade);
+      resolve(comprimida.length < dataUrl.length ? comprimida : dataUrl);
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
   previewBox.addEventListener('click', () => inputElement.click());
   
@@ -2156,8 +2178,8 @@ function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        const base64 = ev.target.result;
+      reader.onload = async (ev) => {
+        const base64 = await comprimirImagem(ev.target.result);
         imgElement.src = base64;
         previewBox.classList.add('has-image');
         callbackBase64(base64);
@@ -2480,7 +2502,7 @@ if (btnSalvarDenuncia) {
     if (!ultimaPosicaoUsuario) return showToast('Aguarde o sinal GPS para registrar.');
 
     btnSalvarDenuncia.disabled = true;
-    btnSalvarDenuncia.innerText = 'Criptografando...';
+    btnSalvarDenuncia.innerText = 'Salvando...';
 
     const denuncia = {
       id: new Date().toISOString(),
@@ -2496,7 +2518,7 @@ if (btnSalvarDenuncia) {
     btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência & Denunciar';
 
     if (sucesso) {
-      showToast(denuncia.synced ? 'Denúncia enviada à PMA!' : 'Salvo offline. Envio pendente.');
+      showToast('Evidência salva no aparelho. Para acionar a PMA agora, ligue 190 ou use o S.O.S.');
       modalDenuncia.classList.add('hidden');
       
       currentBase64Denuncia = null;
@@ -2535,7 +2557,7 @@ async function renderizarTrofeusNoMapa() {
     });
     
     L.marker([t.lat, t.lng], { icon: iconeTrofeu })
-     .bindPopup(`<strong style="color:#0b4f6c;">${t.especie}</strong><br>${t.tamanho} cm<br><img src="${t.foto}" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">`)
+     .bindPopup(`<strong style="color:#0b4f6c;">${escapeHTML(t.especie)}</strong><br>${escapeHTML(t.tamanho)} cm<br><img src="${escapeHTML(t.foto)}" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">`)
      .addTo(trofeusLayerGroup);
   });
 }
@@ -2556,7 +2578,6 @@ window.addEventListener('online', async () => {
   for (const denuncia of denunciasPendentes) {
     simularEnvioAoServidor(denuncia, 'Servidor Secreto da PMA');
     await GeoFishDB.marcarComoSincronizado('denuncias_pma', denuncia.id);
-    showToast('Alerta: Uma denúncia salva offline acaba de ser transmitida à PMA.');
   }
 });
 

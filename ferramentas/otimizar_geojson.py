@@ -5,6 +5,9 @@ import argparse
 
 def round_coords(coords, decimals):
     if isinstance(coords, list):
+        if coords and not isinstance(coords[0], list):
+            # Posição [lng, lat, (z)]: descarta a altitude Z (sempre 0 nos dados SEMADESC/IMASUL)
+            return [round(c, decimals) if isinstance(c, float) else c for c in coords[:2]]
         return [round_coords(c, decimals) for c in coords]
     if isinstance(coords, float):
         return round(coords, decimals)
@@ -12,7 +15,7 @@ def round_coords(coords, decimals):
 
 def optimize(filepath, decimals):
     print(f'Otimizando {filepath} (precisão: {decimals} casas)...')
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, 'r', encoding='utf-8-sig') as f:
         data = json.load(f)
     
     for feat in data.get('features', []):
