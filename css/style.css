@@ -1,4 +1,4 @@
-﻿/* GeoFish MS - Estilos Oficiais Mobile-First e Acessíveis */
+/* GeoFish MS - Estilos Oficiais Mobile-First e Acessíveis */
 :root {
   --primary-color: #0b4f6c;
   --primary-dark: #073448;
@@ -903,6 +903,7 @@ body.sheet-open .btn-gps {
 
 /* Barra de Filtros Rápidos no Topo do Mapa */
 .quick-filters-bar {
+  display: none !important;
   position: absolute;
   top: 66px;
   left: 0;
@@ -1160,7 +1161,7 @@ body.sheet-open .btn-gps {
 /* Barra de Busca Rápida na Bacia (Portos, Ranchos, Rios, Guias) */
 .local-search-container {
   position: absolute;
-  top: 114px;
+  top: 72px;
   left: 16px;
   width: 320px;
   max-width: calc(100vw - 80px);
@@ -1170,7 +1171,7 @@ body.sheet-open .btn-gps {
 
 /* Posicionamento dos controles do Leaflet para eliminar sobreposições */
 .leaflet-top.leaflet-right {
-  top: 114px !important;
+  top: 72px !important;
   right: 16px !important;
   display: flex !important;
   flex-direction: column !important;

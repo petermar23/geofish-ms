@@ -1398,7 +1398,7 @@ const ESPECIES_MS = [
     statusTexto: 'Faixa 85 a 125 cm (1 Nativo)',
     min: 85,
     max: 125,
-    regra: 'Permitida a captura e o transporte de 1 exemplar nativo por pescador licenciado, dentro da faixa de 85 a 125 cm (Decretos nº 15.166/19 e 15.375/20). Peixe DEVE estar inteiro no gelo com Selo Turismo e lacre/GCP emitido pela PMA antes da rodovia.'
+    regra: 'Permitida a captura e o transporte de 1 exemplar nativo por pescador licenciado, dentro da faixa de 85 a 125 cm (Decretos nº 15.166/19 e 15.375/20). Transporte EXCLUSIVO dentro de MS (proibido interestadual/internacional). O peixe deve estar inteiro no gelo, vistoriado e lacrado pela PMA com a GCP emitida em qualquer unidade da PMA antes de pegar a rodovia.'
   },
   {
     id: 'pacu',
