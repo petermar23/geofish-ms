@@ -67,10 +67,10 @@
       <nav class="tpwd-nav" aria-label="Navegação Principal">
         <ul class="tpwd-menu">
           <li><a href="#hero-territorio" class="tpwd-menu-link active">Início</a></li>
+          <li><a href="#secao-parceiros-turismo" class="tpwd-menu-link">Hospedagem &amp; Turismo</a></li>
           <li><a href="#secao-explore-bacia" class="tpwd-menu-link">Explore a Bacia</a></li>
           <li><a href="#secao-territorio" class="tpwd-menu-link">O Território</a></li>
           <li><a href="#secao-mapa" class="tpwd-menu-link">Mapa WebGIS</a></li>
-          <li><a href="#secao-historias" class="tpwd-menu-link">Histórias</a></li>
           <li><a href="#secao-transporte-passo-a-passo" class="tpwd-menu-link">Regras &amp; Guia</a></li>
           <li><a href="#secao-cartilha" class="tpwd-menu-link">Cartilha PMA</a></li>
         </ul>
@@ -90,17 +90,26 @@
     </div>
   </header>
 
-  <!-- 3. Faixa de Alerta Compacta e Objetiva ao Pescador -->
+  <!-- 3. Ticker Fluvial & Alerta ao Pescador (Estilo Globo.com Indicadores) -->
   <aside class="tpwd-alert-bar" role="region" aria-label="Aviso Legal e Normativo">
     <div class="tpwd-container tpwd-alert-inner">
       <div class="tpwd-alert-content">
-        <span class="pulse-dot" aria-hidden="true"></span>
-        <svg class="icon-svg" viewBox="0 0 24 24" style="color: var(--color-gold); width: 18px; height: 18px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span class="status-indicator-chip chip-open">
+          <span class="pulse-dot-green" aria-hidden="true"></span>
+          <span>Temporada 2026: Aberta</span>
+        </span>
+        <span class="status-indicator-chip chip-gold">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>Cota Zero Dourado</span>
+        </span>
         <div class="alert-text">
-          <strong>ALERTA AO PESCADOR:</strong> Transporte de pescado autorizado <strong>EXCLUSIVAMENTE DENTRO DO MS</strong> (proibido interestadual/internacional) para <strong>1 exemplar nativo na medida + 5 piranhas</strong> (inteiro, vistoriado e lacrado pela PMA com a GCP). Dourado é 100% Pesque e Solte!
+          Transporte autorizado <strong>exclusivamente dentro do MS</strong>: 1 exemplar nativo na medida + 5 piranhas (inteiro, lacrado com GCP pela PMA).
         </div>
       </div>
-      <a href="#secao-transporte-passo-a-passo" id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Passo a Passo Sem Multa &rarr;</a>
+      <div class="tpwd-alert-actions">
+        <span class="pma-contact-tag">📞 Plantão PMA: 190 / (67) 3357-1500</span>
+        <a href="#secao-transporte-passo-a-passo" id="btn-ver-alerta-regras" class="tpwd-alert-link">Passo a Passo Sem Multa &rarr;</a>
+      </div>
     </div>
   </aside>
 
@@ -113,45 +122,196 @@
   </div>
 
   <!-- ========================================================
-       NOVO HERO FOTOGRÁFICO TERRITORIAL
+       NOVO HERO FOTOGRÁFICO TERRITORIAL & PAINEL DE PRONTIDÃO
        ======================================================== -->
   <section id="hero-territorio" class="hero-territorial" aria-label="Apresentação da Bacia do Rio Miranda">
     <div class="hero-photo-layer" style="background-image: url('images/hero/rio_miranda_panorama.jpg');"></div>
     <div class="hero-overlay-gradient"></div>
     
     <div class="tpwd-container hero-content-inner">
-      <div class="hero-text-block">
-        <span class="hero-kicker">BACIA HIDROGRÁFICA DO RIO MIRANDA &bull; PANTANAL SUL-MATO-GROSSENSE</span>
-        <h1 class="hero-headline">Águas, Território e Tradição Pesqueira</h1>
-        <p class="hero-subheadline">
-          Pesca esportiva responsável, conservação e território conectados nas águas do Pantanal sul-mato-grossense. Conheça os rios, as regras de cota e navegue com informação segura.
+      <div class="hero-editorial-grid">
+        <!-- COLUNA PRINCIPAL (65%): NARRATIVA POÉTICA DO TERRITÓRIO -->
+        <div class="hero-poetic-block">
+          <div class="hero-kicker-badge">
+            <span class="kicker-dot"></span>
+            <span>BACIA HIDROGRÁFICA DO RIO MIRANDA &bull; PANTANAL SUL-MATO-GROSSENSE</span>
+          </div>
+          <h1 class="hero-poetic-headline">
+            Onde as águas desenham a vida e o tempo corre no ritmo do Pantanal.
+          </h1>
+          <p class="hero-poetic-subheadline">
+            Na imensidão da bacia que acolhe 23 municípios e mais de 490 km de curso fluvial, a pesca esportiva ganha sentido no respeito à natureza. Conheça as matas ciliares, proteja as matrizes reprodutoras e navegue pelo território com cartografia viva e informação segura.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#secao-mapa" class="btn-hero-primary">
+              <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+              <span>Navegar no WebGIS</span>
+            </a>
+            <button type="button" onclick="abrirModalCartilha()" class="btn-hero-secondary">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <span>Cartilha Oficial PMA</span>
+            </button>
+          </div>
+
+          <div class="hero-meta-badges">
+            <span class="hero-badge-pill">
+              <span class="badge-dot"></span>
+              Operação 100% Offline no Barco
+            </span>
+            <span class="hero-badge-pill">
+              <span class="badge-dot"></span>
+              Apoio às Colônias Z-1 e Z-7
+            </span>
+            <span class="hero-badge-pill">
+              <span class="badge-dot"></span>
+              Conservação &amp; Cota Zero
+            </span>
+          </div>
+        </div>
+
+        <!-- COLUNA LATERAL DE PRONTIDÃO (35%): FERRAMENTAS FUNDAMENTAIS DO PESCADOR -->
+        <aside class="hero-quick-tools-panel" aria-label="Ferramentas Essenciais do Pescador">
+          <div class="panel-header">
+            <span class="panel-kicker">PRONTIDÃO DO PESCADOR</span>
+            <h2 class="panel-title">Ferramentas Essenciais</h2>
+          </div>
+
+          <!-- 1. Medidor Rápido de Peixes -->
+          <div class="quick-tool-card tool-species">
+            <div class="quick-tool-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/></svg>
+            </div>
+            <div class="quick-tool-content">
+              <div class="quick-tool-head">
+                <span class="tool-tag tag-species">MEDIDAS PMA</span>
+                <span class="tool-status">Cota Zero p/ Dourado</span>
+              </div>
+              <p class="tool-desc">
+                Pintado: <strong>85–125 cm</strong> &bull; Pacu: <strong>45–65 cm</strong> &bull; Cachara: <strong>80–120 cm</strong>
+              </p>
+              <button type="button" id="btn-hero-species" class="btn-panel-action">
+                <span>Consultar Régua de Espécies &rarr;</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Cota de Transporte Oficial -->
+          <div class="quick-tool-card tool-transport">
+            <div class="quick-tool-icon">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="quick-tool-content">
+              <div class="quick-tool-head">
+                <span class="tool-tag tag-pma">LEGISLAÇÃO MS</span>
+                <span class="tool-status">Dentro de MS</span>
+              </div>
+              <p class="tool-desc">
+                Autorizado <strong>1 exemplar nativo + 5 piranhas</strong> (vistoriado e lacrado com GCP pela PMA).
+              </p>
+              <a href="#secao-transporte-passo-a-passo" class="btn-panel-link">
+                <span>Guia Passo a Passo Sem Multa &rarr;</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- 3. Licença Digital e Emergência SOS -->
+          <div class="panel-dual-actions">
+            <a href="https://www.imasul.ms.gov.br/" target="_blank" rel="noopener noreferrer" class="panel-dual-btn btn-licenca" title="Emissão da Licença Digital de Pesca no IMASUL">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Licença IMASUL</span>
+            </a>
+            <button type="button" id="btn-quick-sos" class="panel-dual-btn btn-sos" title="Central S.O.S Fluvial e Telefones de Emergência">
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>S.O.S Fluvial</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       NOVO BLOCO: VITRINE DE TURISMO, POUSADAS & PARCEIROS (INFORME PUBLICITÁRIO)
+       ======================================================== -->
+  <section id="secao-parceiros-turismo" class="editorial-partners-strip" aria-label="Parceiros do Turismo e Hospedagem Pantaneira">
+    <div class="editorial-container">
+      <div class="partners-strip-header">
+        <div class="partners-badge-group">
+          <span class="partners-kicker">INFORME PUBLICITÁRIO &bull; TURISMO &amp; SERVIÇOS</span>
+          <span class="partners-pill-badge">Bacia do Rio Miranda</span>
+        </div>
+        <div class="partners-header-row">
+          <h2 class="partners-title">Onde Ficar &amp; Serviços Náuticos no Pantanal</h2>
+          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20anunciar%20minha%20pousada/servi%C3%A7o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-partners-anuncie">
+            <span>Anuncie sua Empresa Aqui &rarr;</span>
+          </a>
+        </div>
+        <p class="partners-desc">
+          Conecte-se com pousadas pesqueiras, barcos-hotéis e comércios náuticos credenciados ao longo do Rio Miranda, Passo do Lontra e Aquidauana.
         </p>
+      </div>
 
-        <div class="hero-cta-group">
-          <a href="#secao-mapa" class="btn-hero-primary">
-            <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-            <span>Explorar no WebGIS</span>
-          </a>
-          <a href="#secao-explore-bacia" class="btn-hero-secondary">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 3.5 0 5 .85 1.28 1.27 2.22 1.27 3.5 0 1.28-.42 2.22-1.27 3.5-1 1.5-1 3.5 0 5 2.85-.47 4.27-2.5 4.27-5.17"/></svg>
-            <span>Onde Pescar &amp; Guias</span>
-          </a>
-        </div>
+      <div class="partners-grid-cards">
+        <!-- CARD 1: POUSADAS & HOTÉIS PESQUEIROS -->
+        <article class="partner-card">
+          <div class="partner-card-media">
+            <img src="images/comunidade/rio_miranda_floresta.jpg" alt="Pousada e beira de rio no Pantanal de Miranda" class="partner-card-img" loading="lazy">
+            <span class="partner-card-tag">HOSPEDAGEM &amp; LAZER</span>
+          </div>
+          <div class="partner-card-content">
+            <h3 class="partner-card-title">Pousadas &amp; Hotéis de Pesca no Rio Miranda</h3>
+            <p class="partner-card-text">
+              Estrutura com pensão completa, apartamentos climatizados, barcos com motor 4 tempos e piloteiros nativos conhecedores dos melhores poços.
+            </p>
+            <div class="partner-card-footer">
+              <span class="partner-loc">📍 Miranda &bull; Passo do Lontra</span>
+              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20as%20pousadas%20parceiras%20no%20Rio%20Miranda." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
+                <span>💬 Falar no WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </article>
 
-        <div class="hero-meta-badges">
-          <span class="hero-badge-pill">
-            <span class="badge-dot"></span>
-            Operação 100% Offline no Barco
-          </span>
-          <span class="hero-badge-pill">
-            <span class="badge-dot"></span>
-            Apoio às Colônias Z-1 e Z-7
-          </span>
-          <span class="hero-badge-pill">
-            <span class="badge-dot"></span>
-            Normas Oficiais PMA e IMASUL
-          </span>
-        </div>
+        <!-- CARD 2: BARCOS-HOTÉIS & EXPEDIÇÕES -->
+        <article class="partner-card">
+          <div class="partner-card-media">
+            <img src="images/navegacao/passo_lontra_foz.jpg" alt="Expedição de barco pelo Rio Miranda e Vermelho" class="partner-card-img" loading="lazy">
+            <span class="partner-card-tag" style="background: #0284c7;">EXPEDIÇÕES FLUVIAIS</span>
+          </div>
+          <div class="partner-card-content">
+            <h3 class="partner-card-title">Barcos-Hotéis &amp; Expedições Fluviais</h3>
+            <p class="partner-card-text">
+              Viva o Pantanal profundo a bordo de chalanas e barcos-hotéis confortáveis com navegação contínua, safári fotográfico e pacotes all-inclusive.
+            </p>
+            <div class="partner-card-footer">
+              <span class="partner-loc">📍 Rio Miranda &bull; Rio Paraguai</span>
+              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20pacotes%20de%20barco-hotel%20no%20Pantanal." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
+                <span>💬 Consultar Pacotes</span>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- CARD 3: ISCAS, GASOLINA NÁUTICA & PILOTEIROS -->
+        <article class="partner-card">
+          <div class="partner-card-media">
+            <img src="images/rio/estrada_parque_miranda.jpg" alt="Apoio náutico e pontes pantaneiras" class="partner-card-img" loading="lazy">
+            <span class="partner-card-tag" style="background: #d97706;">APOIO NÁUTICO</span>
+          </div>
+          <div class="partner-card-content">
+            <h3 class="partner-card-title">Comércio Náutico, Iscas &amp; Guias Nativos</h3>
+            <p class="partner-card-text">
+              Tuviras selecionadas, caranguejos, tralhas de pesca, combustível náutico e contratação de guias credenciados pelas Colônias Z-1 e Z-7.
+            </p>
+            <div class="partner-card-footer">
+              <span class="partner-loc">📍 Estrada Parque &bull; Postos Náuticos</span>
+              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Preciso%20de%20iscas%2C%20apoio%20n%C3%A1utico%20ou%20piloteiro%20em%20Miranda." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
+                <span>💬 Contatar Fornecedores</span>
+              </a>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
