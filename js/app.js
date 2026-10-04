@@ -1,110 +1,52 @@
 /**
  * GeoFish MS - Bacia do Rio Miranda (Mato Grosso do Sul)
  * Aplicação WebGIS PWA para Governança Territorial e Pesca Sustentável
+ * Orquestrador Principal Modularizado (ES6)
  */
 
-// 1. Funções de Segurança e Sanitização de Dados
-function escapeHTML(str) {
-  if (str === null || str === undefined || String(str).trim() === '') {
-    return 'Não informado';
-  }
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
+import {
+  escapeHTML,
+  sanitizeDigits,
+  sanitizeTel,
+  normalizeWhatsApp,
+  formatPossuiRampa,
+  obterCorPorRegra,
+  vibrar,
+  manterTelaAtiva,
+  showToast
+} from './modules/utils.js';
 
-function sanitizeDigits(val) {
-  if (!val) return '';
-  return String(val).replace(/\D/g, '');
-}
+import {
+  abrirModalCartilha,
+  fecharModalCartilha,
+  alternarAbaCartilha
+} from './modules/cartilha-modal.js';
 
-// Utilitário de Vibração Háptica para Celulares Android (Samsung / Motorola)
-function vibrar(padrao = 35) {
-  if ('vibrate' in navigator) {
-    try {
-      navigator.vibrate(padrao);
-    } catch (_) {}
-  }
-}
+import {
+  ESPECIES_MS,
+  renderizarEspecies,
+  verificarMedidaPescado,
+  abrirModalEspecies,
+  fecharModalEspecies,
+  initSpeciesChecker
+} from './modules/species-checker.js';
 
-// Utilitário Screen Wake Lock (mantém a tela do celular acesa durante a navegação no barco)
-let wakeLockAtivo = null;
-async function manterTelaAtiva() {
-  if ('wakeLock' in navigator) {
-    try {
-      wakeLockAtivo = await navigator.wakeLock.request('screen');
-      wakeLockAtivo.addEventListener('release', () => {
-        wakeLockAtivo = null;
-      });
-    } catch (_) {}
-  }
-}
+import {
+  gerarTextoResgate,
+  abrirModalSos,
+  fecharModalSos,
+  abrirConfirmacaoSos,
+  fecharConfirmacaoSos,
+  initSosEmergency
+} from './modules/sos-emergency.js';
 
-function normalizeWhatsApp(contato, nome = '') {
-  if (!contato) return null;
-  const digits = sanitizeDigits(contato);
-  if (!digits) return null;
-  // Se não começar com código do país (55), adiciona 55
-  const fullNumber = digits.startsWith('55') ? digits : '55' + digits;
-  const textoMsg = encodeURIComponent(`Olá! Vi seu contato no aplicativo GeoFish MS (Bacia do Rio Miranda) e gostaria de informações sobre serviços e pesca.`);
-  return `https://api.whatsapp.com/send?phone=${fullNumber}&text=${textoMsg}`;
-}
-
-function sanitizeTel(tel) {
-  if (!tel) return null;
-  const clean = String(tel).trim().replace(/[^\d+]/g, '');
-  if (!/^\+?[0-9]{3,15}$/.test(clean)) return null;
-  return `tel:${clean}`;
-}
-
-function formatPossuiRampa(val) {
-  if (val === true || val === 1) return 'Sim (Possui rampa pública/apoio)';
-  if (val === false || val === 0) return 'Não informado / Sem rampa';
-  if (typeof val === 'string') {
-    const lower = val.trim().toLowerCase();
-    if (lower === 'sim' || lower === 's' || lower === 'true') {
-      return 'Sim (Possui rampa pública/apoio)';
-    }
-    if (lower === 'não' || lower === 'nao' || lower === 'n' || lower === 'false') {
-      return 'Não';
-    }
-  }
-  return 'Não informado';
-}
-
-function obterCorPorRegra(regra) {
-  switch (regra) {
-    case 'Pesque e Solte':
-      return '#2e7d32'; // Verde
-    case 'Cota Zero':
-      return '#f57c00'; // Laranja
-    case 'Defeso':
-      return '#d32f2f'; // Vermelho
-    default:
-      return '#0288d1'; // Azul padrão
-  }
-}
-
-// 2. Sistema de Notificações Toast
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.setAttribute('role', 'alert');
-  toast.textContent = message;
-
-  container.appendChild(toast);
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.parentNode.removeChild(toast);
-    }
-  }, 4000);
-}
+import {
+  atualizarStatusRede,
+  registrarServiceWorker,
+  abrirModalInstall,
+  fecharModalInstall,
+  initPWAOffline
+} from './modules/pwa-offline.js';
 
 // Limites geográficos estritos da Bacia Hidrográfica do Rio Miranda (Pantanal MS)
 const BOUNDS_BACIA = L.latLngBounds(
@@ -891,157 +833,7 @@ if (modalSobre) {
     }
   });
 }
-
-// 10. Indicador de Rede Online / Modo Offline
-const statusRedeEl = document.getElementById('status-rede');
-
-function atualizarStatusRede() {
-  if (!statusRedeEl) return;
-  if (navigator.onLine) {
-    statusRedeEl.innerHTML = '<span class="status-dot"></span> Online';
-    statusRedeEl.className = '';
-  } else {
-    statusRedeEl.innerHTML = '<span class="status-dot"></span> Modo Offline';
-    statusRedeEl.className = 'offline';
-  }
-}
-
-window.addEventListener('online', () => {
-  atualizarStatusRede();
-  showToast('Conexão restabelecida: Você está online.');
-});
-
-window.addEventListener('offline', () => {
-  atualizarStatusRede();
-  showToast('Você está offline: GeoFish MS operando com dados salvos no celular.');
-});
-
-atualizarStatusRede();
-
-// 11. Registro do Service Worker (PWA)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => {
-        reg.update();
-      })
-      .catch((err) => {
-        console.warn('Erro ao registrar Service Worker do PWA:', err);
-      });
-  });
-
-  let reloading = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!reloading) {
-      reloading = true;
-      window.location.reload();
-    }
-  });
-}
-
-// 12. Instalação do PWA Otimizada para Celulares Android (Samsung / Motorola)
-let deferredInstallPrompt = null;
-const btnInstallPWA = document.getElementById('btn-install-pwa');
-const modalInstall = document.getElementById('modal-install');
-const btnFecharInstall = document.getElementById('btn-fechar-install');
-const androidBanner = document.getElementById('android-install-banner');
-const btnAndroidInstall = document.getElementById('btn-android-install');
-const btnAndroidDismiss = document.getElementById('btn-android-dismiss');
-
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-  window.navigator.standalone === true;
-
-function abrirModalInstall() {
-  if (!modalInstall) return;
-  modalInstall.classList.remove('hidden');
-  modalInstall.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-  try {
-    history.pushState({ modal: 'install' }, '');
-  } catch (_) {}
-}
-
-function fecharModalInstall() {
-  if (!modalInstall) return;
-  modalInstall.classList.add('hidden');
-  modalInstall.setAttribute('aria-hidden', 'true');
-}
-
-if (btnFecharInstall) {
-  btnFecharInstall.addEventListener('click', fecharModalInstall);
-}
-
-if (modalInstall) {
-  modalInstall.addEventListener('click', (e) => {
-    if (e.target === modalInstall) fecharModalInstall();
-  });
-}
-
-// Captura o evento nativo de instalação no Android (Google Chrome & Samsung Internet)
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-
-  if (btnInstallPWA && !isStandalone) {
-    btnInstallPWA.style.display = 'inline-flex';
-  }
-
-  // Exibe banner nativo de instalação no Android se não tiver sido dispensado
-  const bannerDispensado = localStorage.getItem('geofish_android_banner_dismiss');
-  if (androidBanner && !isStandalone && !bannerDispensado) {
-    androidBanner.classList.remove('hidden');
-  }
-});
-
-if (btnInstallPWA) {
-  btnInstallPWA.addEventListener('click', async () => {
-    vibrar(25);
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      const choice = await deferredInstallPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        showToast('GeoFish MS instalado no seu celular!');
-        btnInstallPWA.style.display = 'none';
-        if (androidBanner) androidBanner.classList.add('hidden');
-      }
-      deferredInstallPrompt = null;
-    } else {
-      abrirModalInstall();
-    }
-  });
-}
-
-if (btnAndroidInstall) {
-  btnAndroidInstall.addEventListener('click', async () => {
-    vibrar(30);
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      const choice = await deferredInstallPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        showToast('GeoFish MS instalado com sucesso!');
-        if (androidBanner) androidBanner.classList.add('hidden');
-        if (btnInstallPWA) btnInstallPWA.style.display = 'none';
-      }
-      deferredInstallPrompt = null;
-    } else {
-      abrirModalInstall();
-    }
-  });
-}
-
-if (btnAndroidDismiss) {
-  btnAndroidDismiss.addEventListener('click', () => {
-    vibrar(20);
-    if (androidBanner) androidBanner.classList.add('hidden');
-    localStorage.setItem('geofish_android_banner_dismiss', 'true');
-  });
-}
-
-window.addEventListener('appinstalled', () => {
-  showToast('Aplicativo instalado no celular! Agora você pode usar sem internet no rio.');
-  if (btnInstallPWA) btnInstallPWA.style.display = 'none';
-  if (androidBanner) androidBanner.classList.add('hidden');
-});
+// 10, 11, 12. Gestão PWA & Offline delegada para o submódulo js/modules/pwa-offline.js
 
 // Suporte ao Botão Físico/Gesto de Voltar do Android (Samsung / Motorola)
 window.addEventListener('popstate', () => {
@@ -1050,6 +842,7 @@ window.addEventListener('popstate', () => {
     document.body.classList.remove('sheet-open');
     return;
   }
+  const modalEspecies = document.getElementById('modal-especies');
   if (modalEspecies && !modalEspecies.classList.contains('hidden')) {
     modalEspecies.classList.add('hidden');
     return;
@@ -1106,8 +899,11 @@ if (navBtnPousadas) {
   });
 }
 
-// Inicialização do aplicativo: carrega camadas, verifica defeso, atalhos do Android e busca local
+// Inicialização do aplicativo: carrega camadas, módulos auxiliares, defeso e busca
 window.addEventListener('DOMContentLoaded', () => {
+  initSpeciesChecker();
+  initSosEmergency();
+  initPWAOffline();
   verificarPeriodoDefeso();
   carregarTodasCamadas().then(() => {
     // Processamento de atalhos rápidos do Android (URL shortcuts do manifest)
@@ -1175,384 +971,8 @@ chipsFiltro.forEach(chip => {
   });
 });
 
-// 14. Tabela Oficial de Espécies e Régua de Medidas (IMASUL MS)
-// 14. Tabela Oficial de Espécies e Régua de Medidas (Decreto Estadual nº 15.166/19 e Decreto nº 15.375/20)
-const ESPECIES_MS = [
-  {
-    id: 'pintado',
-    nome: 'Pintado / Surubim',
-    nomeCientifico: 'Pseudoplatystoma corruscans',
-    status: 'cota-zero',
-    statusTexto: 'Faixa 85 a 125 cm (1 Nativo)',
-    min: 85,
-    max: 125,
-    regra: 'Permitida a captura e o transporte de 1 exemplar nativo por pescador licenciado, dentro da faixa de 85 a 125 cm (Decretos nº 15.166/19 e 15.375/20). Transporte EXCLUSIVO dentro de MS (proibido interestadual/internacional). O peixe deve estar inteiro no gelo, vistoriado e lacrado pela PMA com a GCP emitida em qualquer unidade da PMA antes de pegar a rodovia.'
-  },
-  {
-    id: 'pacu',
-    nome: 'Pacu',
-    nomeCientifico: 'Piaractus mesopotamicus',
-    status: 'cota-zero',
-    statusTexto: 'Faixa 45 a 65 cm',
-    min: 45,
-    max: 65,
-    regra: 'Permitida a captura e o transporte de 1 exemplar entre 45 e 65 cm. Exemplares acima de 65 cm são matrizes protegidas por lei e devem ser soltos vivos imediatamente (Art. 9º, § 3º).'
-  },
-  {
-    id: 'cachara',
-    nome: 'Cachara',
-    nomeCientifico: 'Pseudoplatystoma reticulatum',
-    status: 'cota-zero',
-    statusTexto: 'Faixa 80 a 120 cm',
-    min: 80,
-    max: 120,
-    regra: 'Faixa permitida de 80 a 120 cm. Fora dessa faixa (menor que 80 ou maior que 120 cm), a soltura é obrigatória (Art. 9º).'
-  },
-  {
-    id: 'jau',
-    nome: 'Jaú',
-    nomeCientifico: 'Zungaro jahu',
-    status: 'cota-zero',
-    statusTexto: 'Faixa 95 a 130 cm',
-    min: 95,
-    max: 130,
-    regra: 'Permitida a captura e o transporte de 1 exemplar entre 95 e 130 cm. Exemplares gigantes acima de 130 cm são reprodutores protegidos por lei (Art. 9º).'
-  },
-  {
-    id: 'piraputanga',
-    nome: 'Piraputanga',
-    nomeCientifico: 'Brycon hilarii',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 30 cm',
-    min: 30,
-    max: null,
-    regra: 'Tamanho mínimo de 30 cm (Art. 9º). Atenção: na calha do Rio Salobra e afluentes é modalidade exclusivamente Pesque e Solte.'
-  },
-  {
-    id: 'curimbata',
-    nome: 'Curimbatá / Curimba / Papaterra',
-    nomeCientifico: 'Prochilodus lineatus',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 38 cm',
-    min: 38,
-    max: null,
-    regra: 'Tamanho mínimo de 38 cm (Art. 9º). Comercialização expressamente proibida na Bacia do Rio Paraguai (Art. 5º, Parágrafo único).'
-  },
-  {
-    id: 'piavucu',
-    nome: 'Piavussu / Piauçu',
-    nomeCientifico: 'Megaleporinus macrocephalus',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 38 cm',
-    min: 38,
-    max: null,
-    regra: 'Tamanho mínimo de 38 cm (Art. 9º). Integrante da cota permitida de 1 exemplar nativo.'
-  },
-  {
-    id: 'barbado',
-    nome: 'Barbado',
-    nomeCientifico: 'Pinirampus pirinampu',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 60 cm',
-    min: 60,
-    max: null,
-    regra: 'Tamanho mínimo de 60 cm (Art. 9º).'
-  },
-  {
-    id: 'pati',
-    nome: 'Pati',
-    nomeCientifico: 'Luciopimelodus pati',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 65 cm',
-    min: 65,
-    max: null,
-    regra: 'Tamanho mínimo de 65 cm (Art. 9º).'
-  },
-  {
-    id: 'jurupoca',
-    nome: 'Jurupoca',
-    nomeCientifico: 'Hemisorubim platyrhynchos',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 40 cm',
-    min: 40,
-    max: null,
-    regra: 'Tamanho mínimo de 40 cm (Art. 9º).'
-  },
-  {
-    id: 'jurupensem',
-    nome: 'Jurupensém',
-    nomeCientifico: 'Sorubim lima',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 35 cm',
-    min: 35,
-    max: null,
-    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
-  },
-  {
-    id: 'armao',
-    nome: 'Armao / Armado / Abotoado',
-    nomeCientifico: 'Pterodoras granulosus / Oxydoras kneri',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 35 cm',
-    min: 35,
-    max: null,
-    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
-  },
-  {
-    id: 'palmito',
-    nome: 'Palmito',
-    nomeCientifico: 'Ageneiosus spp.',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 35 cm',
-    min: 35,
-    max: null,
-    regra: 'Tamanho mínimo de 35 cm (Art. 9º).'
-  },
-  {
-    id: 'mandi',
-    nome: 'Mandi / Mandi Amarelo',
-    nomeCientifico: 'Pimelodus maculatus',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 25 cm',
-    min: 25,
-    max: null,
-    regra: 'Tamanho mínimo de 25 cm (Art. 9º).'
-  },
-  {
-    id: 'piau',
-    nome: 'Piau / Piau Três Pintas',
-    nomeCientifico: 'Leporinus spp. / Leporinus friderici',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 25 cm',
-    min: 25,
-    max: null,
-    regra: 'Tamanho mínimo de 25 cm (Art. 9º).'
-  },
-  {
-    id: 'pacupeva',
-    nome: 'Pacupeva',
-    nomeCientifico: 'Mylossoma paraguayensis',
-    status: 'cota-zero',
-    statusTexto: 'Mínimo 20 cm',
-    min: 20,
-    max: null,
-    regra: 'Tamanho mínimo de 20 cm (Art. 9º).'
-  },
-  {
-    id: 'piranha',
-    nome: 'Piranha (Vermelha / Amarela)',
-    nomeCientifico: 'Pygocentrus nattereri / Serrasalmus marginatus',
-    status: 'cota-zero',
-    statusTexto: 'Até 5 Exemplares',
-    min: null,
-    max: null,
-    regra: 'Cota de até 5 (cinco) exemplares autorizada cumulativamente com o exemplar nativo (Art. 4º, II do Decreto nº 15.166/19).'
-  },
-  {
-    id: 'tucunare',
-    nome: 'Tucunaré',
-    nomeCientifico: 'Cichla spp.',
-    status: 'exotica',
-    statusTexto: 'Captura e Cota Livre',
-    min: null,
-    max: null,
-    regra: 'Espécie alóctone/exótica listada no Art. 7º, IX. Captura e transporte LIVRES de limite de cota em MS.'
-  },
-  {
-    id: 'corvina',
-    nome: 'Corvina / Pescada-do-Piauí',
-    nomeCientifico: 'Plagioscion squamosissimus',
-    status: 'exotica',
-    statusTexto: 'Captura e Cota Livre',
-    min: null,
-    max: null,
-    regra: 'Espécie alóctone listada no Art. 7º, V. Captura e transporte LIVRES de limite de cota.'
-  },
-  {
-    id: 'tilapia',
-    nome: 'Tilápia',
-    nomeCientifico: 'Oreochromis spp. / Tilapia spp.',
-    status: 'exotica',
-    statusTexto: 'Captura e Cota Livre',
-    min: null,
-    max: null,
-    regra: 'Espécie exótica listada no Art. 7º, VIII. Captura e transporte LIVRES de limite de cota.'
-  },
-  {
-    id: 'tambaqui',
-    nome: 'Tambaqui',
-    nomeCientifico: 'Colossoma macropomum',
-    status: 'exotica',
-    statusTexto: 'Captura e Cota Livre',
-    min: null,
-    max: null,
-    regra: 'Espécie alóctone listada no Art. 7º, XI (acrescentado pelo Decreto nº 15.375/20). Captura e transporte LIVRES de cota.'
-  },
-  {
-    id: 'dourado',
-    nome: 'Dourado',
-    nomeCientifico: 'Salminus brasiliensis',
-    status: 'proibido',
-    statusTexto: 'PROIBIDO / Moratória',
-    min: null,
-    max: null,
-    regra: 'PROIBIDA a captura, abate, transporte e comercialização em todo o MS (Art. 8º do Decreto nº 15.166 e Lei Estadual nº 5.321/19, prorrogada pela Lei nº 6.190/24 até 2029). Permitido exclusivamente Pesque e Solte esportivo.'
-  }
-];
+// 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
-const modalEspecies = document.getElementById('modal-especies');
-const btnAbrirEspecies = document.getElementById('btn-especies');
-const btnFecharEspecies = document.getElementById('btn-fechar-especies');
-const speciesGrid = document.getElementById('species-grid');
-const speciesSearchInput = document.getElementById('species-search-input');
-const btnRunCheck = document.getElementById('btn-run-check');
-const checkerSpecies = document.getElementById('checker-species');
-const checkerLength = document.getElementById('checker-length');
-const measureResult = document.getElementById('measure-result');
-
-function renderizarEspécies(termo = '') {
-  if (!speciesGrid) return;
-  speciesGrid.innerHTML = '';
-
-  const termoLimpo = termo.toLowerCase().trim();
-  const filtradas = ESPECIES_MS.filter(e => 
-    e.nome.toLowerCase().includes(termoLimpo) || 
-    e.nomeCientifico.toLowerCase().includes(termoLimpo)
-  );
-
-  if (filtradas.length === 0) {
-    speciesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 20px;">Nenhuma espécie encontrada para a busca.</p>';
-    return;
-  }
-
-  filtradas.forEach(esp => {
-    let badgeClass = 'badge-cota-zero';
-    if (esp.status === 'proibido') badgeClass = 'badge-proibido';
-    else if (esp.status === 'pesque-solte') badgeClass = 'badge-pesque-solte';
-    else if (esp.status === 'exotica') badgeClass = 'badge-exotica';
-
-    let medidasTexto = '';
-    if (esp.min && esp.max) {
-      medidasTexto = `<span>Mín: <strong>${esp.min} cm</strong></span> <span>Máx: <strong>${esp.max} cm</strong></span>`;
-    } else if (esp.min) {
-      medidasTexto = `<span>Mínimo: <strong>${esp.min} cm</strong></span> <span>Sem limite máx.</span>`;
-    } else {
-      medidasTexto = `<span style="color: #b91c1c; font-weight: 700;">Moratória: Captura 0 cm</span>`;
-    }
-
-    const card = document.createElement('div');
-    card.className = 'species-card';
-    card.innerHTML = `
-      <div class="species-header">
-        <div>
-          <div class="species-name">${escapeHTML(esp.nome)}</div>
-          <div class="species-sci">${escapeHTML(esp.nomeCientifico)}</div>
-        </div>
-        <span class="species-badge ${badgeClass}">${escapeHTML(esp.statusTexto)}</span>
-      </div>
-      <div class="species-measures">
-        ${medidasTexto}
-      </div>
-      <div class="species-desc">${escapeHTML(esp.regra)}</div>
-    `;
-    speciesGrid.appendChild(card);
-  });
-}
-
-function verificarMedidaPescado() {
-  if (!checkerSpecies || !checkerLength || !measureResult) return;
-  const espId = checkerSpecies.value;
-  const valor = parseFloat(checkerLength.value);
-
-  if (isNaN(valor) || valor <= 0) {
-    measureResult.className = 'measure-result-box forbidden';
-    measureResult.textContent = 'Por favor, informe o tamanho do peixe em centímetros (ex: 88).';
-    return;
-  }
-
-  const esp = ESPECIES_MS.find(e => e.id === espId);
-  if (!esp) return;
-
-  if (esp.status === 'proibido') {
-    measureResult.className = 'measure-result-box forbidden';
-    measureResult.innerHTML = `🚫 <strong>Dourado Proibido!</strong> Em Mato Grosso do Sul, a captura e o abate do Dourado são proibidos por lei (Lei Estadual nº 5.321/19 prorrogada até 2029). <strong>Soltura imediata e obrigatória!</strong>`;
-    return;
-  }
-
-  if (esp.status === 'exotica') {
-    measureResult.className = 'measure-result-box allowed';
-    measureResult.innerHTML = `✅ <strong>Espécie Exótica / Alóctone!</strong> Captura e transporte <strong>totalmente livres de limite de cota</strong> (Decreto Estadual nº 15.166/19, Art. 7º). Ajude a controlar as espécies invasoras!`;
-    return;
-  }
-
-  if (esp.min && esp.max) {
-    if (valor >= esp.min && valor <= esp.max) {
-      measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL) ou consumo no local. O peixe transportado deve estar inteiro com cabeça e escamas/couro!`;
-    } else if (valor < esp.min) {
-      measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave. <strong>Solte imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
-    } else {
-      measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Acima da Medida Máxima!</strong> O exemplar tem ${valor} cm e o teto máximo de proteção de matrizes reprodutoras é <strong>${esp.max} cm</strong>. <strong>Solte vivo imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
-    }
-  } else if (esp.min) {
-    if (valor >= esp.min) {
-      measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (Mínimo: ${esp.min} cm). Permitido para captura e transporte (1 exemplar nativo) ou consumo local.`;
-    } else {
-      measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
-    }
-  } else {
-    measureResult.className = 'measure-result-box allowed';
-    measureResult.innerHTML = `ℹ️ ${esp.regra}`;
-  }
-}
-
-if (btnRunCheck) {
-  btnRunCheck.addEventListener('click', verificarMedidaPescado);
-}
-
-if (speciesSearchInput) {
-  speciesSearchInput.addEventListener('input', (e) => {
-    renderizarEspécies(e.target.value);
-  });
-}
-
-function abrirModalEspecies() {
-  if (!modalEspecies) return;
-  renderizarEspécies();
-  modalEspecies.classList.remove('hidden');
-  modalEspecies.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-  try {
-    history.pushState({ modal: 'especies' }, '');
-  } catch (_) {}
-  if (btnFecharEspecies) btnFecharEspecies.focus();
-}
-
-function fecharModalEspecies() {
-  if (!modalEspecies) return;
-  modalEspecies.classList.add('hidden');
-  modalEspecies.setAttribute('aria-hidden', 'true');
-}
-
-if (btnAbrirEspecies) {
-  btnAbrirEspecies.addEventListener('click', abrirModalEspecies);
-}
-
-if (btnFecharEspecies) {
-  btnFecharEspecies.addEventListener('click', fecharModalEspecies);
-}
-
-if (modalEspecies) {
-  modalEspecies.addEventListener('click', (e) => {
-    if (e.target === modalEspecies) {
-      fecharModalEspecies();
-    }
-  });
-}
 
 // Fechamento de todos os modais com Escape
 window.addEventListener('keydown', (e) => {
@@ -1750,149 +1170,8 @@ function inicializarBuscaLocal() {
 }
 
 
-// 16. Central de Emergência & S.O.S Fluvial com Confirmação Prévia
-let ultimaPosicaoUsuario = null;
+// 16. Central de Emergência & S.O.S Fluvial delegada para js/modules/sos-emergency.js
 
-const btnSos = document.getElementById('btn-sos');
-const modalSos = document.getElementById('modal-sos');
-const btnFecharSos = document.getElementById('btn-fechar-sos');
-const sosCoordsDisplay = document.getElementById('sos-coords-display');
-const btnCopiarResgate = document.getElementById('btn-copiar-resgate');
-const btnWppResgate = document.getElementById('btn-wpp-resgate');
-
-const modalConfirmSos = document.getElementById('modal-confirm-sos');
-const confirmSosText = document.getElementById('confirm-sos-text');
-const btnCancelarSosCall = document.getElementById('btn-cancelar-sos-call');
-const btnExecutarSosCall = document.getElementById('btn-executar-sos-call');
-
-let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico, texto }
-
-function atualizarDisplayCoordsSos() {
-  if (!sosCoordsDisplay) return;
-  sosCoordsDisplay.innerHTML = '🚨 <strong>Canais de Emergência Ativos:</strong> Marinha (185) | PMA (190) | Bombeiros (193)';
-}
-
-function gerarTextoResgate() {
-  const dataHora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
-         `📍 Região: Bacia do Rio Miranda (Pantanal/MS)\n` +
-         `⏰ Horário: ${dataHora}\n` +
-         `🆘 Solicito apoio emergencial para embarcação/pescador na calha do rio.\n\n` +
-         `Canais de Acionamento Imediato:\n` +
-         `• Marinha do Brasil (Capitania Fluvial): 185\n` +
-         `• Polícia Militar Ambiental (Pelotão Miranda): 190 / (67) 3242-1200\n` +
-         `• Corpo de Bombeiros Militar: 193\n` +
-         `• Hospital Municipal de Miranda: (67) 3242-1222`;
-}
-
-function abrirModalSos() {
-  if (!modalSos) return;
-  atualizarDisplayCoordsSos();
-  modalSos.classList.remove('hidden');
-  modalSos.setAttribute('aria-hidden', 'false');
-  vibrar(35);
-  try {
-    history.pushState({ modal: 'sos' }, '');
-  } catch (_) {}
-}
-
-function fecharModalSos() {
-  if (!modalSos) return;
-  modalSos.classList.add('hidden');
-  modalSos.setAttribute('aria-hidden', 'true');
-}
-
-function abrirConfirmacaoSos(acao) {
-  acaoPendenteSos = acao;
-  if (!modalConfirmSos || !confirmSosText) return;
-
-  if (acao.tipo === 'call') {
-    confirmSosText.innerHTML = `Você está prestes a discar para <strong>${escapeHTML(acao.servico)} (${escapeHTML(acao.numero)})</strong>.<br><br>` +
-      `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
-  } else if (acao.tipo === 'copy') {
-    confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
-  } else if (acao.tipo === 'wpp') {
-    confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `💬 Sim, Abrir WhatsApp`;
-  }
-
-  modalConfirmSos.classList.remove('hidden');
-  modalConfirmSos.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-}
-
-function fecharConfirmacaoSos() {
-  acaoPendenteSos = null;
-  if (!modalConfirmSos) return;
-  modalConfirmSos.classList.add('hidden');
-  modalConfirmSos.setAttribute('aria-hidden', 'true');
-}
-
-if (btnSos) btnSos.addEventListener('click', abrirModalSos);
-if (btnFecharSos) btnFecharSos.addEventListener('click', fecharModalSos);
-
-if (btnCancelarSosCall) btnCancelarSosCall.addEventListener('click', fecharConfirmacaoSos);
-
-if (btnExecutarSosCall) {
-  btnExecutarSosCall.addEventListener('click', () => {
-    if (!acaoPendenteSos) return;
-    const acao = acaoPendenteSos;
-    fecharConfirmacaoSos();
-
-    if (acao.tipo === 'call') {
-      vibrar(40);
-      window.location.href = `tel:${acao.numero}`;
-    } else if (acao.tipo === 'copy') {
-      vibrar(25);
-      const texto = gerarTextoResgate();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texto)
-          .then(() => showToast('Mensagem de resgate copiada com sucesso!'))
-          .catch(() => showToast('Aviso: Mensagem gerada pronta para envio manual.'));
-      } else {
-        showToast('Aviso: Dispositivo não suporta cópia automática.');
-      }
-    } else if (acao.tipo === 'wpp') {
-      vibrar(30);
-      const texto = gerarTextoResgate();
-      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
-      window.open(url, '_blank');
-    }
-  });
-}
-
-if (btnCopiarResgate) {
-  btnCopiarResgate.addEventListener('click', () => {
-    abrirConfirmacaoSos({ tipo: 'copy' });
-  });
-}
-
-if (btnWppResgate) {
-  btnWppResgate.addEventListener('click', () => {
-    abrirConfirmacaoSos({ tipo: 'wpp' });
-  });
-}
-
-// Intercepta e protege os 4 botões oficiais
-document.querySelectorAll('.sos-call-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const servico = btn.getAttribute('data-service') || 'Serviço de Emergência';
-    const numero = btn.getAttribute('data-number') || '';
-    if (numero) {
-      abrirConfirmacaoSos({ tipo: 'call', servico, numero });
-    }
-  });
-});
-
-// Interceptar o fechamento dos modais SOS via Tecla ESC
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    if (typeof fecharConfirmacaoSos === 'function') fecharConfirmacaoSos();
-    if (typeof fecharModalSos === 'function') fecharModalSos();
-  }
-});
 
 // ========================================================
 // 17. DIÁRIO DE PESCA E DENÚNCIAS OFFLINE (GAMIFICAÇÃO & CIDADANIA)
@@ -2623,80 +1902,4 @@ if (btnHeroParceiros) {
   });
 }
 
-// ========================================================
-// 20. CARTILHA OFICIAL DO PESCADOR (BPMA / PMA-MS)
-// ========================================================
-const modalCartilha = document.getElementById('modal-cartilha');
-const btnFecharCartilha = document.getElementById('btn-fechar-cartilha');
-
-function abrirModalCartilha(abaInicial = 'rios') {
-  if (!modalCartilha) return;
-  modalCartilha.classList.remove('hidden');
-  modalCartilha.setAttribute('aria-hidden', 'false');
-  alternarAbaCartilha(abaInicial);
-  vibrar(25);
-}
-
-function fecharModalCartilha() {
-  if (!modalCartilha) return;
-  modalCartilha.classList.add('hidden');
-  modalCartilha.setAttribute('aria-hidden', 'true');
-}
-
-function alternarAbaCartilha(tipo) {
-  const tabs = {
-    rios: { btn: 'tab-btn-rios-proibidos', panel: 'panel-cartilha-rios' },
-    iscas: { btn: 'tab-btn-iscas', panel: 'panel-cartilha-iscas' },
-    transporte: { btn: 'tab-btn-transporte', panel: 'panel-cartilha-transporte' },
-    petrechos: { btn: 'tab-btn-petrechos', panel: 'panel-cartilha-petrechos' },
-    contatos: { btn: 'tab-btn-contatos', panel: 'panel-cartilha-contatos' }
-  };
-
-  Object.entries(tabs).forEach(([k, item]) => {
-    const b = document.getElementById(item.btn);
-    const p = document.getElementById(item.panel);
-    if (b && p) {
-      if (k === tipo) {
-        b.classList.add('active');
-        b.setAttribute('aria-selected', 'true');
-        p.classList.add('active');
-      } else {
-        b.classList.remove('active');
-        b.setAttribute('aria-selected', 'false');
-        p.classList.remove('active');
-      }
-    }
-  });
-}
-
-if (btnFecharCartilha) btnFecharCartilha.addEventListener('click', fecharModalCartilha);
-
-window.abrirModalCartilha = abrirModalCartilha;
-window.fecharModalCartilha = fecharModalCartilha;
-window.alternarAbaCartilha = alternarAbaCartilha;
-
-// 21. Preparação para o Rio (Modo 100% Offline)
-const btnPrepOffline = document.getElementById('btn-prep-offline');
-if (btnPrepOffline) {
-  btnPrepOffline.addEventListener('click', async () => {
-    vibrar([40, 60, 40]);
-    btnPrepOffline.innerHTML = '⏳ Verificando dados offline...';
-    btnPrepOffline.disabled = true;
-
-    try {
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
-      }
-
-      setTimeout(() => {
-        btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
-        btnPrepOffline.style.background = '#15803d';
-        btnPrepOffline.style.color = '#ffffff';
-        showToast('Pronto para o Rio! Regras, mapa e contatos de emergência salvos no seu aparelho.', 'info');
-      }, 900);
-    } catch (_) {
-      btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
-      btnPrepOffline.disabled = false;
-    }
-  });
-}
+// 20, 21. Cartilha PMA sob demanda e Prep Offline delegados para módulos ES6.
