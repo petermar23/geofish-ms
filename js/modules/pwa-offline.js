@@ -42,22 +42,24 @@ export function registrarServiceWorker() {
   }
 }
 
+import { abrirModalDeTemplate } from './modal-manager.js';
+
+let modalInstallInstancia = null;
+
 export function abrirModalInstall() {
-  const modalInstall = document.getElementById('modal-install');
-  if (!modalInstall) return;
-  modalInstall.classList.remove('hidden');
-  modalInstall.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-  try {
-    history.pushState({ modal: 'install' }, '');
-  } catch (_) {}
+  modalInstallInstancia = abrirModalDeTemplate('template-modal-install', {
+    modalId: 'modal-install',
+    onDestroy: () => {
+      modalInstallInstancia = null;
+    }
+  });
 }
 
 export function fecharModalInstall() {
-  const modalInstall = document.getElementById('modal-install');
-  if (!modalInstall) return;
-  modalInstall.classList.add('hidden');
-  modalInstall.setAttribute('aria-hidden', 'true');
+  if (modalInstallInstancia) {
+    modalInstallInstancia.destroy();
+    modalInstallInstancia = null;
+  }
 }
 
 export function initPWAOffline() {

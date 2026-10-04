@@ -228,8 +228,15 @@ export const ESPECIES_MS = [
   }
 ];
 
-export function renderizarEspecies(termoBusca = '') {
-  const container = document.getElementById('species-grid') || document.getElementById('species-cards-container');
+import { abrirModalDeTemplate } from './modal-manager.js';
+
+let modalEspeciesInstancia = null;
+
+export function renderizarEspecies(termoBusca = '', containerEl = null) {
+  const container = containerEl 
+    ? (containerEl.querySelector('#species-grid') || containerEl.querySelector('#species-cards-container'))
+    : (document.getElementById('species-grid') || document.getElementById('species-cards-container'));
+
   if (!container) return;
 
   const termo = termoBusca.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -281,10 +288,11 @@ export function renderizarEspecies(termoBusca = '') {
   }).join('');
 }
 
-export function verificarMedidaPescado() {
-  const selectSpecies = document.getElementById('checker-species');
-  const inputSize = document.getElementById('checker-length') || document.getElementById('checker-size');
-  const measureResult = document.getElementById('measure-result');
+export function verificarMedidaPescado(modalEl = null) {
+  const ctx = modalEl || document;
+  const selectSpecies = ctx.querySelector('#checker-species') || document.getElementById('checker-species');
+  const inputSize = ctx.querySelector('#checker-length') || ctx.querySelector('#checker-size') || document.getElementById('checker-length');
+  const measureResult = ctx.querySelector('#measure-result') || document.getElementById('measure-result');
 
   if (!selectSpecies || !inputSize || !measureResult) return;
 
@@ -340,63 +348,46 @@ export function verificarMedidaPescado() {
 }
 
 export function abrirModalEspecies() {
-  const modalEspecies = document.getElementById('modal-especies');
-  const btnFecharEspecies = document.getElementById('btn-fechar-especies');
-  if (!modalEspecies) return;
-  renderizarEspecies();
-  modalEspecies.classList.remove('hidden');
-  modalEspecies.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-  try {
-    history.pushState({ modal: 'especies' }, '');
-  } catch (_) {}
-  if (btnFecharEspecies) btnFecharEspecies.focus();
+  modalEspeciesInstancia = abrirModalDeTemplate('template-modal-especies', {
+    modalId: 'modal-especies',
+    onMount: (modalEl) => {
+      renderizarEspecies('', modalEl);
+
+      const btnRunCheck = modalEl.querySelector('#btn-run-check') || modalEl.querySelector('#checker-btn');
+      if (btnRunCheck) {
+        btnRunCheck.addEventListener('click', () => verificarMedidaPescado(modalEl));
+      }
+
+      const speciesSearchInput = modalEl.querySelector('#species-search-input');
+      if (speciesSearchInput) {
+        speciesSearchInput.addEventListener('input', (e) => {
+          renderizarEspecies(e.target.value, modalEl);
+        });
+      }
+    },
+    onDestroy: () => {
+      modalEspeciesInstancia = null;
+    }
+  });
 }
 
 export function fecharModalEspecies() {
-  const modalEspecies = document.getElementById('modal-especies');
-  if (!modalEspecies) return;
-  modalEspecies.classList.add('hidden');
-  modalEspecies.setAttribute('aria-hidden', 'true');
+  if (modalEspeciesInstancia) {
+    modalEspeciesInstancia.destroy();
+    modalEspeciesInstancia = null;
+  }
 }
 
 export function initSpeciesChecker() {
-  const btnRunCheck = document.getElementById('btn-run-check') || document.getElementById('checker-btn');
-  if (btnRunCheck) {
-    btnRunCheck.addEventListener('click', verificarMedidaPescado);
-  }
-
-  const speciesSearchInput = document.getElementById('species-search-input');
-  if (speciesSearchInput) {
-    speciesSearchInput.addEventListener('input', (e) => {
-      renderizarEspecies(e.target.value);
+  const triggerBtns = document.querySelectorAll('#btn-especies, #btn-especies-modal, #btn-hero-species, #nav-btn-especies');
+  triggerBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      vibrar(25);
+      abrirModalEspecies();
     });
-  }
-
-  const btnAbrirEspecies = document.getElementById('btn-especies') || document.getElementById('btn-especies-modal');
-  if (btnAbrirEspecies) {
-    btnAbrirEspecies.addEventListener('click', abrirModalEspecies);
-  }
-
-  const btnFecharEspecies = document.getElementById('btn-fechar-especies');
-  if (btnFecharEspecies) {
-    btnFecharEspecies.addEventListener('click', fecharModalEspecies);
-  }
-
-  const modalEspecies = document.getElementById('modal-especies');
-  if (modalEspecies) {
-    modalEspecies.addEventListener('click', (e) => {
-      if (e.target === modalEspecies) fecharModalEspecies();
-    });
-  }
+  });
 }
-
-// Fechamento com Escape
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharModalEspecies();
-  }
-});
 
 // Retrocompatibilidade global
 if (typeof window !== 'undefined') {

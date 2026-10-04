@@ -1,10 +1,13 @@
 /**
  * GeoFish MS - Módulo de Central de Emergência & S.O.S Fluvial
- * Prevenção de acidentes, suporte de resgate com Marinha (185), PMA (190) e Bombeiros (193)
+ * Utiliza <template> nativo, instanciando no DOM sob demanda e destruindo ao fechar.
  */
 
 import { escapeHTML, vibrar, showToast } from './utils.js';
+import { abrirModalDeTemplate } from './modal-manager.js';
 
+let modalSosInstancia = null;
+let modalConfirmSosInstancia = null;
 let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico }
 
 export function gerarTextoResgate() {
@@ -21,52 +24,99 @@ export function gerarTextoResgate() {
 }
 
 export function abrirModalSos() {
-  const modalSos = document.getElementById('modal-sos');
-  if (!modalSos) return;
-  modalSos.classList.remove('hidden');
-  modalSos.setAttribute('aria-hidden', 'false');
-  vibrar(35);
-  try {
-    history.pushState({ modal: 'sos' }, '');
-  } catch (_) {}
+  modalSosInstancia = abrirModalDeTemplate('template-modal-sos', {
+    modalId: 'modal-sos',
+    onMount: (modalEl) => {
+      const btnCopiar = modalEl.querySelector('#btn-copiar-resgate');
+      if (btnCopiar) {
+        btnCopiar.addEventListener('click', () => {
+          abrirConfirmacaoSos({ tipo: 'copy' });
+        });
+      }
+
+      const btnWpp = modalEl.querySelector('.btn-wpp-action') || modalEl.querySelector('#btn-wpp-resgate');
+      if (btnWpp) {
+        btnWpp.addEventListener('click', (e) => {
+          e.preventDefault();
+          abrirConfirmacaoSos({ tipo: 'wpp' });
+        });
+      }
+
+      const callBtns = modalEl.querySelectorAll('.sos-call-btn');
+      callBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const servico = btn.getAttribute('data-service') || 'Serviço de Emergência';
+          const numero = btn.getAttribute('data-number') || '';
+          if (numero) {
+            abrirConfirmacaoSos({ tipo: 'call', servico, numero });
+          }
+        });
+      });
+    },
+    onDestroy: () => {
+      modalSosInstancia = null;
+    }
+  });
 }
 
 export function fecharModalSos() {
-  const modalSos = document.getElementById('modal-sos');
-  if (!modalSos) return;
-  modalSos.classList.add('hidden');
-  modalSos.setAttribute('aria-hidden', 'true');
+  if (modalSosInstancia) {
+    modalSosInstancia.destroy();
+    modalSosInstancia = null;
+  }
 }
 
 export function abrirConfirmacaoSos(acao) {
   acaoPendenteSos = acao;
-  const modalConfirmSos = document.getElementById('modal-confirm-sos');
-  const confirmSosText = document.getElementById('confirm-sos-text');
-  const btnExecutarSosCall = document.getElementById('btn-executar-sos-call');
 
-  if (!modalConfirmSos || !confirmSosText) return;
+  modalConfirmSosInstancia = abrirModalDeTemplate('template-modal-confirm-sos', {
+    modalId: 'modal-confirm-sos',
+    empilhar: true,
+    onMount: (modalEl, destroy) => {
+      const confirmSosText = modalEl.querySelector('#confirm-sos-text');
+      const btnExecutarSosCall = modalEl.querySelector('#btn-executar-sos-call');
+      const btnCancelarSosCall = modalEl.querySelector('#btn-cancelar-sos-call');
 
-  if (acao.tipo === 'call') {
-    confirmSosText.innerHTML = `Você está prestes a discar para <strong>${escapeHTML(acao.servico)} (${escapeHTML(acao.numero)})</strong>.<br><br>` +
-      `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
-  } else if (acao.tipo === 'copy') {
-    confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
-  } else if (acao.tipo === 'wpp') {
-    confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
-    if (btnExecutarSosCall) btnExecutarSosCall.textContent = `💬 Sim, Abrir WhatsApp`;
-  }
+      if (confirmSosText) {
+        if (acao.tipo === 'call') {
+          confirmSosText.innerHTML = `Você está prestes a discar para <strong>${escapeHTML(acao.servico)} (${escapeHTML(acao.numero)})</strong>.<br><br>` +
+            `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
+          if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
+        } else if (acao.tipo === 'copy') {
+          confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
+          if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
+        } else if (acao.tipo === 'wpp') {
+          confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
+          if (btnExecutarSosCall) btnExecutarSosCall.textContent = `💬 Sim, Abrir WhatsApp`;
+        }
+      }
 
-  modalConfirmSos.classList.remove('hidden');
-  vibrar(40);
+      if (btnExecutarSosCall) {
+        btnExecutarSosCall.addEventListener('click', () => {
+          executarSosAcao();
+          destroy();
+        });
+      }
+
+      if (btnCancelarSosCall) {
+        btnCancelarSosCall.addEventListener('click', () => {
+          destroy();
+        });
+      }
+    },
+    onDestroy: () => {
+      acaoPendenteSos = null;
+      modalConfirmSosInstancia = null;
+    }
+  });
 }
 
 export function fecharConfirmacaoSos() {
-  const modalConfirmSos = document.getElementById('modal-confirm-sos');
-  if (!modalConfirmSos) return;
-  modalConfirmSos.classList.add('hidden');
-  acaoPendenteSos = null;
+  if (modalConfirmSosInstancia) {
+    modalConfirmSosInstancia.destroy();
+    modalConfirmSosInstancia = null;
+    acaoPendenteSos = null;
+  }
 }
 
 export function executarSosAcao() {
@@ -97,66 +147,15 @@ export function executarSosAcao() {
 }
 
 export function initSosEmergency() {
-  const btnSos = document.getElementById('btn-sos');
-  const btnFecharSos = document.getElementById('btn-fechar-sos');
-  const modalSos = document.getElementById('modal-sos');
-
-  if (btnSos) btnSos.addEventListener('click', abrirModalSos);
-  if (btnFecharSos) btnFecharSos.addEventListener('click', fecharModalSos);
-
-  if (modalSos) {
-    modalSos.addEventListener('click', (e) => {
-      if (e.target === modalSos) fecharModalSos();
-    });
-  }
-
-  const btnCopiarResgate = document.getElementById('btn-copiar-resgate');
-  if (btnCopiarResgate) {
-    btnCopiarResgate.addEventListener('click', () => {
-      abrirConfirmacaoSos({ tipo: 'copy' });
-    });
-  }
-
-  const btnWppResgate = document.getElementById('btn-wpp-resgate');
-  if (btnWppResgate) {
-    btnWppResgate.addEventListener('click', () => {
-      abrirConfirmacaoSos({ tipo: 'wpp' });
-    });
-  }
-
-  // Delegação dos botões de ligação rápida
-  const sosButtons = document.querySelectorAll('.sos-call-btn');
-  sosButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const servico = btn.getAttribute('data-service') || 'Serviço de Emergência';
-      const numero = btn.getAttribute('data-number') || '';
-      if (numero) {
-        abrirConfirmacaoSos({ tipo: 'call', servico, numero });
-      }
+  const triggerBtns = document.querySelectorAll('#btn-sos, .btn-alerta-sos');
+  triggerBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      vibrar(30);
+      abrirModalSos();
     });
   });
-
-  const btnCancelarSosCall = document.getElementById('btn-cancelar-sos-call');
-  const btnExecutarSosCall = document.getElementById('btn-executar-sos-call');
-  const modalConfirmSos = document.getElementById('modal-confirm-sos');
-
-  if (btnCancelarSosCall) btnCancelarSosCall.addEventListener('click', fecharConfirmacaoSos);
-  if (btnExecutarSosCall) btnExecutarSosCall.addEventListener('click', executarSosAcao);
-
-  if (modalConfirmSos) {
-    modalConfirmSos.addEventListener('click', (e) => {
-      if (e.target === modalConfirmSos) fecharConfirmacaoSos();
-    });
-  }
 }
-
-// Fechamento com Escape
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharConfirmacaoSos();
-    fecharModalSos();
-  }
-});
 
 // Retrocompatibilidade global
 if (typeof window !== 'undefined') {

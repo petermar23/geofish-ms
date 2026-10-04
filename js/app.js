@@ -23,6 +23,11 @@ import {
 } from './modules/cartilha-modal.js';
 
 import {
+  abrirModalDeTemplate,
+  fecharModalAtivo
+} from './modules/modal-manager.js';
+
+import {
   ESPECIES_MS,
   renderizarEspecies,
   verificarMedidaPescado,
@@ -740,11 +745,8 @@ let marcadorPosicao = null;
 let circuloPrecisao = null;
 const btnLocalizacao = null; // Sensor de GPS descontinuado em prol de economia de bateria e foco em contatos
 
-// 9. Modal "Sobre os Dados" e Governança Territorial
-const modalSobre = document.getElementById('modal-sobre');
-const btnAbrirSobre = document.getElementById('btn-sobre');
-const btnFecharSobre = document.getElementById('btn-fechar-sobre');
-const layerStatusList = document.getElementById('layer-status-list');
+// 9. Modal "Sobre os Dados" e Governança Territorial (Instanciado sob demanda via <template>)
+let modalSobreInstancia = null;
 
 function formatarDataBR(isoString) {
   if (!isoString) return 'Data não disponível';
@@ -763,75 +765,63 @@ function formatarDataBR(isoString) {
 }
 
 function abrirModalSobre() {
-  if (!modalSobre) return;
+  modalSobreInstancia = abrirModalDeTemplate('template-modal-sobre', {
+    modalId: 'modal-sobre',
+    onMount: (modalEl) => {
+      const layerStatusList = modalEl.querySelector('#layer-status-list');
+      if (layerStatusList) {
+        layerStatusList.innerHTML = '';
+        const nomes = {
+          trechos_pesca: 'Regras de Pesca por Trecho',
+          guias_credenciados: 'Guias de Pesca Credenciados',
+          pontos_emergencia: 'Pontos de Apoio e Emergência',
+          areas_restritas: 'Áreas Restritas (Unidades de Conservação)',
+          rios_principais: 'Rios Principais do Estado',
+          bacias_uepgrh: 'Bacias Hidrográficas (UEPGRH)',
+          bacias_especiais: 'Bacias Especiais de Manejo',
+          aglomerados_rurais: 'Aglomerados e Comunidades Rurais'
+        };
 
-  // Atualiza a listagem de status das camadas
-  if (layerStatusList) {
-    layerStatusList.innerHTML = '';
-    const nomes = {
-      trechos_pesca: 'Regras de Pesca por Trecho',
-      guias_credenciados: 'Guias de Pesca Credenciados',
-      pontos_emergencia: 'Pontos de Apoio e Emergência',
-      areas_restritas: 'Áreas Restritas (Unidades de Conservação)',
-      rios_principais: 'Rios Principais do Estado',
-      bacias_uepgrh: 'Bacias Hidrográficas (UEPGRH)',
-      bacias_especiais: 'Bacias Especiais de Manejo',
-      aglomerados_rurais: 'Aglomerados e Comunidades Rurais'
-    };
+        for (const [key, nome] of Object.entries(nomes)) {
+          const status = statusCamadas[key] || { origem: 'indisponivel', atualizado_em: null };
+          const row = document.createElement('div');
+          row.className = 'layer-status-row';
 
-    for (const [key, nome] of Object.entries(nomes)) {
-      const status = statusCamadas[key] || { origem: 'indisponivel', atualizado_em: null };
-      const row = document.createElement('div');
-      row.className = 'layer-status-row';
+          let tagClass = 'status-unavailable';
+          let tagTexto = 'Indisponível';
 
-      let tagClass = 'status-unavailable';
-      let tagTexto = 'Indisponível';
+          if (status.origem === 'rede') {
+            tagClass = 'status-online';
+            tagTexto = 'Atualizada na sessão';
+          } else if (status.origem === 'offline') {
+            tagClass = 'status-cached';
+            tagTexto = `Offline (${formatarDataBR(status.atualizado_em)})`;
+          }
 
-      if (status.origem === 'rede') {
-        tagClass = 'status-online';
-        tagTexto = 'Atualizada na sessão';
-      } else if (status.origem === 'offline') {
-        tagClass = 'status-cached';
-        tagTexto = `Offline (${formatarDataBR(status.atualizado_em)})`;
+          row.innerHTML = `
+            <span><strong>${escapeHTML(nome)}</strong></span>
+            <span class="status-tag ${tagClass}">${tagTexto}</span>
+          `;
+          layerStatusList.appendChild(row);
+        }
       }
-
-      row.innerHTML = `
-        <span><strong>${escapeHTML(nome)}</strong></span>
-        <span class="status-tag ${tagClass}">${tagTexto}</span>
-      `;
-      layerStatusList.appendChild(row);
+    },
+    onDestroy: () => {
+      modalSobreInstancia = null;
     }
-  }
-
-  modalSobre.classList.remove('hidden');
-  modalSobre.setAttribute('aria-hidden', 'false');
-  vibrar(25);
-  try {
-    history.pushState({ modal: 'sobre' }, '');
-  } catch (_) {}
-  if (btnFecharSobre) btnFecharSobre.focus();
+  });
 }
 
 function fecharModalSobre() {
-  if (!modalSobre) return;
-  modalSobre.classList.add('hidden');
-  modalSobre.setAttribute('aria-hidden', 'true');
+  if (modalSobreInstancia) {
+    modalSobreInstancia.destroy();
+    modalSobreInstancia = null;
+  }
 }
 
+const btnAbrirSobre = document.getElementById('btn-sobre');
 if (btnAbrirSobre) {
   btnAbrirSobre.addEventListener('click', abrirModalSobre);
-}
-
-if (btnFecharSobre) {
-  btnFecharSobre.addEventListener('click', fecharModalSobre);
-}
-
-if (modalSobre) {
-  modalSobre.addEventListener('click', (e) => {
-    if (e.target === modalSobre) {
-      fecharModalSobre();
-    }
-  });
 }
 // 10, 11, 12. Gestão PWA & Offline delegada para o submódulo js/modules/pwa-offline.js
 
@@ -1174,34 +1164,16 @@ function inicializarBuscaLocal() {
 
 
 // ========================================================
-// 17. DIÁRIO DE PESCA E DENÚNCIAS OFFLINE (GAMIFICAÇÃO & CIDADANIA)
-// ========================================================
-
-const btnAbrirDiario = document.getElementById('btn-abrir-diario');
-const modalDiario = document.getElementById('modal-diario');
-const btnFecharDiario = document.getElementById('btn-fechar-diario');
-const previewBoxDiario = document.getElementById('preview-box-diario');
-const inputFotoDiario = document.getElementById('input-foto-diario');
-const imgDiario = document.getElementById('img-diario');
-const btnSalvarDiario = document.getElementById('btn-salvar-diario');
-const selectEspecieDiario = document.getElementById('select-especie-diario');
-const inputTamanhoDiario = document.getElementById('input-tamanho-diario');
-
-const btnAbrirDenuncia = document.getElementById('btn-abrir-denuncia');
-const modalDenuncia = document.getElementById('modal-denuncia');
-const btnFecharDenuncia = document.getElementById('btn-fechar-denuncia');
-const previewBoxDenuncia = document.getElementById('preview-box-denuncia');
-const inputFotoDenuncia = document.getElementById('input-foto-denuncia');
-const imgDenuncia = document.getElementById('img-denuncia');
-const btnSalvarDenuncia = document.getElementById('btn-salvar-denuncia');
-const selectCrimeDenuncia = document.getElementById('select-crime-denuncia');
-
+// 17. DIÁRIO DE PESCA E DENÚNCIAS OFFLINE (Instanciados sob demanda via <template>)
 let currentBase64Diario = null;
 let currentBase64Denuncia = null;
 let trofeusLayerGroup = L.layerGroup().addTo(map);
 
-// ----- Funções Auxiliares de Câmera -----
+let modalDiarioInstancia = null;
+let modalDenunciaInstancia = null;
+
 function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
+  if (!previewBox || !inputElement || !imgElement) return;
   previewBox.addEventListener('click', () => inputElement.click());
   
   inputElement.addEventListener('change', (e) => {
@@ -1219,342 +1191,252 @@ function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
   });
 }
 
-setupPhotoInput(previewBoxDiario, inputFotoDiario, imgDiario, (b64) => { currentBase64Diario = b64; });
-setupPhotoInput(previewBoxDenuncia, inputFotoDenuncia, imgDenuncia, (b64) => { currentBase64Denuncia = b64; });
-
-// ----- Diário de Troféus -----
-if (btnAbrirDiario) btnAbrirDiario.addEventListener('click', () => {
-  modalDiario.classList.remove('hidden');
-  atualizarLocalizacaoOculta(); // Força GPS
-});
-if (btnFecharDiario) btnFecharDiario.addEventListener('click', () => modalDiario.classList.add('hidden'));
-
-const cbLgpdDiario = document.getElementById('cb-lgpd-diario');
-
-// ========================================================
-// 17.1. ICTIÓLOGO VIRTUAL COM IA NATIVA (GOOGLE GEMINI)
-// ========================================================
-const btnIaIdentificar = document.getElementById('btn-ia-identificar');
-const btnConfigGemini = document.getElementById('btn-config-gemini');
-const aiKeyBox = document.getElementById('ai-key-box');
-const btnFecharKeyBox = document.getElementById('btn-fechar-key-box');
-const inputGeminiKey = document.getElementById('input-gemini-key');
-const btnSalvarGeminiKey = document.getElementById('btn-salvar-gemini-key');
-const aiLoadingBox = document.getElementById('ai-loading-box');
-const aiLoadingMsg = document.getElementById('ai-loading-msg');
-const aiResultadoBox = document.getElementById('ai-resultado-box');
-
 function obterChaveGemini() {
   return localStorage.getItem('geofish_gemini_api_key') || 
          (typeof window.GEMINI_API_KEY === 'string' ? window.GEMINI_API_KEY : '') ||
          (window.__ENV__ && window.__ENV__.GEMINI_API_KEY ? window.__ENV__.GEMINI_API_KEY : '');
 }
 
-if (btnConfigGemini && aiKeyBox) {
-  btnConfigGemini.addEventListener('click', () => {
-    aiKeyBox.classList.toggle('hidden');
-    if (!aiKeyBox.classList.contains('hidden') && inputGeminiKey) {
-      inputGeminiKey.value = obterChaveGemini();
-      inputGeminiKey.focus();
-    }
-  });
-}
+async function consultarGeminiVision(base64Image, apiKey) {
+  const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
+  const mimeTypeMatch = base64Image.match(/^data:(image\/[a-z]+);base64,/);
+  const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
 
-if (btnFecharKeyBox && aiKeyBox) {
-  btnFecharKeyBox.addEventListener('click', () => {
-    aiKeyBox.classList.add('hidden');
-  });
-}
-
-if (btnSalvarGeminiKey && inputGeminiKey) {
-  btnSalvarGeminiKey.addEventListener('click', () => {
-    const val = inputGeminiKey.value.trim();
-    if (!val) {
-      localStorage.removeItem('geofish_gemini_api_key');
-      showToast('Chave da API removida.');
-    } else {
-      localStorage.setItem('geofish_gemini_api_key', val);
-      showToast('Chave da Google Gemini API salva!');
-    }
-    if (aiKeyBox) aiKeyBox.classList.add('hidden');
-  });
-}
-
-async function analisarFotoComIA() {
-  if (!currentBase64Diario) {
-    vibrar(30);
-    return showToast('Tire ou selecione uma foto do peixe primeiro!');
-  }
-
-  if (!navigator.onLine) {
-    vibrar(30);
-    return showToast('📡 Sem sinal de internet. Use a régua offline para conferir a medida legal.');
-  }
-
-  const apiKey = obterChaveGemini();
-  if (!apiKey) {
-    if (aiKeyBox) {
-      aiKeyBox.classList.remove('hidden');
-      if (inputGeminiKey) inputGeminiKey.focus();
-    }
-    vibrar(30);
-    return showToast('Insira sua chave gratuita do Google AI Studio para ativar o Ictiólogo IA.');
-  }
-
-  if (btnIaIdentificar) btnIaIdentificar.disabled = true;
-  if (aiLoadingBox) aiLoadingBox.classList.remove('hidden');
-  if (aiResultadoBox) {
-    aiResultadoBox.classList.add('hidden');
-    aiResultadoBox.innerHTML = '';
-  }
-
-  try {
-    const commaIdx = currentBase64Diario.indexOf(',');
-    const metaPart = currentBase64Diario.substring(0, commaIdx);
-    const base64Data = currentBase64Diario.substring(commaIdx + 1);
-    const mimeMatch = metaPart.match(/:(.*?);/);
-    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-
-    const systemPrompt = `Você é um ictiólogo e fiscal ambiental de referência na Bacia do Rio Miranda e Pantanal de Mato Grosso do Sul, especialista no Decreto Estadual nº 15.166/MS (Cota Zero para transporte rodoviário, consumo local, medidas mínimas e máximas de captura) e Lei Estadual de Proteção ao Dourado.
-Analise a imagem deste peixe e responda EXCLUSIVAMENTE em formato JSON puro, sem crases de markdown e sem texto antes ou depois:
+  const prompt = `Você é um ictiólogo e biólogo sênior especialista na ictiofauna da Bacia do Rio Miranda (Pantanal de Mato Grosso do Sul).
+Analise a foto deste peixe e forneça a identificação rigorosa conforme a legislação ambiental do Estado de MS (Decreto Estadual nº 15.166/2019 e Lei nº 5.321/19).
+Responda EXCLUSIVAMENTE em formato JSON puro, sem markdown, no seguinte formato:
 {
-  "especie": "Nome Comum (ex: Pintado, Pacu, Cachara, Jaú, Dourado, Piraputanga, Curimbatá, Piavuçu, Barbado)",
-  "nomeCientifico": "Nome científico em latim",
-  "confianca": "Alta, Média ou Baixa",
-  "tamanhoEstimadoCm": null,
-  "medidaMinima": 85,
-  "medidaMaxima": 125,
-  "statusLegal": "PERMITIDO CONSUMO LOCAL | PROIBIDO TOTAL (COTA ZERO) | ATENÇÃO À FAIXA LEGAL",
-  "regraTexto": "Explicação resumida das regras do IMASUL MS para a espécie",
-  "dicaPantaneira": "Dica prática pantaneira sobre soltura, manuseio seguro ou biologia do peixe"
+  "especie": "Nome Comum Principal",
+  "nomeCientifico": "Gênero e espécie em latim",
+  "idSugerido": "pintado | pacu | cachara | jau | dourado | piraputanga | curimbata | piavucu | barbado | outro",
+  "conformidade": "Permitido com Cota (Faixa X a Y cm) | Cota Zero / Proibido Abate (Dourado) | Cota Livre (Exótica)",
+  "observacoes": "Resumo biológico de 1 frase para o pescador pantaneiro."
 }`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          { text: prompt },
+          { inline_data: { mime_type: mimeType, data: cleanBase64 } }
+        ]
+      }],
+      generationConfig: { response_mime_type: "application/json" }
+    })
+  });
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `Erro HTTP ${response.status}`);
+  }
 
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: systemPrompt },
-              {
-                inlineData: {
-                  mimeType: mimeType,
-                  data: base64Data
-                }
-              }
-            ]
+  const data = await response.json();
+  const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  return JSON.parse(textResponse);
+}
+
+function abrirModalDiario() {
+  modalDiarioInstancia = abrirModalDeTemplate('template-modal-diario', {
+    modalId: 'modal-diario',
+    onMount: (modalEl, destroy) => {
+      const previewBoxDiario = modalEl.querySelector('#preview-box-diario');
+      const inputFotoDiario = modalEl.querySelector('#input-foto-diario');
+      const imgDiario = modalEl.querySelector('#img-diario');
+      const btnSalvarDiario = modalEl.querySelector('#btn-salvar-diario');
+      const selectEspecieDiario = modalEl.querySelector('#select-especie-diario');
+      const inputTamanhoDiario = modalEl.querySelector('#input-tamanho-diario');
+      const cbLgpdDiario = modalEl.querySelector('#cb-lgpd-diario');
+
+      const btnIaIdentificar = modalEl.querySelector('#btn-ia-identificar');
+      const btnConfigGemini = modalEl.querySelector('#btn-config-gemini');
+      const aiKeyBox = modalEl.querySelector('#ai-key-box');
+      const btnFecharKeyBox = modalEl.querySelector('#btn-fechar-key-box');
+      const inputGeminiKey = modalEl.querySelector('#input-gemini-key');
+      const btnSalvarGeminiKey = modalEl.querySelector('#btn-salvar-gemini-key');
+      const aiLoadingBox = modalEl.querySelector('#ai-loading-box');
+      const aiResultadoBox = modalEl.querySelector('#ai-resultado-box');
+
+      setupPhotoInput(previewBoxDiario, inputFotoDiario, imgDiario, (b64) => { currentBase64Diario = b64; });
+
+      if (btnConfigGemini && aiKeyBox) {
+        btnConfigGemini.addEventListener('click', () => {
+          aiKeyBox.classList.toggle('hidden');
+          if (!aiKeyBox.classList.contains('hidden') && inputGeminiKey) {
+            inputGeminiKey.value = obterChaveGemini();
+            inputGeminiKey.focus();
           }
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          responseMimeType: "application/json"
-        }
-      })
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!resp.ok) {
-      const errData = await resp.json().catch(() => ({}));
-      const msg = errData?.error?.message || `Erro HTTP ${resp.status}`;
-      throw new Error(msg);
-    }
-
-    const data = await resp.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) throw new Error('Resposta vazia da IA Gemini.');
-
-    let resultado;
-    try {
-      resultado = JSON.parse(rawText.trim());
-    } catch (_) {
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) resultado = JSON.parse(jsonMatch[0]);
-      else throw new Error('Não foi possível interpretar o retorno da IA.');
-    }
-
-    // Auto-preenche o select de espécies
-    if (selectEspecieDiario && resultado.especie) {
-      const especieNorm = resultado.especie.toLowerCase();
-      for (const opt of selectEspecieDiario.options) {
-        const valNorm = opt.value.toLowerCase();
-        const textNorm = opt.text.toLowerCase();
-        if (especieNorm.includes(valNorm) || textNorm.includes(especieNorm)) {
-          selectEspecieDiario.value = opt.value;
-          break;
-        }
+        });
       }
-    }
 
-    // Preenche tamanho se estimado
-    if (inputTamanhoDiario && resultado.tamanhoEstimadoCm && !inputTamanhoDiario.value) {
-      inputTamanhoDiario.value = resultado.tamanhoEstimadoCm;
-    }
+      if (btnFecharKeyBox && aiKeyBox) {
+        btnFecharKeyBox.addEventListener('click', () => aiKeyBox.classList.add('hidden'));
+      }
 
-    // Determina badge e cores
-    let statusClass = 'legal';
-    let badgeClass = 'badge-permitido';
-    const statusUpper = (resultado.statusLegal || '').toUpperCase();
+      if (btnSalvarGeminiKey && inputGeminiKey && aiKeyBox) {
+        btnSalvarGeminiKey.addEventListener('click', () => {
+          const key = inputGeminiKey.value.trim();
+          if (key) {
+            localStorage.setItem('geofish_gemini_api_key', key);
+            showToast('Chave Google Gemini salva com sucesso!');
+            aiKeyBox.classList.add('hidden');
+          } else {
+            localStorage.removeItem('geofish_gemini_api_key');
+            showToast('Chave removida.');
+          }
+        });
+      }
 
-    if (statusUpper.includes('PROIBIDO') || (resultado.especie || '').toLowerCase().includes('dourado')) {
-      statusClass = 'proibido';
-      badgeClass = 'badge-proibido';
-    } else if (statusUpper.includes('ATENÇÃO') || statusUpper.includes('FAIXA') || statusUpper.includes('FORA')) {
-      statusClass = 'alerta';
-      badgeClass = 'badge-atencao';
-    }
+      if (btnIaIdentificar) {
+        btnIaIdentificar.addEventListener('click', async () => {
+          vibrar(25);
+          if (!currentBase64Diario) {
+            return showToast('Tire ou escolha uma foto do peixe primeiro!');
+          }
+          const apiKey = obterChaveGemini();
+          if (!apiKey) {
+            if (aiKeyBox) aiKeyBox.classList.remove('hidden');
+            return showToast('Configure sua chave gratuita do Google Gemini.');
+          }
+          if (aiLoadingBox) aiLoadingBox.classList.remove('hidden');
+          if (aiResultadoBox) aiResultadoBox.classList.add('hidden');
 
-    let faixaTexto = '';
-    if (resultado.medidaMinima && resultado.medidaMaxima) {
-      faixaTexto = `<div style="font-size: 0.78rem; color: #475569; margin-top: 4px;">📏 <strong>Faixa legal:</strong> ${resultado.medidaMinima} cm a ${resultado.medidaMaxima} cm</div>`;
-    } else if (resultado.medidaMinima) {
-      faixaTexto = `<div style="font-size: 0.78rem; color: #475569; margin-top: 4px;">📏 <strong>Tamanho Mínimo Legal:</strong> ${resultado.medidaMinima} cm</div>`;
-    }
+          try {
+            const analise = await consultarGeminiVision(currentBase64Diario, apiKey);
+            if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
+            if (aiResultadoBox) {
+              aiResultadoBox.classList.remove('hidden');
+              aiResultadoBox.innerHTML = `
+                <div class="ai-result-title">✨ Parecer do Ictiólogo Virtual (Gemini)</div>
+                <div class="ai-result-body">
+                  <strong>Espécie Sugerida:</strong> ${escapeHTML(analise.especie || 'Não identificada')}<br>
+                  <strong>Nome Científico:</strong> <em>${escapeHTML(analise.nomeCientifico || '')}</em><br>
+                  <strong>Situação Legal em MS:</strong> ${escapeHTML(analise.conformidade || 'Consulte o regulamento')}<br>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #334155;">${escapeHTML(analise.observacoes || '')}</p>
+                </div>
+              `;
+            }
+            if (selectEspecieDiario && analise.idSugerido) {
+              selectEspecieDiario.value = analise.idSugerido;
+            }
+          } catch (err) {
+            if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
+            showToast('Falha ao consultar IA: ' + (err.message || 'Verifique a chave'));
+          }
+        });
+      }
 
-    if (aiResultadoBox) {
-      aiResultadoBox.className = `ai-resultado-box ${statusClass}`;
-      aiResultadoBox.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-          <div>
-            <span class="ai-badge ${badgeClass}">${escapeHTML(resultado.statusLegal || 'Identificado')}</span>
-            <h4 style="font-size: 0.95rem; color: #0f172a; margin-top: 3px; font-weight: 800;">
-              🐟 ${escapeHTML(resultado.especie)}
-              <span style="font-size: 0.78rem; color: #64748b; font-weight: 400; font-style: italic;">(${escapeHTML(resultado.nomeCientifico || '')})</span>
-            </h4>
-          </div>
-          <span style="font-size: 0.7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">Confiança: ${escapeHTML(resultado.confianca || 'Normal')}</span>
-        </div>
-        <p style="font-size: 0.8rem; color: #334155; margin-top: 6px; line-height: 1.4;">
-          <strong>⚖️ Regra MS:</strong> ${escapeHTML(resultado.regraTexto || 'Consulte o Decreto Estadual 15.166/MS.')}
-        </p>
-        ${faixaTexto}
-        ${resultado.dicaPantaneira ? `
-          <p style="font-size: 0.76rem; color: #0369a1; margin-top: 6px; background: #f0f9ff; padding: 6px 8px; border-radius: 6px; line-height: 1.35;">
-            💡 <strong>Dica Pantaneira:</strong> ${escapeHTML(resultado.dicaPantaneira)}
-          </p>
-        ` : ''}
-      `;
-      aiResultadoBox.classList.remove('hidden');
-    }
+      if (btnSalvarDiario) {
+        btnSalvarDiario.addEventListener('click', async () => {
+          if (!currentBase64Diario) return showToast('Você precisa fotografar o peixe.');
+          if (!inputTamanhoDiario.value) return showToast('Informe o comprimento aproximado em cm.');
+          if (cbLgpdDiario && !cbLgpdDiario.checked) return showToast('Você precisa aceitar o Termo de Consentimento.');
 
-    vibrar([30, 60, 30]);
-    showToast(`Identificado: ${resultado.especie}!`);
-  } catch (err) {
-    console.error('Erro na identificação com Gemini:', err);
-    vibrar(40);
-    showToast(`Erro na IA: ${err.message || 'Verifique sua chave ou conexão.'}`);
-    if (aiResultadoBox) {
-      aiResultadoBox.className = 'ai-resultado-box alerta';
-      aiResultadoBox.innerHTML = `
-        <p style="font-size: 0.8rem; color: #b45309;">
-          ⚠️ <strong>Não foi possível identificar:</strong> ${escapeHTML(err.message)}
-        </p>
-        <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
-          Verifique se a foto está nítida ou clique na engrenagem ⚙️ para conferir sua chave da Google Gemini API.
-        </p>
-      `;
-      aiResultadoBox.classList.remove('hidden');
+          btnSalvarDiario.disabled = true;
+          btnSalvarDiario.innerText = 'Salvando...';
+
+          const trofeu = {
+            id: new Date().toISOString(),
+            lat: ultimaPosicaoUsuario?.lat || -20.24,
+            lng: ultimaPosicaoUsuario?.lng || -56.38,
+            especie: selectEspecieDiario.options[selectEspecieDiario.selectedIndex].text,
+            tamanho: parseFloat(inputTamanhoDiario.value),
+            foto: currentBase64Diario,
+            synced: navigator.onLine ? 1 : 0
+          };
+
+          const sucesso = await GeoFishDB.salvarTrofeu(trofeu);
+          btnSalvarDiario.disabled = false;
+          btnSalvarDiario.innerHTML = '💾 Salvar Troféu (Offline)';
+
+          if (sucesso) {
+            showToast('Troféu salvo no seu diário!');
+            destroy();
+            currentBase64Diario = null;
+            if (trofeu.synced === 1) simularEnvioAoServidor(trofeu, 'Pesquisa de Repovoamento');
+            renderizarTrofeusNoMapa();
+          }
+        });
+      }
+
+      atualizarLocalizacaoOculta();
+    },
+    onDestroy: () => {
+      modalDiarioInstancia = null;
     }
-  } finally {
-    if (btnIaIdentificar) btnIaIdentificar.disabled = false;
-    if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
+  });
+}
+
+function fecharModalDiario() {
+  if (modalDiarioInstancia) {
+    modalDiarioInstancia.destroy();
+    modalDiarioInstancia = null;
   }
 }
 
-if (btnIaIdentificar) {
-  btnIaIdentificar.addEventListener('click', analisarFotoComIA);
-}
+function abrirModalDenuncia() {
+  modalDenunciaInstancia = abrirModalDeTemplate('template-modal-denuncia', {
+    modalId: 'modal-denuncia',
+    onMount: (modalEl, destroy) => {
+      const previewBoxDenuncia = modalEl.querySelector('#preview-box-denuncia');
+      const inputFotoDenuncia = modalEl.querySelector('#input-foto-denuncia');
+      const imgDenuncia = modalEl.querySelector('#img-denuncia');
+      const btnSalvarDenuncia = modalEl.querySelector('#btn-salvar-denuncia');
+      const selectCrimeDenuncia = modalEl.querySelector('#select-crime-denuncia');
+      const cbLgpdDenuncia = modalEl.querySelector('#cb-lgpd-denuncia');
 
-if (btnSalvarDiario) {
-  btnSalvarDiario.addEventListener('click', async () => {
-    if (!currentBase64Diario) return showToast('Tire uma foto do troféu primeiro!');
-    if (!inputTamanhoDiario.value) return showToast('Informe o tamanho do peixe.');
-    if (cbLgpdDiario && !cbLgpdDiario.checked) return showToast('Você precisa aceitar o Termo de Consentimento.');
-    btnSalvarDiario.disabled = true;
-    btnSalvarDiario.innerText = 'Salvando...';
+      setupPhotoInput(previewBoxDenuncia, inputFotoDenuncia, imgDenuncia, (b64) => { currentBase64Denuncia = b64; });
 
-    const trofeu = {
-      id: new Date().toISOString(),
-      lat: ultimaPosicaoUsuario?.lat || -20.24,
-      lng: ultimaPosicaoUsuario?.lng || -56.38,
-      especie: selectEspecieDiario.options[selectEspecieDiario.selectedIndex].text,
-      tamanho: parseFloat(inputTamanhoDiario.value),
-      foto: currentBase64Diario,
-      synced: navigator.onLine ? 1 : 0
-    };
+      if (btnSalvarDenuncia) {
+        btnSalvarDenuncia.addEventListener('click', async () => {
+          if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
+          if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
 
-    const sucesso = await GeoFishDB.salvarTrofeu(trofeu);
-    btnSalvarDiario.disabled = false;
-    btnSalvarDiario.innerHTML = '💾 Salvar Troféu (Offline)';
+          btnSalvarDenuncia.disabled = true;
+          btnSalvarDenuncia.innerText = 'Criptografando...';
 
-    if (sucesso) {
-      showToast('Troféu salvo no seu diário!');
-      modalDiario.classList.add('hidden');
-      // Limpar form
-      currentBase64Diario = null;
-      imgDiario.src = '';
-      previewBoxDiario.classList.remove('has-image');
-      inputTamanhoDiario.value = '';
-      if (aiResultadoBox) {
-        aiResultadoBox.classList.add('hidden');
-        aiResultadoBox.innerHTML = '';
+          const denuncia = {
+            id: new Date().toISOString(),
+            lat: ultimaPosicaoUsuario?.lat || -20.24,
+            lng: ultimaPosicaoUsuario?.lng || -56.38,
+            tipo: selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex].text,
+            foto: currentBase64Denuncia,
+            synced: navigator.onLine ? 1 : 0
+          };
+
+          const sucesso = await GeoFishDB.salvarDenuncia(denuncia);
+          btnSalvarDenuncia.disabled = false;
+          btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência & Denunciar';
+
+          if (sucesso) {
+            showToast(denuncia.synced ? 'Denúncia enviada à PMA!' : 'Salvo offline. Envio pendente.');
+            destroy();
+            currentBase64Denuncia = null;
+            if (denuncia.synced === 1) simularEnvioAoServidor(denuncia, 'Servidor da PMA-MS');
+          }
+        });
       }
-      
-      if (trofeu.synced === 1) simularEnvioAoServidor(trofeu, 'Pesquisa de Repovoamento');
-      renderizarTrofeusNoMapa();
+    },
+    onDestroy: () => {
+      modalDenunciaInstancia = null;
     }
   });
 }
 
-// ----- Denúncia Ambiental Offline -----
-if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', () => {
-  modalDenuncia.classList.remove('hidden');
-});
-if (btnFecharDenuncia) btnFecharDenuncia.addEventListener('click', () => modalDenuncia.classList.add('hidden'));
-
-const cbLgpdDenuncia = document.getElementById('cb-lgpd-denuncia');
-
-if (btnSalvarDenuncia) {
-  btnSalvarDenuncia.addEventListener('click', async () => {
-    if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
-    if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
-
-    btnSalvarDenuncia.disabled = true;
-    btnSalvarDenuncia.innerText = 'Criptografando...';
-
-    const denuncia = {
-      id: new Date().toISOString(),
-      lat: ultimaPosicaoUsuario?.lat || -20.24,
-      lng: ultimaPosicaoUsuario?.lng || -56.38,
-      tipo: selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex].text,
-      foto: currentBase64Denuncia,
-      synced: navigator.onLine ? 1 : 0
-    };
-
-    const sucesso = await GeoFishDB.salvarDenuncia(denuncia);
-    btnSalvarDenuncia.disabled = false;
-    btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência & Denunciar';
-
-    if (sucesso) {
-      showToast(denuncia.synced ? 'Denúncia enviada à PMA!' : 'Salvo offline. Envio pendente.');
-      modalDenuncia.classList.add('hidden');
-      
-      currentBase64Denuncia = null;
-      imgDenuncia.src = '';
-      previewBoxDenuncia.classList.remove('has-image');
-
-      if (denuncia.synced === 1) simularEnvioAoServidor(denuncia, 'Servidor da PMA-MS');
-    }
-  });
+function fecharModalDenuncia() {
+  if (modalDenunciaInstancia) {
+    modalDenunciaInstancia.destroy();
+    modalDenunciaInstancia = null;
+  }
 }
+
+const btnAbrirDiario = document.getElementById('btn-abrir-diario');
+if (btnAbrirDiario) btnAbrirDiario.addEventListener('click', abrirModalDiario);
+
+const btnAbrirDenuncia = document.getElementById('btn-abrir-denuncia');
+if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', abrirModalDenuncia);
 
 // Renderiza troféus pessoais no mapa
 async function renderizarTrofeusNoMapa() {
@@ -1634,20 +1516,17 @@ if (btnVerAlertaRegras) {
   });
 }
 
-// Modal Central de Parcerias & Cadastros Comunitários
-const modalParceiros = document.getElementById('modal-parceiros');
-const btnParceirosTopo = document.getElementById('btn-parceiros-topo');
-const btnFecharParceiros = document.getElementById('btn-fechar-parceiros');
-const footerBtnParceiros = document.getElementById('footer-btn-parceiros');
-const footerBtnPiloteiros = document.getElementById('footer-btn-piloteiros');
+// Modal Central de Parcerias & Cadastros Comunitários (Instanciado sob demanda via <template>)
+let modalParceirosInstancia = null;
+let modalPixInstancia = null;
 
-const tabBtnPousadas = document.getElementById('tab-btn-pousadas');
-const tabBtnPiloteiros = document.getElementById('tab-btn-piloteiros');
-const tabPanePousadas = document.getElementById('tab-pane-pousadas');
-const tabPanePiloteiros = document.getElementById('tab-pane-piloteiros');
-
-function alternarAbaParcerias(aba = 'pousadas') {
+function alternarAbaParcerias(aba = 'pousadas', container = document) {
   vibrar(20);
+  const tabBtnPiloteiros = container.querySelector('#tab-btn-piloteiros');
+  const tabBtnPousadas = container.querySelector('#tab-btn-pousadas');
+  const tabPanePiloteiros = container.querySelector('#tab-pane-piloteiros');
+  const tabPanePousadas = container.querySelector('#tab-pane-pousadas');
+
   if (aba === 'piloteiros') {
     tabBtnPiloteiros?.classList.add('active');
     tabBtnPousadas?.classList.remove('active');
@@ -1665,170 +1544,155 @@ function alternarAbaParcerias(aba = 'pousadas') {
   }
 }
 
-if (tabBtnPousadas) tabBtnPousadas.addEventListener('click', () => alternarAbaParcerias('pousadas'));
-if (tabBtnPiloteiros) tabBtnPiloteiros.addEventListener('click', () => alternarAbaParcerias('piloteiros'));
-
 function abrirModalParcerias(aba = 'pousadas') {
-  if (modalParceiros) {
-    alternarAbaParcerias(aba);
-    modalParceiros.classList.remove('hidden');
-    vibrar(25);
-  }
+  modalParceirosInstancia = abrirModalDeTemplate('template-modal-parceiros', {
+    modalId: 'modal-parceiros',
+    onMount: (modalEl, destroy) => {
+      const tabBtnPousadas = modalEl.querySelector('#tab-btn-pousadas');
+      const tabBtnPiloteiros = modalEl.querySelector('#tab-btn-piloteiros');
+
+      if (tabBtnPousadas) tabBtnPousadas.addEventListener('click', () => alternarAbaParcerias('pousadas', modalEl));
+      if (tabBtnPiloteiros) tabBtnPiloteiros.addEventListener('click', () => alternarAbaParcerias('piloteiros', modalEl));
+
+      alternarAbaParcerias(aba, modalEl);
+
+      const btnEnviarPropostaPousada = modalEl.querySelector('#btn-enviar-proposta-pousada');
+      if (btnEnviarPropostaPousada) {
+        btnEnviarPropostaPousada.addEventListener('click', () => {
+          const nome = modalEl.querySelector('#pousada-nome')?.value.trim();
+          const rio = modalEl.querySelector('#pousada-rio')?.value;
+          const wpp = modalEl.querySelector('#pousada-wpp')?.value.trim();
+          const rampa = modalEl.querySelector('#pousada-rampa')?.value.trim();
+
+          if (!nome) { vibrar(30); return showToast('Informe o nome da pousada ou rancho.'); }
+          if (!wpp) { vibrar(30); return showToast('Informe o WhatsApp para contato de reservas.'); }
+
+          const comodidades = [];
+          modalEl.querySelectorAll('input[name="pousada-amenity"]:checked').forEach(cb => comodidades.push(cb.value));
+
+          if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarSolicitacaoPousada === 'function') {
+            window.GeoFishFirebase.salvarSolicitacaoPousada({ nome, rio, whatsapp: wpp, rampa, comodidades }).catch(err => console.warn('[Firebase] Aviso Pousada:', err));
+          }
+
+          const texto = `*SOLICITAÇÃO DE ANÚNCIO - GEOFISH MS (Pousadas & Ranchos)*\n\n` +
+            `🏨 *Estabelecimento:* ${nome}\n` +
+            `📍 *Localização:* ${rio}\n` +
+            `💬 *WhatsApp Reservas:* ${wpp}\n` +
+            `⚓ *Rampa/Estrutura:* ${rampa || 'A informar'}\n` +
+            `✨ *Comodidades:* ${comodidades.length > 0 ? comodidades.join(', ') : 'Padrão'}\n\n` +
+            `Olá! Tenho interesse no plano comercial de divulgação da temporada para destacar meu estabelecimento no WebGIS da Bacia do Miranda!`;
+
+          const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+          window.open(urlWpp, '_blank');
+          vibrar(30);
+          showToast('Proposta registrada e abrindo WhatsApp para confirmação...');
+          destroy();
+        });
+      }
+
+      const btnEnviarCadastroGuia = modalEl.querySelector('#btn-enviar-cadastro-guia');
+      if (btnEnviarCadastroGuia) {
+        btnEnviarCadastroGuia.addEventListener('click', () => {
+          const nome = modalEl.querySelector('#guia-nome')?.value.trim();
+          const apelido = modalEl.querySelector('#guia-apelido')?.value.trim();
+          const colonia = modalEl.querySelector('#guia-colonia')?.value;
+          const rgp = modalEl.querySelector('#guia-rgp')?.value.trim();
+          const porto = modalEl.querySelector('#guia-porto')?.value.trim();
+          const wpp = modalEl.querySelector('#guia-wpp')?.value.trim();
+
+          if (!nome) { vibrar(30); return showToast('Informe o seu nome completo.'); }
+          if (!porto) { vibrar(30); return showToast('Informe seu porto de saída habitual.'); }
+          if (!wpp) { vibrar(30); return showToast('Informe o WhatsApp para os pescadores te contatarem.'); }
+
+          const diferenciais = [];
+          modalEl.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
+
+          if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarCadastroPiloteiro === 'function') {
+            window.GeoFishFirebase.salvarCadastroPiloteiro({ nome, apelido, colonia, rgp, porto, whatsapp: wpp, diferenciais }).catch(err => console.warn('[Firebase] Aviso Piloteiro:', err));
+          }
+
+          const texto = `*CADASTRO GRATUITO DE PILOTEIRO - GEOFISH MS*\n\n` +
+            `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
+            `📜 *Colônia de Filiação:* ${colonia}\n` +
+            `🆔 *RGP / Carteira:* ${rgp || 'Em regularização / Apresentará'}\n` +
+            `📍 *Porto de Saída:* ${porto}\n` +
+            `💬 *WhatsApp Turistas:* ${wpp}\n` +
+            `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
+            `Olá! Sou piloteiro da região e gostaria de ativar meu ponto e contato GRATUITAMENTE no mapa do GeoFish MS!`;
+
+          const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+          window.open(urlWpp, '_blank');
+          vibrar(30);
+          showToast('Cadastro registrado e abrindo WhatsApp para homologação...');
+          destroy();
+        });
+      }
+    },
+    onDestroy: () => {
+      modalParceirosInstancia = null;
+    }
+  });
 }
 
 function fecharModalParceiros() {
-  if (modalParceiros) modalParceiros.classList.add('hidden');
+  if (modalParceirosInstancia) {
+    modalParceirosInstancia.destroy();
+    modalParceirosInstancia = null;
+  }
 }
 
 window.abrirModalParceriasTab = (aba) => abrirModalParcerias(aba);
 window.abrirModalParceiros = () => abrirModalParcerias('pousadas');
 
+const btnParceirosTopo = document.getElementById('btn-parceiros-topo');
+const footerBtnParceiros = document.getElementById('footer-btn-parceiros');
+const footerBtnPiloteiros = document.getElementById('footer-btn-piloteiros');
+
 if (btnParceirosTopo) btnParceirosTopo.addEventListener('click', () => abrirModalParcerias('pousadas'));
 if (footerBtnParceiros) footerBtnParceiros.addEventListener('click', () => abrirModalParcerias('pousadas'));
 if (footerBtnPiloteiros) footerBtnPiloteiros.addEventListener('click', () => abrirModalParcerias('piloteiros'));
-if (btnFecharParceiros) btnFecharParceiros.addEventListener('click', fecharModalParceiros);
-
-// Envio de Proposta Comercial de Pousada / Rancho via WhatsApp
-const btnEnviarPropostaPousada = document.getElementById('btn-enviar-proposta-pousada');
-if (btnEnviarPropostaPousada) {
-  btnEnviarPropostaPousada.addEventListener('click', () => {
-    const nome = document.getElementById('pousada-nome')?.value.trim();
-    const rio = document.getElementById('pousada-rio')?.value;
-    const wpp = document.getElementById('pousada-wpp')?.value.trim();
-    const rampa = document.getElementById('pousada-rampa')?.value.trim();
-
-    if (!nome) {
-      vibrar(30);
-      return showToast('Informe o nome da pousada ou rancho.');
-    }
-    if (!wpp) {
-      vibrar(30);
-      return showToast('Informe o WhatsApp para contato de reservas.');
-    }
-
-    const comodidades = [];
-    document.querySelectorAll('input[name="pousada-amenity"]:checked').forEach(cb => comodidades.push(cb.value));
-
-    // Gravação segura no Firebase Firestore (sincroniza online ou enfileira offline)
-    if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarSolicitacaoPousada === 'function') {
-      window.GeoFishFirebase.salvarSolicitacaoPousada({
-        nome,
-        rio,
-        whatsapp: wpp,
-        rampa,
-        comodidades
-      }).catch(err => console.warn('[Firebase] Aviso Pousada:', err));
-    }
-
-    const texto = `*SOLICITAÇÃO DE ANÚNCIO - GEOFISH MS (Pousadas & Ranchos)*\n\n` +
-      `🏨 *Estabelecimento:* ${nome}\n` +
-      `📍 *Localização:* ${rio}\n` +
-      `💬 *WhatsApp Reservas:* ${wpp}\n` +
-      `⚓ *Rampa/Estrutura:* ${rampa || 'A informar'}\n` +
-      `✨ *Comodidades:* ${comodidades.length > 0 ? comodidades.join(', ') : 'Padrão'}\n\n` +
-      `Olá! Tenho interesse no plano comercial de divulgação da temporada para destacar meu estabelecimento no WebGIS da Bacia do Miranda!`;
-
-    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
-    window.open(urlWpp, '_blank');
-    vibrar(30);
-    showToast('Proposta registrada e abrindo WhatsApp para confirmação...');
-  });
-}
-
-// Envio de Cadastro Gratuito de Piloteiro Z-1 / Z-7 via WhatsApp
-const btnEnviarCadastroGuia = document.getElementById('btn-enviar-cadastro-guia');
-if (btnEnviarCadastroGuia) {
-  btnEnviarCadastroGuia.addEventListener('click', () => {
-    const nome = document.getElementById('guia-nome')?.value.trim();
-    const apelido = document.getElementById('guia-apelido')?.value.trim();
-    const colonia = document.getElementById('guia-colonia')?.value;
-    const rgp = document.getElementById('guia-rgp')?.value.trim();
-    const porto = document.getElementById('guia-porto')?.value.trim();
-    const wpp = document.getElementById('guia-wpp')?.value.trim();
-
-    if (!nome) {
-      vibrar(30);
-      return showToast('Informe o seu nome completo.');
-    }
-    if (!porto) {
-      vibrar(30);
-      return showToast('Informe seu porto de saída habitual.');
-    }
-    if (!wpp) {
-      vibrar(30);
-      return showToast('Informe o WhatsApp para os pescadores te contatarem.');
-    }
-
-    const diferenciais = [];
-    document.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
-
-    // Gravação segura no Firebase Firestore (sincroniza online ou enfileira offline)
-    if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarCadastroPiloteiro === 'function') {
-      window.GeoFishFirebase.salvarCadastroPiloteiro({
-        nome,
-        apelido,
-        colonia,
-        rgp,
-        porto,
-        whatsapp: wpp,
-        diferenciais
-      }).catch(err => console.warn('[Firebase] Aviso Piloteiro:', err));
-    }
-
-    const texto = `*CADASTRO GRATUITO DE PILOTEIRO - GEOFISH MS*\n\n` +
-      `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
-      `📜 *Colônia de Filiação:* ${colonia}\n` +
-      `🆔 *RGP / Carteira:* ${rgp || 'Em regularização / Apresentará'}\n` +
-      `📍 *Porto de Saída:* ${porto}\n` +
-      `💬 *WhatsApp Turistas:* ${wpp}\n` +
-      `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
-      `Olá! Sou piloteiro da região e gostaria de ativar meu ponto e contato GRATUITAMENTE no mapa do GeoFish MS!`;
-
-    const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
-    window.open(urlWpp, '_blank');
-    vibrar(30);
-    showToast('Cadastro registrado e abrindo WhatsApp para homologação...');
-  });
-}
-
-// Modal de Apoio PIX
-const modalApoiePix = document.getElementById('modal-apoie-pix');
-const btnApoiePixTopo = document.getElementById('btn-apoie-pix-topo');
-const btnFecharPix = document.getElementById('btn-fechar-pix');
-const footerBtnPix = document.getElementById('footer-btn-pix');
-const btnCopiarChavePix = document.getElementById('btn-copiar-chave-pix');
-const pixChaveTexto = document.getElementById('pix-chave-texto');
 
 function abrirModalPix() {
-  if (modalApoiePix) {
-    vibrar(25);
-    modalApoiePix.classList.remove('hidden');
+  modalPixInstancia = abrirModalDeTemplate('template-modal-apoie-pix', {
+    modalId: 'modal-apoie-pix',
+    onMount: (modalEl) => {
+      const btnCopiarChavePix = modalEl.querySelector('#btn-copiar-chave-pix');
+      const pixChaveTexto = modalEl.querySelector('#pix-chave-texto');
+      if (btnCopiarChavePix && pixChaveTexto) {
+        btnCopiarChavePix.addEventListener('click', async () => {
+          vibrar(20);
+          const chave = pixChaveTexto.textContent.trim();
+          try {
+            await navigator.clipboard.writeText(chave);
+            btnCopiarChavePix.innerHTML = '✅ Chave Copiada!';
+            showToast('Chave PIX copiada para a área de transferência!');
+            setTimeout(() => {
+              btnCopiarChavePix.innerHTML = '📋 Copiar Chave PIX';
+            }, 3000);
+          } catch (_) {
+            showToast(`Chave PIX: ${chave}`);
+          }
+        });
+      }
+    },
+    onDestroy: () => {
+      modalPixInstancia = null;
+    }
+  });
+}
+
+function fecharModalPix() {
+  if (modalPixInstancia) {
+    modalPixInstancia.destroy();
+    modalPixInstancia = null;
   }
 }
-function fecharModalPix() {
-  if (modalApoiePix) modalApoiePix.classList.add('hidden');
-}
+
+const btnApoiePixTopo = document.getElementById('btn-apoie-pix-topo');
+const footerBtnPix = document.getElementById('footer-btn-pix');
 
 if (btnApoiePixTopo) btnApoiePixTopo.addEventListener('click', abrirModalPix);
 if (footerBtnPix) footerBtnPix.addEventListener('click', abrirModalPix);
-if (btnFecharPix) btnFecharPix.addEventListener('click', fecharModalPix);
-
-if (btnCopiarChavePix && pixChaveTexto) {
-  btnCopiarChavePix.addEventListener('click', async () => {
-    vibrar(20);
-    const chave = pixChaveTexto.textContent.trim();
-    try {
-      await navigator.clipboard.writeText(chave);
-      btnCopiarChavePix.innerHTML = '✅ Chave Copiada!';
-      showToast('Chave PIX copiada para a área de transferência!');
-      setTimeout(() => {
-        btnCopiarChavePix.innerHTML = '📋 Copiar Chave PIX';
-      }, 3000);
-    } catch (_) {
-      showToast(`Chave PIX: ${chave}`);
-    }
-  });
-}
 
 // Botões do Rodapé para Modais Existentes
 const footerBtnDefeso = document.getElementById('footer-btn-defeso');
