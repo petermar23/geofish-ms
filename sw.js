@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v23';
+const CACHE_VERSION = 'geofish-shell-v24';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -23,6 +23,7 @@ const SHELL_ASSETS = [
   './css/style.css',
   './js/app.js',
   './js/db.js',
+  './js/geoFishImages.js',
   './js/firebase-service.js',
   './manifest.json',
   './lib/leaflet/leaflet.css',
@@ -37,6 +38,15 @@ const SHELL_ASSETS = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
+  './images/hero/rio_miranda_panorama.jpg',
+  './images/pesca/barco_rio_miranda.jpg',
+  './images/navegacao/passo_lontra_foz.jpg',
+  './images/natureza/rio_salobra_cristalino.jpg',
+  './images/natureza/arara_azul_miranda.jpg',
+  './images/rio/estrada_parque_miranda.jpg',
+  './images/pantanal/tuiuiu_pantanal.jpg',
+  './images/pantanal/pantanal_crepusculo.jpg',
+  './images/comunidade/rio_miranda_floresta.jpg',
   './docs/cartilha_do_pescador_pma_ms.pdf',
   './data/processed/pontos_emergencia.geojson',
   './data/processed/trechos_pesca.geojson'

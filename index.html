@@ -29,6 +29,9 @@
   <!-- Folhas de Estilo (Leaflet Local e Estilo do GeoFish) -->
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Preload da Fotografia Principal do Hero para Performance Visual Imediata -->
+  <link rel="preload" as="image" href="images/hero/rio_miranda_panorama.jpg">
 </head>
 <body>
 
@@ -45,149 +48,60 @@
     </div>
   </div>
 
-  <!-- 2. Faixa de Alerta Oficial (Regras de Transporte Rodoviário & Defeso) -->
+  <!-- 2. Header Principal Editorial (Identidade & Navegação do Território) -->
+  <header id="header" class="tpwd-header" role="banner">
+    <div class="tpwd-container tpwd-header-inner">
+      <div class="tpwd-brand">
+        <a href="#hero-territorio" class="brand-link" aria-label="Página Inicial do GeoFish MS">
+          <div class="brand-logo-symbol" aria-hidden="true">🐟</div>
+          <div class="brand-text">
+            <span class="brand-title">GeoFish <strong>MS</strong></span>
+            <span class="brand-sub">Bacia do Rio Miranda &bull; Pantanal</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Navegação Desktop Editorial -->
+      <nav class="tpwd-nav" aria-label="Navegação Principal">
+        <ul class="tpwd-menu">
+          <li><a href="#hero-territorio" class="tpwd-menu-link active">Início</a></li>
+          <li><a href="#secao-explore-bacia" class="tpwd-menu-link">Explore a Bacia</a></li>
+          <li><a href="#secao-territorio" class="tpwd-menu-link">O Território</a></li>
+          <li><a href="#secao-mapa" class="tpwd-menu-link">Mapa WebGIS</a></li>
+          <li><a href="#secao-historias" class="tpwd-menu-link">Histórias</a></li>
+          <li><a href="#secao-transporte-passo-a-passo" class="tpwd-menu-link">Regras &amp; Guia</a></li>
+          <li><a href="#secao-cartilha" class="tpwd-menu-link">Cartilha PMA</a></li>
+        </ul>
+      </nav>
+
+      <!-- Ações do Header -->
+      <div class="header-actions">
+        <span id="status-rede"><span class="status-dot"></span> Online</span>
+        <a href="#secao-mapa" class="btn-header-webgis">
+          <span>🗺️</span>
+          <span>Explorar WebGIS</span>
+        </a>
+        <button id="btn-sobre" type="button" class="btn-header" title="Informações sobre o projeto comunitário">
+          Sobre
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. Faixa de Alerta Compacta e Objetiva ao Pescador -->
   <aside class="tpwd-alert-bar" role="region" aria-label="Aviso Legal e Normativo">
     <div class="tpwd-container tpwd-alert-inner">
       <div class="tpwd-alert-content">
         <span class="alert-icon" aria-hidden="true">⚠️</span>
         <div class="alert-text">
-          <strong>AVISO AO PESCADOR:</strong> Transporte permitido <strong>EXCLUSIVAMENTE DENTRO DO MS</strong> (proibido interestadual/internacional) para <strong>1 exemplar nativo na medida + 5 piranhas</strong> (inteiro, vistoriado e lacrado pela PMA com a GCP). Dourado é Pesque e Solte!
+          <strong>ALERTA AO PESCADOR:</strong> Transporte de pescado autorizado <strong>EXCLUSIVAMENTE DENTRO DO MS</strong> (proibido interestadual/internacional) para <strong>1 exemplar nativo na medida + 5 piranhas</strong> (inteiro, vistoriado e lacrado pela PMA com a GCP). Dourado é 100% Pesque e Solte!
         </div>
       </div>
       <a href="#secao-transporte-passo-a-passo" id="btn-ver-alerta-regras" class="tpwd-alert-link">Ver Passo a Passo Sem Multa &rarr;</a>
     </div>
   </aside>
 
-  <!-- 3. Header Principal Escuro Institucional (Estilo Texas Parks and Wildlife) -->
-  <header id="header" class="tpwd-header" role="banner">
-    <div class="tpwd-container tpwd-header-inner">
-      <div class="tpwd-brand">
-        <a href="#secao-mapa" class="brand-link" aria-label="Página Inicial do GeoFish MS">
-          <div class="brand-logo-symbol" aria-hidden="true">🐟</div>
-          <div class="brand-text">
-            <span class="brand-title">GeoFish <strong>MS</strong></span>
-            <span class="brand-sub">Guia Aberto da Bacia do Rio Miranda</span>
-          </div>
-        </a>
-      </div>
-
-      <!-- Navegação Desktop -->
-      <nav class="tpwd-nav" aria-label="Navegação Principal">
-        <ul class="tpwd-menu">
-          <li><a href="#secao-mapa" class="tpwd-menu-link active">🗺️ Mapa WebGIS</a></li>
-          <li><a href="#coluna-pesca" class="tpwd-menu-link">🎣 Pesca Esportiva</a></li>
-          <li><a href="#coluna-nautica" class="tpwd-menu-link">🚤 Náutica &amp; Rampas</a></li>
-          <li><a href="#secao-transporte-passo-a-passo" class="tpwd-menu-link">📋 Regras de Transporte</a></li>
-          <li><a href="#secao-cartilha" class="tpwd-menu-link">📖 Cartilha PMA</a></li>
-        </ul>
-      </nav>
-
-      <!-- Ações do Header (Status PWA Offline, Instalar e Sobre) -->
-      <div class="header-actions">
-        <span id="status-rede"><span class="status-dot"></span> Online</span>
-        <button id="btn-parceiros-topo" class="btn-header" style="display: none;" title="Rede de parceiros locais e pousadas">
-          🤝 Parceiros
-        </button>
-        <button id="btn-install-pwa" type="button" class="btn-header btn-install" style="display: none;" title="Instalar aplicativo">
-          📲 Instalar
-        </button>
-        <button id="btn-sobre" type="button" class="btn-header" title="Informações sobre o projeto comunitário">
-          ℹ️ Sobre
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- 4. Barra Utilitária de Ações Rápidas (Quick Bar com Ícones) -->
-  <nav class="tpwd-quick-bar" aria-label="Acesso Rápido de Utilidade do Pescador">
-    <div class="tpwd-container tpwd-quick-inner">
-      <a href="#secao-mapa" class="quick-btn">
-        <span class="quick-icon" aria-hidden="true">📍</span>
-        <span class="quick-label">Onde Pescar</span>
-      </a>
-      <a href="javascript:void(0)" onclick="abrirModalEspecies()" class="quick-btn">
-        <span class="quick-icon" aria-hidden="true">📏</span>
-        <span class="quick-label">Medidas de Peixes</span>
-      </a>
-      <a href="https://servicos.imasul.ms.gov.br/pesca/" target="_blank" rel="noopener noreferrer" class="quick-btn quick-license">
-        <span class="quick-icon" aria-hidden="true">💳</span>
-        <span class="quick-label">Emitir Licença</span>
-      </a>
-      <button id="btn-quick-sos" type="button" class="quick-btn quick-sos" title="Abrir Central de Emergência e Resgate Náutico" aria-label="Emergência S.O.S Fluvial">
-        <span class="quick-icon" aria-hidden="true">🚨</span>
-        <span class="quick-label">S.O.S Fluvial</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- 5. Seção Hero Panorâmica com Card Sobreposto (Padrão TPWD) -->
-  <section class="tpwd-hero-section" aria-label="Apresentação do Pantanal da Bacia do Miranda">
-    <div class="hero-backdrop-gradient"></div>
-    <div class="tpwd-container tpwd-hero-container">
-      
-      <!-- Card Branco Frontal Sobreposto (Formato Retângulo Deitado / Panorâmico) -->
-      <div class="tpwd-hero-card">
-        <div class="hero-card-col-main">
-          <span class="hero-card-kicker">INICIATIVA CIDADÃ &bull; PANTANAL SUSTENTÁVEL</span>
-          <h1 class="hero-card-title">Guia Comunitário e Pesca na Bacia do Rio Miranda</h1>
-          <p class="hero-card-desc">
-            Um portal independente e aberto criado para aproximar o turista dos piloteiros das Colônias Z-1 e Z-7 e pousadas da região. Acesse o WebGIS interativo de exploração territorial, medidas oficiais de peixes e planeje sua viagem sem intermediários.
-          </p>
-
-          <div class="hero-card-actions">
-            <a href="https://servicos.imasul.ms.gov.br/pesca/" target="_blank" rel="noopener noreferrer" class="btn-primary-action">
-              💳 Licença Digital IMASUL
-            </a>
-            <button id="btn-hero-species" type="button" class="btn-secondary-action">
-              📏 Medidas &amp; Cotas
-            </button>
-            <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-secondary-action" style="background: #14281d; border-color: #2d5a3f; color: #86efac;" title="Baixar Cartilha Oficial da PMA-MS">
-              📖 Cartilha PMA (PDF)
-            </a>
-            <button id="btn-hero-parceiros" type="button" class="btn-secondary-action" style="background: #ecfdf5; border-color: #10b981; color: #065f46;">
-              🤝 Apoiar / Divulgar Pousada
-            </button>
-          </div>
-        </div>
-
-        <div class="hero-card-col-side">
-          <div class="hero-offline-box">
-            <div class="offline-icon" aria-hidden="true">📡</div>
-            <div class="offline-text">
-              <strong>Tecnologia Aberta &bull; 100% Funcional Offline:</strong>
-              <span>Criado em código aberto para navegar nos corixos pantaneiros mesmo onde nenhuma operadora de celular pega.</span>
-            </div>
-          </div>
-
-          <div class="hero-highlights-list">
-            <div class="hero-highlight-pill">
-              <span class="highlight-icon">🛰️</span>
-              <div class="highlight-info">
-                <strong>WebGIS Satélite Esri</strong>
-                <span>Mapeamento Interativo de Apoio Náutico</span>
-              </div>
-            </div>
-            <div class="hero-highlight-pill">
-              <span class="highlight-icon">📏</span>
-              <div class="highlight-info">
-                <strong>Régua Digital de Espécies</strong>
-                <span>Tamanhos e cotas da PMA-MS na tela</span>
-              </div>
-            </div>
-            <div class="hero-highlight-pill">
-              <span class="highlight-icon">🚨</span>
-              <div class="highlight-info">
-                <strong>S.O.S Resgate Fluvial 24h</strong>
-                <span>Coordenadas prontas para Marinha e Bombeiros</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal -->
+  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Quando Ativo) -->
   <div id="banner-defeso" class="banner-defeso hidden" role="alert" aria-live="assertive">
     <div class="banner-defeso-content">
       <span class="banner-defeso-icon">⚠️</span>
@@ -195,23 +109,348 @@
     </div>
   </div>
 
-  <!-- Indicador Flutuante de Carga de Camadas -->
-  <div id="loading-indicator" aria-live="polite">
-    <span class="spinner"></span>
-    <span id="loading-text">Carregando camadas…</span>
-  </div>
+  <!-- ========================================================
+       NOVO HERO FOTOGRÁFICO TERRITORIAL
+       ======================================================== -->
+  <section id="hero-territorio" class="hero-territorial" aria-label="Apresentação da Bacia do Rio Miranda">
+    <div class="hero-photo-layer" style="background-image: url('images/hero/rio_miranda_panorama.jpg');"></div>
+    <div class="hero-overlay-gradient"></div>
+    
+    <div class="tpwd-container hero-content-inner">
+      <div class="hero-text-block">
+        <span class="hero-kicker">BACIA HIDROGRÁFICA DO RIO MIRANDA &bull; PANTANAL SUL-MATO-GROSSENSE</span>
+        <h1 class="hero-headline">Águas, Território e Tradição Pesqueira</h1>
+        <p class="hero-subheadline">
+          Pesca esportiva responsável, conservação e território conectados nas águas do Pantanal sul-mato-grossense. Conheça os rios, as regras de cota e navegue com informação segura.
+        </p>
 
-  <!-- 3. Core Central WebGIS (Leaflet 100% Nativo com Modo Barco) -->
-  <section id="secao-mapa" class="portal-map-section" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
-    <div class="map-toolbar-top">
-      <span class="map-status-pill">🗺️ Bacia do Rio Miranda &bull; SIRGAS 2000</span>
-      <button id="btn-toggle-fullscreen" class="btn-map-fullscreen" title="Alternar entre visualização do Portal e Modo Barco em tela cheia">
-        ⛶ Modo Barco (Tela Cheia)
-      </button>
+        <div class="hero-cta-group">
+          <a href="#secao-mapa" class="btn-hero-primary">
+            <span>🗺️</span>
+            <span>Explorar o Mapa WebGIS</span>
+          </a>
+          <a href="#secao-explore-bacia" class="btn-hero-secondary">
+            <span>🎣</span>
+            <span>Onde Pescar &amp; Guias</span>
+          </a>
+        </div>
+
+        <div class="hero-meta-badges">
+          <span class="hero-badge-pill">
+            <span class="badge-dot"></span>
+            Operação 100% Offline no Barco
+          </span>
+          <span class="hero-badge-pill">
+            <span class="badge-dot"></span>
+            Apoio às Colônias Z-1 e Z-7
+          </span>
+          <span class="hero-badge-pill">
+            <span class="badge-dot"></span>
+            Normas Oficiais PMA e IMASUL
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SEÇÃO 1: EXPLORE A BACIA DO RIO MIRANDA (MOSAICO EDITORIAL)
+       ======================================================== -->
+  <section id="secao-explore-bacia" class="editorial-section" aria-label="Explore a Bacia do Rio Miranda">
+    <div class="editorial-container">
+      <div class="editorial-section-header">
+        <span class="editorial-section-kicker">GUIA PRÁTICO DO TERRITÓRIO</span>
+        <h2 class="editorial-section-title">Explore a Bacia do Rio Miranda</h2>
+        <p class="editorial-section-desc">
+          Tudo o que você precisa para planejar sua pescaria, navegar com segurança e vivenciar o Pantanal com responsabilidade ambiental.
+        </p>
+      </div>
+
+      <div class="explore-mosaic-grid">
+        <!-- BLOCO 1 (GRANDE COM FOTO): ONDE PESCAR -->
+        <article class="mosaic-card card-onde-pescar">
+          <div class="mosaic-card-image-wrap">
+            <img src="images/pesca/barco_rio_miranda.jpg" alt="Pescadores navegando no Rio Miranda" class="mosaic-card-img" loading="lazy">
+            <span class="mosaic-card-tag">PESCA ESPORTIVA</span>
+          </div>
+          <div class="mosaic-card-body">
+            <h3 class="mosaic-card-title">Onde Pescar: Trechos &amp; Regimes Normativos</h3>
+            <p class="mosaic-card-text">
+              Descubra os pontos de rodada de pintado no canal principal, batida de pacu nas margens e trechos exclusivos de Pesque e Solte no Rio Miranda e Rio Aquidauana.
+            </p>
+            <a href="#secao-mapa" class="mosaic-card-action">
+              <span>Localizar Trechos no Mapa</span>
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- BLOCO 2 (MÉDIO / COTAS): MEDIDAS DOS PEIXES -->
+        <article class="mosaic-card card-medidas">
+          <div class="mosaic-card-body">
+            <span class="mosaic-card-tag tag-amber">COTAS &amp; MEDIDAS OFICIAIS</span>
+            <h3 class="mosaic-card-title">Medidas dos Peixes do Pantanal</h3>
+            <p class="mosaic-card-text">
+              Consulte a faixa permitida de cada espécie para evitar autuação da PMA: Pintado (85 a 125 cm), Pacu (45 a 65 cm), Jaú (mín. 95 cm). Dourado é 100% Pesque e Solte!
+            </p>
+            <div class="card-species-preview">
+              <span class="species-chip">🐟 Pintado: 85–125 cm</span>
+              <span class="species-chip">🐟 Pacu: 45–65 cm</span>
+              <span class="species-chip">⭐ Dourado: Soltura Obrigatória</span>
+            </div>
+            <button type="button" onclick="abrirModalEspecies()" class="mosaic-btn-action">
+              <span>📏 Consultar Régua Digital de Espécies</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- BLOCO 3 (MÉDIO COM FOTO): NÁUTICA & RAMPAS -->
+        <article class="mosaic-card card-nautica">
+          <div class="mosaic-card-image-wrap">
+            <img src="images/navegacao/passo_lontra_foz.jpg" alt="Passo do Lontra e foz do Rio Vermelho" class="mosaic-card-img" loading="lazy">
+            <span class="mosaic-card-tag tag-cyan">NÁUTICA &amp; RAMPAS</span>
+          </div>
+          <div class="mosaic-card-body">
+            <h3 class="mosaic-card-title">Rampas de Barco &amp; Apoio Náutico</h3>
+            <p class="mosaic-card-text">
+              Descidas de concreto homologadas, postos com gasolina náutica e atracadouros estratégicos em Miranda, Passo do Lontra e Anastácio.
+            </p>
+            <a href="#secao-mapa" class="mosaic-card-action">
+              <span>Ver Rampas no WebGIS</span>
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- BLOCO 4 (GRANDE COM FOTO): REGRAS DE PESCA & SANTUÁRIO DO SALOBRA -->
+        <article class="mosaic-card card-regras-salobra">
+          <div class="mosaic-card-image-wrap">
+            <img src="images/natureza/rio_salobra_cristalino.jpg" alt="Águas cristalinas do Rio Salobra na Bodoquena" class="mosaic-card-img" loading="lazy">
+            <span class="mosaic-card-tag tag-emerald">SANTUÁRIO ECOLÓGICO</span>
+          </div>
+          <div class="mosaic-card-body">
+            <h3 class="mosaic-card-title">Regras de Pesca &amp; Santuário do Rio Salobra</h3>
+            <p class="mosaic-card-text">
+              Águas transparentes de calcário protegidas por lei estadual. Na calha do Salobra, a pesca é estritamente Pesque e Solte, proibido abate ou transporte, com autorização apenas para motores 4 tempos até 15 HP.
+            </p>
+            <div class="mosaic-card-footer-btns">
+              <button type="button" onclick="abrirModalCartilha()" class="mosaic-btn-sub">
+                <span>📖 Ler Cartilha Oficial PMA</span>
+              </button>
+              <a href="#secao-transporte-passo-a-passo" class="mosaic-card-action">
+                <span>Passo a Passo Sem Multa &rarr;</span>
+              </a>
+            </div>
+          </div>
+        </article>
+
+        <!-- BLOCO 5 (MÉDIO COM FOTO): S.O.S FLUVIAL & SEGURANÇA -->
+        <article class="mosaic-card card-sos">
+          <div class="mosaic-card-image-wrap">
+            <img src="images/rio/estrada_parque_miranda.jpg" alt="Estrada Parque e ponte sobre o Rio Miranda" class="mosaic-card-img" loading="lazy">
+            <span class="mosaic-card-tag tag-red">EMERGÊNCIA 24H</span>
+          </div>
+          <div class="mosaic-card-body">
+            <h3 class="mosaic-card-title">S.O.S Fluvial &amp; Resgate no Rio</h3>
+            <p class="mosaic-card-text">
+              Coordenadas de satélite para envio rápido à Marinha do Brasil (Capitania Fluvial 185), Polícia Militar Ambiental e Bombeiros em caso de pane ou acidente.
+            </p>
+            <button type="button" onclick="abrirModalSos()" class="mosaic-btn-action btn-danger">
+              <span>🚨 Abrir Central S.O.S Fluvial</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- BLOCO 6 (CHAMADA NOBRE PARA O MAPA): WEBGIS COMPLETO -->
+        <article class="mosaic-card card-webgis-highlight">
+          <div class="mosaic-card-body">
+            <span class="mosaic-card-tag tag-gold">CARTOGRAFIA DIGITAL</span>
+            <h3 class="mosaic-card-title">WebGIS Interativo da Bacia</h3>
+            <p class="mosaic-card-text">
+              Visualize todas as camadas geográficas integradas: limites municipais, reservas ecológicas, piloteiros credenciados e áreas de restrição na palma da sua mão.
+            </p>
+            <div class="webgis-features-inline">
+              <span>🛰️ Satélite Esri</span>
+              <span>⚡ Offline-First</span>
+              <span>📍 Sem sinal de celular</span>
+            </div>
+            <a href="#secao-mapa" class="mosaic-btn-action btn-webgis-lead">
+              <span>🗺️ Explorar Mapa Interativo &rarr;</span>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SEÇÃO 2: CONHEÇA A BACIA DO RIO MIRANDA (O TERRITÓRIO)
+       ======================================================== -->
+  <section id="secao-territorio" class="editorial-territorio-section" aria-label="Conheça a Bacia do Rio Miranda">
+    <div class="editorial-container">
+      <div class="territorio-layout-grid">
+        
+        <!-- Coluna Visual: Mosaico Fotográfico Regional -->
+        <div class="territorio-media-col">
+          <figure class="territorio-figure-main">
+            <img src="images/pantanal/tuiuiu_pantanal.jpg" alt="Tuiuiú em área alagada da Bacia do Rio Miranda" class="territorio-photo-main" loading="lazy">
+            <figcaption class="territorio-photo-caption">
+              Tuiuiú (<em>Jabiru mycteria</em>), ave-símbolo do Pantanal sul-mato-grossense &bull; Foto: Chuheng Xi (CC BY-SA 4.0)
+            </figcaption>
+          </figure>
+          <div class="territorio-figure-secondary-wrap">
+            <figure class="territorio-figure-secondary">
+              <img src="images/natureza/arara_azul_miranda.jpg" alt="Arara-azul nas matas ciliares do Rio Miranda" class="territorio-photo-sub" loading="lazy">
+              <figcaption class="territorio-photo-caption">
+                Arara-azul nas matas ciliares do Rio Miranda &bull; Foto: Alessandra Thompson (CC BY-SA 4.0)
+              </figcaption>
+            </figure>
+            <figure class="territorio-figure-secondary">
+              <img src="images/pantanal/pantanal_crepusculo.jpg" alt="Crepúsculo espelhado sobre o Pantanal" class="territorio-photo-sub" loading="lazy">
+              <figcaption class="territorio-photo-caption">
+                Crepúsculo nas planícies pantaneiras &bull; Foto: Alice Pache (CC BY-SA 3.0)
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <!-- Coluna Textual: Narrativa do Território -->
+        <div class="territorio-content-col">
+          <span class="editorial-section-kicker">O TERRITÓRIO &amp; NATUREZA</span>
+          <h2 class="territorio-title">Conheça a Bacia do Rio Miranda</h2>
+          
+          <div class="territorio-prose">
+            <p>
+              A <strong>Bacia Hidrográfica do Rio Miranda</strong> é uma das artérias vitais do Pantanal sul-mato-grossense. Abrangendo mais de <strong>43.000 km²</strong> de área de drenagem, suas águas nascem nos planaltos da Serra de Maracaju e nas escarpas calcárias da Serra da Bodoquena, serpenteando por quase 500 quilômetros até desaguar no Rio Paraguai.
+            </p>
+            <p>
+              Ao longo do seu curso, o Rio Miranda recebe afluentes fundamentais como o <strong>Rio Aquidauana</strong>, o límpido <strong>Rio Salobra</strong> e o <strong>Rio Vermelho</strong>. Essa rede hídrica dinâmica forma um dos mais ricos ecossistemas de peixes migradores do planeta, sustentando espécies de grande valor esportivo e ecológico — como o Pintado, o Pacu, a Cachara e o emblemático Dourado.
+            </p>
+            <p>
+              Mais do que um destino de pesca, a bacia é a morada de comunidades ribeirinhas históricas. Os piloteiros e pescadores nativos das <strong>Colônias Z-1 (Miranda e Corumbá)</strong> e <strong>Z-7 (Aquidauana e Anastácio)</strong> são os verdadeiros guardiões desse conhecimento secular, conduzindo com segurança quem navega pelos balseiros e canais pantaneiros.
+            </p>
+          </div>
+
+          <div class="territorio-facts-grid">
+            <div class="territorio-fact-card">
+              <span class="fact-num">43.000 km²</span>
+              <span class="fact-label">Área total de drenagem da bacia</span>
+            </div>
+            <div class="territorio-fact-card">
+              <span class="fact-num">4 Rios</span>
+              <span class="fact-label">Miranda, Aquidauana, Salobra e Vermelho</span>
+            </div>
+            <div class="territorio-fact-card">
+              <span class="fact-num">2 Colônias</span>
+              <span class="fact-label">Colônias Z-1 e Z-7 de Piloteiros Nativos</span>
+            </div>
+            <div class="territorio-fact-card">
+              <span class="fact-num">100% Cidadão</span>
+              <span class="fact-label">Plataforma aberta, gratuita e sem taxas</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SEÇÃO 3: EXPLORE NO MAPA (WEBGIS INTERATIVO)
+       ======================================================== -->
+  <section id="secao-mapa" class="portal-map-section-wrapper" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
+    <div class="editorial-container map-header-container">
+      <div class="map-intro-row">
+        <div>
+          <span class="editorial-section-kicker">CARTOGRAFIA DIGITAL TERRITORIAL</span>
+          <h2 class="editorial-section-title">Explore no Mapa Interativo</h2>
+          <p class="editorial-section-desc">
+            Toque nos rios para consultar cotas e regimes de pesca, localize rampas de barcos e contate guias nativos credenciados.
+          </p>
+        </div>
+        <div class="map-intro-actions">
+          <button id="btn-toggle-fullscreen" class="btn-map-fullscreen" title="Alternar entre visualização do Portal e Modo Barco em tela cheia">
+            ⛶ Modo Barco (Tela Cheia)
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Contêiner do Mapa Interativo -->
-    <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
+    <!-- Indicador Flutuante de Carga de Camadas -->
+    <div id="loading-indicator" aria-live="polite">
+      <span class="spinner"></span>
+      <span id="loading-text">Carregando camadas…</span>
+    </div>
+
+    <!-- Contêiner do Mapa Leaflet -->
+    <div class="portal-map-section">
+      <div class="map-toolbar-top">
+        <span class="map-status-pill">🗺️ Bacia do Rio Miranda &bull; SIRGAS 2000</span>
+      </div>
+      <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       SEÇÃO 4: HISTÓRIAS DA BACIA (EDITORIAL)
+       ======================================================== -->
+  <section id="secao-historias" class="editorial-section historias-section" aria-label="Histórias da Bacia do Rio Miranda">
+    <div class="editorial-container">
+      <div class="editorial-section-header">
+        <span class="editorial-section-kicker">MEMÓRIA, NATUREZA &amp; GENTE</span>
+        <h2 class="editorial-section-title">Histórias da Bacia</h2>
+        <p class="editorial-section-desc">
+          Artigos, relatos de campo e conhecimento prático sobre os rios, a fauna e a vida pantaneira.
+        </p>
+      </div>
+
+      <div class="historias-cards-grid">
+        <!-- História 1: Rios da Bacia -->
+        <article class="historia-card">
+          <div class="historia-img-wrap">
+            <img src="images/comunidade/rio_miranda_floresta.jpg" alt="Matas ciliares e curso do Rio Miranda" class="historia-img" loading="lazy">
+            <span class="historia-tag">RIOS DA BACIA</span>
+          </div>
+          <div class="historia-body">
+            <h3 class="historia-title">Das Corredeiras do Aquidauana às Baías do Miranda</h3>
+            <p class="historia-desc">
+              Como a transição do relevo da Serra de Maracaju para a planície pantaneira cria ambientes fluviais únicos para diferentes espécies de peixes.
+            </p>
+            <a href="#secao-territorio" class="historia-link">Ler artigo &rarr;</a>
+          </div>
+        </article>
+
+        <!-- História 2: Comunidades -->
+        <article class="historia-card">
+          <div class="historia-img-wrap">
+            <img src="images/pesca/barco_rio_miranda.jpg" alt="Piloteiro navegando no rio" class="historia-img" loading="lazy">
+            <span class="historia-tag">COMUNIDADES</span>
+          </div>
+          <div class="historia-body">
+            <h3 class="historia-title">Piloteiros Nativos: Mestres da Navegação Pantaneira</h3>
+            <p class="historia-desc">
+              O saber transmitido de pai para filho nas Colônias Z-1 e Z-7: como ler a lâmina d'água, desviar de paus submersos e encontrar o cardume.
+            </p>
+            <a href="#secao-servicos" class="historia-link">Conhecer piloteiros &rarr;</a>
+          </div>
+        </article>
+
+        <!-- História 3: Conservação -->
+        <article class="historia-card">
+          <div class="historia-img-wrap">
+            <img src="images/pantanal/pantanal_crepusculo.jpg" alt="Pôr do sol no Pantanal" class="historia-img" loading="lazy">
+            <span class="historia-tag">PESCA RESPONSÁVEL</span>
+          </div>
+          <div class="historia-body">
+            <h3 class="historia-title">O Valor do Pesque e Solte para o Futuro do Pantanal</h3>
+            <p class="historia-desc">
+              O impacto econômico e biológico de devolver grandes matrizes reprodutoras vivas às águas: sustentabilidade que gera turismo o ano inteiro.
+            </p>
+            <a href="#secao-transporte-passo-a-passo" class="historia-link">Ver boas práticas &rarr;</a>
+          </div>
+        </article>
+      </div>
+    </div>
   </section>
 
 
@@ -1752,6 +1991,8 @@
   <!-- Scripts Locais PWA & Leaflet GIS -->
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="js/db.js"></script>
+  <!-- Catálogo Centralizado de Imagens Territoriais -->
+  <script type="module" src="js/geoFishImages.js"></script>
   <!-- Firebase Service (Cloud Firestore Offline-First para o Pantanal) -->
   <script type="module" src="js/firebase-service.js"></script>
   <script src="js/app.js"></script>
