@@ -6,10 +6,7 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview",
-    "cap:add": "cap add android",
-    "cap:sync": "cap sync",
-    "cap:open": "cap open android"
+    "preview": "vite preview"
   },
   "keywords": [
     "webgis",
@@ -20,11 +17,8 @@
     "gemini-ai",
     "civic-tech"
   ],
-  "author": "Comunidade Pantaneira GeoFish MS",
+  "author": "Peterson Martins da Costa",
   "license": "MIT",
-  "dependencies": {
-    "@google/genai": "^2.4.0"
-  },
   "devDependencies": {
     "vite": "^6.0.0"
   }

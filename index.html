@@ -2,9 +2,9 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="light">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com https://generativelanguage.googleapis.com https://firestore.googleapis.com https://*.firebaseio.com; font-src 'self';">
 
   <title>GeoFish MS - Bacia do Rio Miranda</title>
   <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Otimizado para celulares Android.">
@@ -148,7 +148,7 @@
               <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
               <span>Navegar no WebGIS</span>
             </a>
-            <button type="button" onclick="abrirModalCartilha()" class="btn-hero-secondary">
+            <button type="button" data-action="abrir-cartilha" class="btn-hero-secondary">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               <span>Cartilha Oficial PMA</span>
             </button>
@@ -221,7 +221,7 @@
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               <span>Licença IMASUL</span>
             </a>
-            <button type="button" onclick="abrirModalCartilha()" class="panel-dual-btn btn-cartilha-panel" title="Consultar a Cartilha Oficial do Pescador PMA">
+            <button type="button" data-action="abrir-cartilha" class="panel-dual-btn btn-cartilha-panel" title="Consultar a Cartilha Oficial do Pescador PMA">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               <span>Cartilha PMA</span>
             </button>
@@ -243,7 +243,7 @@
         </div>
         <div class="partners-header-row">
           <h2 class="partners-title">Onde Ficar &amp; Serviços Náuticos no Pantanal</h2>
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partners-anuncie" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partners-anuncie" style="border: none; cursor: pointer;">
             <span>Anuncie sua Empresa Aqui &rarr;</span>
           </button>
         </div>
@@ -266,7 +266,7 @@
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Miranda &bull; Passo do Lontra</span>
-              <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+              <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partner-wpp" style="border: none; cursor: pointer;">
                 <span>💬 Informações &amp; Parcerias</span>
               </button>
             </div>
@@ -286,7 +286,7 @@
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Rio Miranda &bull; Rio Paraguai</span>
-              <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+              <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partner-wpp" style="border: none; cursor: pointer;">
                 <span>💬 Consultar Parcerias</span>
               </button>
             </div>
@@ -302,11 +302,11 @@
           <div class="partner-card-content">
             <h3 class="partner-card-title">Comércio Náutico, Iscas &amp; Guias Nativos</h3>
             <p class="partner-card-text">
-              Tuviras selecionadas, caranguejos, tralhas de pesca, combustível náutico e contratação de guias credenciados pelas Colônias Z-1 e Z-7.
+              Tuviras selecionadas, caranguejos, tralhas de pesca, combustível náutico e contratação de guias credenciados pelas Colônias Z-1, Z-7 e Z-11.
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Estrada Parque &bull; Postos Náuticos</span>
-              <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+              <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-partner-wpp" style="border: none; cursor: pointer;">
                 <span>💬 Piloteiros &amp; Apoio</span>
               </button>
             </div>
@@ -370,7 +370,7 @@
                 Dourado: Soltura Obrigatória
               </span>
             </div>
-            <button type="button" onclick="abrirModalEspecies()" class="mosaic-btn-action">
+            <button type="button" data-action="abrir-especies" class="mosaic-btn-action">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
               <span>Consultar Régua Digital de Espécies</span>
             </button>
@@ -407,7 +407,7 @@
               Águas transparentes de calcário protegidas por lei estadual. Na calha do Salobra, a pesca é estritamente Pesque e Solte, proibido abate ou transporte, com autorização apenas para motores 4 tempos até 15 HP.
             </p>
             <div class="mosaic-card-footer-btns">
-              <button type="button" onclick="abrirModalCartilha()" class="mosaic-btn-sub">
+              <button type="button" data-action="abrir-cartilha" class="mosaic-btn-sub">
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
                 <span>Ler Cartilha Oficial PMA</span>
               </button>
@@ -429,7 +429,7 @@
             <p class="mosaic-card-text">
               Acesso rápido aos telefones de socorro: Marinha do Brasil (185), Polícia Militar Ambiental (190), Bombeiros (193) e pronto atendimento de Miranda.
             </p>
-            <button type="button" onclick="abrirModalSos()" class="mosaic-btn-action btn-danger">
+            <button type="button" data-action="abrir-sos" class="mosaic-btn-action btn-danger">
               <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
               <span>Ver Telefones de Emergência</span>
             </button>
@@ -503,7 +503,7 @@
               Ao longo do seu percurso, o Miranda recebe tributários fundamentais como o <strong>Rio Aquidauana</strong>, o límpido <strong>Rio Salobra</strong> e o <strong>Rio Vermelho</strong>. Essa dinâmica fluvial sustenta um dos ecossistemas de peixes migradores mais produtivos do planeta — como o Pintado, o Pacu, o Jaú, a Cachara e o emblemático Dourado — sob forte regramento ambiental de preservação.
             </p>
             <p>
-              Mais do que uma bacia hidrográfica, este território é o lar de comunidades ribeirinhas históricas. Os piloteiros e pescadores nativos das <strong>Colônias Z-1 (Miranda e Corumbá)</strong> e <strong>Z-7 (Aquidauana e Anastácio)</strong> detêm o conhecimento tradicional da navegação, conduzindo com segurança os visitantes por canais, baías e restingas pantaneiras.
+              Mais do que uma bacia hidrográfica, este território é o lar de comunidades ribeirinhas históricas. Os piloteiros e pescadores nativos das <strong>Colônias Z-1 (Miranda e Corumbá)</strong>, <strong>Z-7 (Aquidauana e Anastácio)</strong> e <strong>Z-11 (Bonito e Águas do Miranda)</strong> detêm o conhecimento tradicional da navegação, conduzindo com segurança os visitantes por canais, baías e restingas pantaneiras.
             </p>
           </div>
 
@@ -521,8 +521,8 @@
               <span class="fact-label">Municípios abrangendo 54% da população do MS</span>
             </div>
             <div class="territorio-fact-card">
-              <span class="fact-num">2 Colônias</span>
-              <span class="fact-label">Colônias Z-1 e Z-7 de Piloteiros Nativos</span>
+              <span class="fact-num">3 Colônias</span>
+              <span class="fact-label">Colônias Z-1, Z-7 e Z-11 de Piloteiros Nativos</span>
             </div>
           </div>
         </div>
@@ -636,11 +636,11 @@
             <span class="historia-tag">COMUNIDADES &amp; TRADIÇÃO</span>
           </div>
           <div class="historia-body">
-            <h3 class="historia-title">Piloteiros Nativos: Guardiões das Colônias Z-1 e Z-7</h3>
+            <h3 class="historia-title">Piloteiros Nativos: Guardiões das Colônias Z-1, Z-7 e Z-11</h3>
             <p class="historia-desc">
-              O saber secular dos pescadores profissionais de Miranda (Colônia Z-1) e Aquidauana (Colônia Z-7) na leitura dos balseiros, corixos e poços profundos onde habitam as grandes matrizes de pintado, pacu e jaú no Pantanal.
+              O saber secular dos pescadores profissionais de Miranda (Colônia Z-1), Aquidauana (Colônia Z-7) e Bonito (Colônia Z-11) na leitura dos balseiros, corixos e poços profundos onde habitam as grandes matrizes de pintado, pacu e jaú no Pantanal.
             </p>
-            <a href="javascript:void(0)" onclick="abrirModalParceriasTab('piloteiros')" class="historia-link">Contatar piloteiros &rarr;</a>
+            <a href="javascript:void(0)" data-action="abrir-parcerias-piloteiros" class="historia-link">Contatar piloteiros &rarr;</a>
           </div>
         </article>
 
@@ -665,7 +665,7 @@
 
   <!-- Barra Inferior de Polegar (Android Bottom Navigation Bar) -->
   <nav id="android-bottom-bar" class="android-bottom-bar" aria-label="Navegação rápida inferior">
-    <button id="nav-btn-guias" class="bottom-nav-item" onclick="abrirModalParceriasTab('piloteiros')" aria-label="Piloteiros e Guias das Colônias Z-1 e Z-7">
+    <button id="nav-btn-guias" class="bottom-nav-item" data-action="abrir-parcerias-piloteiros" aria-label="Piloteiros e Guias das Colônias Z-1, Z-7 e Z-11">
       <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
       <span class="bottom-nav-label">Piloteiros</span>
     </button>
@@ -677,7 +677,7 @@
       <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
       <span class="bottom-nav-label">Rampas</span>
     </button>
-    <button id="nav-btn-pousadas" class="bottom-nav-item" onclick="abrirModalParceriasTab('pousadas')" aria-label="Pousadas e Ranchos">
+    <button id="nav-btn-pousadas" class="bottom-nav-item" data-action="abrir-parcerias-pousadas" aria-label="Pousadas e Ranchos">
       <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
       <span class="bottom-nav-label">Pousadas</span>
     </button>
@@ -765,7 +765,7 @@
         <div>
           <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Governança Participativa e Colônias</h3>
           <p style="font-size: 0.86rem; color: #334155; line-height: 1.4;">
-            Dados oficiais da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda) e Z-7 (Aquidauana)</strong>.
+            Dados oficiais da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito / Águas do Miranda)</strong>.
           </p>
         </div>
 
@@ -1205,7 +1205,7 @@
             🏨 Pousadas &amp; Ranchos (Anúncio Pago)
           </button>
           <button type="button" id="tab-btn-piloteiros" class="parceria-tab-btn" role="tab" aria-selected="false">
-            🚤 Piloteiros Z-1 / Z-7 (100% Grátis)
+            🚤 Piloteiros Z-1 / Z-7 / Z-11 (100% Grátis)
           </button>
         </div>
 
@@ -1215,7 +1215,7 @@
             <strong>💼 Sustentabilidade e Parceria Comercial:</strong> Divulgue sua pousada, rancho ou marina com presença destacada no WebGIS, fotos da rampa de descida, amenidades e botão direto para seu WhatsApp de reservas — sem comissões abusivas de plataformas internacionais.
           </div>
 
-          <form id="form-parceria-pousada" onsubmit="event.preventDefault();">
+          <form id="form-parceria-pousada">
             <div style="margin-bottom: 10px;">
               <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome do Rancho / Pousada / Marina:</label>
               <input type="text" id="pousada-nome" class="checker-input" placeholder="Ex: Pousada Pantaneira Beira Rio" required style="margin-bottom: 0;">
@@ -1227,6 +1227,7 @@
                 <select id="pousada-rio" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
                   <option value="Rio Miranda (Urbano / Porto Geral)">Rio Miranda (Urbano / Porto Geral)</option>
                   <option value="Rio Miranda (Passo do Lontra / Vermelho)">Rio Miranda (Passo do Lontra / Vermelho)</option>
+                  <option value="Rio Miranda (Distrito Águas do Miranda / Bonito)">Rio Miranda (Distrito Águas do Miranda / Bonito)</option>
                   <option value="Rio Aquidauana (Urbano / Anastácio)">Rio Aquidauana (Urbano / Anastácio)</option>
                   <option value="Rio Aquidauana (Palmeiras / Piraputanga)">Rio Aquidauana (Palmeiras / Piraputanga)</option>
                   <option value="Estrada Parque Pantanal MS-184">Estrada Parque Pantanal MS-184</option>
@@ -1279,13 +1280,13 @@
           </form>
         </div>
 
-        <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1 E Z-7) -->
+        <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1, Z-7 E Z-11) -->
         <div id="tab-pane-piloteiros" class="tab-pane hidden">
           <div class="parceria-callout-box parceria-callout-social">
-            <strong>🚤 Compromisso Social Ribeirinho:</strong> Piloteiros e guias profissionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong> e <strong>Z-7 (Aquidauana/Anastácio)</strong> <strong>NÃO PAGAM NADA</strong>. O cadastro no mapa com seu WhatsApp direto é 100% gratuito e livre de qualquer taxa ou mensalidade.
+            <strong>🚤 Compromisso Social Ribeirinho:</strong> Piloteiros e guias profissionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> <strong>NÃO PAGAM NADA</strong>. O cadastro no mapa com seu WhatsApp direto é 100% gratuito e livre de qualquer taxa ou mensalidade.
           </div>
 
-          <form id="form-parceria-guia" onsubmit="event.preventDefault();">
+          <form id="form-parceria-guia">
             <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 10px;">
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome Completo:</label>
@@ -1302,6 +1303,7 @@
               <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
                 <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
                 <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
+                <option value="Colônia Z-11 (Bonito / Águas do Miranda)">Colônia Z-11 (Bonito / Águas do Miranda)</option>
                 <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
               </select>
             </div>
@@ -1761,7 +1763,7 @@
           <strong>Quer divulgar os roteiros ou pacotes da sua agência no GeoFish MS?</strong>
           <span>Apareça em posição de honra no guia oficial mais consultado da região pantaneira.</span>
         </div>
-        <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="background: #0284c7; color: #ffffff; border: none; cursor: pointer;">
+        <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="background: #0284c7; color: #ffffff; border: none; cursor: pointer;">
           <span>💬 Divulgar Pacotes da Agência</span>
         </button>
       </div>
@@ -1778,7 +1780,7 @@
           </p>
         </div>
         <div class="ad-banner-cta">
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="background: #38bdf8; color: #082f49; border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="background: #38bdf8; color: #082f49; border: none; cursor: pointer;">
             <span>💬 Divulgar meu Negócio no Portal</span>
           </button>
         </div>
@@ -1918,7 +1920,7 @@
         </p>
       </div>
       <div class="ad-banner-cta">
-        <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="border: none; cursor: pointer;">
+        <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="border: none; cursor: pointer;">
           <span>💬 Propor Parceria ou Anúncio</span>
         </button>
       </div>
@@ -1959,7 +1961,7 @@
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="resource-item-link">
+            <a href="javascript:void(0)" data-action="scroll-top" class="resource-item-link">
               <div class="item-title">Onde Pescar: Trechos &amp; Zonas no WebGIS &rarr;</div>
               <div class="item-sub">Consulte no mapa se o trecho é Pesque e Solte, Cota Zero ou Reserva</div>
             </a>
@@ -1993,14 +1995,14 @@
 
         <ul class="column-resource-list">
           <li>
-            <a href="javascript:void(0)" onclick="abrirConfirmacaoSos({tipo: 'call', numero: '185', servico: 'Marinha do Brasil (Capitania Fluvial)'})" class="resource-item-link">
+            <a href="javascript:void(0)" data-action="sos-call-marinha" class="resource-item-link">
               <div class="item-title">Capitania Fluvial &amp; Marinha (Emergência 185) &rarr;</div>
               <div class="item-sub">Normas da Capitania e fiscalização de habilitação na calha navegável</div>
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" onclick="abrirModalParceiros()" class="resource-item-link">
-              <div class="item-title">Guias Nativos Credenciados (Colônias Z-1 e Z-7) &rarr;</div>
+            <a href="javascript:void(0)" data-action="abrir-parcerias-pousadas" class="resource-item-link">
+              <div class="item-title">Guias Nativos Credenciados (Colônias Z-1, Z-7 e Z-11) &rarr;</div>
               <div class="item-sub">Piloteiros experientes para condução segura nos labirintos do Pantanal</div>
             </a>
           </li>
@@ -2011,9 +2013,9 @@
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" onclick="abrirModalSos()" class="resource-item-link">
-              <div class="item-title">Central de Resgate S.O.S Fluvial &rarr;</div>
-              <div class="item-sub">Coordenadas de satélite prontas para envio aos Bombeiros e Marinha</div>
+            <a href="javascript:void(0)" data-action="abrir-sos" class="resource-item-link">
+              <div class="item-title">Central de Apoio &amp; Emergência Fluvial &rarr;</div>
+              <div class="item-sub">Telefones e resgate com a Marinha, PMA e Bombeiros</div>
             </a>
           </li>
         </ul>
@@ -2028,7 +2030,7 @@
       <div class="section-tag">ECOTURISMO & SERVIÇOS NÁUTICOS</div>
       <h2 class="portal-section-title">Pousadas, Ranchos &amp; Piloteiros Nativos Credenciados</h2>
       <p class="portal-section-desc">
-        Infraestrutura verificada e condutores das Colônias Z-1 (Miranda) e Z-7 (Aquidauana) para uma pescaria segura no Pantanal.
+        Infraestrutura verificada e condutores das Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito) para uma pescaria segura no Pantanal.
       </p>
     </div>
 
@@ -2050,21 +2052,21 @@
           <p>
             O motor de faturamento e sustentabilidade do projeto. O rancho ou pousada ganha presença destacada no WebGIS, fotos, descrição da rampa de barcos, amenidades e botão direto para o WhatsApp de reservas — sem comissões abusivas.
           </p>
-          <button type="button" class="btn-banner-action btn-banner-comercial" onclick="abrirModalParceriasTab('pousadas')">
+          <button type="button" class="btn-banner-action btn-banner-comercial" data-action="abrir-parcerias-pousadas">
             <span>🏨</span>
             <span>Anunciar Estabelecimento &rarr;</span>
           </button>
         </div>
 
-        <!-- Coluna 2: Piloteiros & Guias Comunitários (100% Gratuito Z-1 / Z-7) -->
+        <!-- Coluna 2: Piloteiros & Guias Comunitários (100% Gratuito Z-1 / Z-7 / Z-11) -->
         <div class="servicos-banner-col col-social">
           <div class="col-icon">🚤</div>
           <h4>Piloteiros &amp; Guias Nativos</h4>
-          <span class="col-tag tag-social">Colônias Z-1 e Z-7 / 100% Grátis</span>
+          <span class="col-tag tag-social">Colônias Z-1, Z-7 e Z-11 / 100% Grátis</span>
           <p>
-            Compromisso comunitário e de responsabilidade social com os ribeirinhos. Os piloteiros e pescadores profissionais das Colônias Z-1 (Miranda/Corumbá) e Z-7 (Aquidauana/Anastácio) NÃO PAGAM NADA. Cadastro e divulgação 100% livres de taxas.
+            Compromisso comunitário e de responsabilidade social com os ribeirinhos. Os piloteiros e pescadores profissionais das Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito / Águas do Miranda) NÃO PAGAM NADA. Cadastro e divulgação 100% livres de taxas.
           </p>
-          <button type="button" class="btn-banner-action btn-banner-social" onclick="abrirModalParceriasTab('piloteiros')">
+          <button type="button" class="btn-banner-action btn-banner-social" data-action="abrir-parcerias-piloteiros">
             <span>🚤</span>
             <span>Cadastrar Guia Grátis &rarr;</span>
           </button>
@@ -2090,7 +2092,7 @@
           <span>🚫 0% de Comissão</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp btn-showcase-ad" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp btn-showcase-ad" style="border: none; cursor: pointer;">
             📲 Anuncie Aqui na Vitrine
           </button>
         </div>
@@ -2113,7 +2115,7 @@
           <span>📶 Wi-Fi</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
             💬 Informações &amp; Parcerias
           </button>
         </div>
@@ -2136,7 +2138,7 @@
           <span>🍽️ Pensão Completa</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
             💬 Informações &amp; Parcerias
           </button>
         </div>
@@ -2158,7 +2160,7 @@
           <span>🎯 Conhecimento do Rio</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
             💬 Cadastrar / Ver Piloteiros Z-1
           </button>
         </div>
@@ -2180,8 +2182,30 @@
           <span>🐟 Pesque &amp; Solte</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
             💬 Cadastrar / Ver Piloteiros Z-7
+          </button>
+        </div>
+      </article>
+
+      <!-- Piloteiro Comunitário: Colônia Z-11 (Bonito / Águas do Miranda) -->
+      <article class="showcase-card card-guide">
+        <div class="showcase-card-header">
+          <span class="showcase-type badge-z1" style="background: #e0f2fe; color: #0369a1;">COLÔNIA Z-11 BONITO</span>
+          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-11</h3>
+          <span class="showcase-location">📍 Bonito &bull; Distrito Águas do Miranda &bull; Rio Miranda</span>
+        </div>
+        <p class="showcase-desc">
+          Condutores ribeirinhos e pescadores profissionais da Colônia Z-11 atuantes em Águas do Miranda e região de Bonito. Conhecimento ímpar das águas cênicas do Rio Miranda e afluentes, preservação ecológica e turismo sustentável. Cadastro 100% gratuito.
+        </p>
+        <div class="showcase-amenities">
+          <span>📜 Colônia Z-11</span>
+          <span>🌿 Águas do Miranda</span>
+          <span>🐟 Pesca Sustentável</span>
+        </div>
+        <div class="showcase-footer">
+          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+            💬 Cadastrar / Ver Piloteiros Z-11
           </button>
         </div>
       </article>
@@ -2191,7 +2215,7 @@
         <div class="showcase-card-header">
           <span class="showcase-type badge-sponsor" style="background: #ecfdf5; color: #065f46;">DIVULGAÇÃO &amp; APOIO LOCAL</span>
           <h3 class="showcase-name">Divulgue sua Pousada, Rancho ou Barco</h3>
-          <span class="showcase-location">📍 Miranda, Aquidauana e Passo do Lontra</span>
+          <span class="showcase-location">📍 Miranda, Aquidauana, Bonito e Passo do Lontra</span>
         </div>
         <p class="showcase-desc">
           Este portal é uma iniciativa cidadã sem verba pública. Ao divulgar sua pousada, rancho ou loja de pesca aqui, você conecta seu negócio diretamente ao pescador esportivo e ajuda a manter a plataforma gratuita para os piloteiros nativos.
@@ -2202,7 +2226,7 @@
           <span>📲 Botão Direto para seu WhatsApp</span>
         </div>
         <div class="showcase-footer">
-          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff; border: none; cursor: pointer;">
+          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff; border: none; cursor: pointer;">
             💬 Anunciar Pousada ou Rancho &rarr;
           </button>
         </div>
@@ -2234,7 +2258,7 @@
             <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>Baixar Cartilha (PDF)</span>
           </a>
-          <button type="button" class="btn-cartilha-read" onclick="abrirModalCartilha()">
+          <button type="button" class="btn-cartilha-read" data-action="abrir-cartilha">
             <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             <span>Consultar Cartilha Online</span>
           </button>
@@ -2267,9 +2291,9 @@
           <span class="footer-kicker">CONFORMAÇÃO &amp; SERVIÇOS</span>
           <h4 class="footer-col-title">Governança da Pesca</h4>
           <ul class="footer-links">
-            <li><button class="footer-link-btn" onclick="abrirModalCartilha()">📖 Cartilha do Pescador (PMA-MS)</button></li>
+            <li><button class="footer-link-btn" data-action="abrir-cartilha">📖 Cartilha do Pescador (PMA-MS)</button></li>
             <li><a href="#secao-parceiros-turismo" class="footer-link-btn">🏨 Pousadas &amp; Barcos-Hotéis</a></li>
-            <li><button class="footer-link-btn" id="footer-btn-piloteiros">🚤 Piloteiros Locais (Colônias Z-1 e Z-7)</button></li>
+            <li><button class="footer-link-btn" id="footer-btn-piloteiros" data-action="abrir-parcerias-piloteiros">🚤 Piloteiros Locais (Colônias Z-1, Z-7 e Z-11)</button></li>
             <li><a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="footer-link-btn">🪪 Emitir Licença no IMASUL</a></li>
             <li><a href="#secao-transporte-passo-a-passo" class="footer-link-btn">⚖️ Regras de Transporte Sem Multa</a></li>
           </ul>
@@ -2282,7 +2306,7 @@
             <li><button class="footer-link-btn" id="footer-btn-pix">☕ Contribuir com a Iniciativa (PIX Cidadão)</button></li>
             <li><a href="https://github.com/petermar23/geofish-ms" target="_blank" rel="noopener noreferrer" class="footer-link-btn">💻 Código Aberto no GitHub</a></li>
             <li><button class="footer-link-btn" id="footer-btn-replicar">🗺️ Replicar na sua Bacia Hidrográfica</button></li>
-            <li><button class="footer-link-btn" onclick="abrirModalSobre()">ℹ️ Fontes Técnicas &amp; Autoria</button></li>
+            <li><button class="footer-link-btn" data-action="abrir-sobre">ℹ️ Fontes Técnicas &amp; Autoria</button></li>
           </ul>
         </div>
       </div>

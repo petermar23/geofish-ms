@@ -1249,30 +1249,64 @@ function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
 
 function obterChaveGemini() {
   return localStorage.getItem('geofish_gemini_api_key') || 
-         (typeof window.GEMINI_API_KEY === 'string' ? window.GEMINI_API_KEY : '') ||
-         (window.__ENV__ && window.__ENV__.GEMINI_API_KEY ? window.__ENV__.GEMINI_API_KEY : '');
+         (typeof window.GEMINI_API_KEY === 'string' ? window.GEMINI_API_KEY : '');
+}
+
+async function redimensionarImagemParaIa(base64Image, maxDimension = 1024) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width <= maxDimension && height <= maxDimension) {
+        return resolve(base64Image);
+      }
+      if (width > height) {
+        height = Math.round((height * maxDimension) / width);
+        width = maxDimension;
+      } else {
+        width = Math.round((width * maxDimension) / height);
+        height = maxDimension;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => resolve(base64Image);
+    img.src = base64Image;
+  });
 }
 
 async function consultarGeminiVision(base64Image, apiKey) {
-  const cleanBase64 = base64Image.replace(/^data:image\/[a-z]+;base64,/, '');
-  const mimeTypeMatch = base64Image.match(/^data:(image\/[a-z]+);base64,/);
+  // Redimensiona para no máximo 1024px no canvas, poupando pacote de dados do pescador
+  const resizedBase64 = await redimensionarImagemParaIa(base64Image, 1024);
+  const cleanBase64 = resizedBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+  const mimeTypeMatch = resizedBase64.match(/^data:(image\/[a-z]+);base64,/);
   const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
 
-  const prompt = `Você é um ictiólogo e biólogo sênior especialista na ictiofauna da Bacia do Rio Miranda (Pantanal de Mato Grosso do Sul).
-Analise a foto deste peixe e forneça a identificação rigorosa conforme a legislação ambiental do Estado de MS (Decreto Estadual nº 15.166/2019 e Lei nº 5.321/19).
-Responda EXCLUSIVAMENTE em formato JSON puro, sem markdown, no seguinte formato:
+  const prompt = `Você é um biólogo especialista na ictiofauna de água doce da Bacia do Rio Miranda e Pantanal (Mato Grosso do Sul).
+Analise a foto deste peixe e forneça APENAS a identificação taxonômica preliminar e características morfológicas visíveis.
+NÃO emita veredito legal sobre pesca, pois regras oficiais dependem de medição em régua homologada e trecho do rio.
+Responda EXCLUSIVAMENTE em formato JSON puro, sem formatação markdown:
 {
-  "especie": "Nome Comum Principal",
+  "especie": "Nome Comum (ex: Pintado, Pacu, Cachara, Jaú, Dourado, Piraputanga, Curimbatá, Piranha)",
   "nomeCientifico": "Gênero e espécie em latim",
-  "idSugerido": "pintado | pacu | cachara | jau | dourado | piraputanga | curimbata | piavucu | barbado | outro",
-  "conformidade": "Permitido com Cota (Faixa X a Y cm) | Cota Zero / Proibido Abate (Dourado) | Cota Livre (Exótica)",
-  "observacoes": "Resumo biológico de 1 frase para o pescador pantaneiro."
+  "idSugerido": "pintado | pacu | cachara | jau | dourado | piraputanga | curimbata | piavucu | barbado | piranha | outro",
+  "confianca": "alta | media | baixa",
+  "caracteristicasVisuais": "Descrição concisa dos detalhes observados (ex: barbilhões, manchas, formato do corpo, nadadeiras).",
+  "notaBiologica": "Observação ecológica de 1 frase para pescadores do Pantanal."
 }`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // Utiliza modelo moderno gemini-2.5-flash com autenticação em cabeçalho x-goog-api-key (chave oculta da URL)
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey
+    },
     body: JSON.stringify({
       contents: [{
         parts: [
@@ -1365,17 +1399,22 @@ function abrirModalDiario() {
             if (aiResultadoBox) {
               aiResultadoBox.classList.remove('hidden');
               aiResultadoBox.innerHTML = `
-                <div class="ai-result-title">✨ Parecer do Ictiólogo Virtual (Gemini)</div>
+                <div class="ai-result-title">✨ Sugestão Morfológica (Google Gemini)</div>
                 <div class="ai-result-body">
-                  <strong>Espécie Sugerida:</strong> ${escapeHTML(analise.especie || 'Não identificada')}<br>
-                  <strong>Nome Científico:</strong> <em>${escapeHTML(analise.nomeCientifico || '')}</em><br>
-                  <strong>Situação Legal em MS:</strong> ${escapeHTML(analise.conformidade || 'Consulte o regulamento')}<br>
-                  <p style="margin-top: 6px; font-size: 0.82rem; color: #334155;">${escapeHTML(analise.observacoes || '')}</p>
+                  <strong>Espécie Provável:</strong> ${escapeHTML(analise.especie || 'Não identificada')}<br>
+                  <strong>Nome Científico:</strong> <em>${escapeHTML(analise.nomeCientifico || 'N/A')}</em><br>
+                  <strong>Grau de Confiança:</strong> ${escapeHTML(analise.confianca || 'Média')}<br>
+                  <strong>Características Visuais:</strong> ${escapeHTML(analise.caracteristicasVisuais || 'Análise visual padrão')}<br>
+                  <p style="margin-top: 6px; font-size: 0.82rem; color: #334155;"><strong>Nota Ecológica:</strong> ${escapeHTML(analise.notaBiologica || '')}</p>
+                  <p style="margin-top: 6px; font-size: 0.72rem; color: #64748b; font-style: italic;">⚠️ <strong>Aviso Educativo:</strong> A identificação por IA é meramente informativa e não substitui a medição em régua oficial e o cumprimento das normas da SEMADESC / IMASUL / PMA.</p>
                 </div>
               `;
             }
             if (selectEspecieDiario && analise.idSugerido) {
-              selectEspecieDiario.value = analise.idSugerido;
+              const matchingOption = selectEspecieDiario.querySelector(`option[value="${analise.idSugerido}"]`);
+              if (matchingOption) {
+                selectEspecieDiario.value = analise.idSugerido;
+              }
             }
           } catch (err) {
             if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
@@ -1814,4 +1853,57 @@ if (btnHeroParceiros) {
   });
 }
 
+// Delegador Global de Cliques para data-action (Zero inline handlers para conformidade estrita de CSP)
+document.addEventListener('click', (e) => {
+  const actionEl = e.target.closest('[data-action]');
+  if (!actionEl) return;
+
+  const action = actionEl.getAttribute('data-action');
+  switch (action) {
+    case 'abrir-cartilha':
+      e.preventDefault();
+      vibrar(25);
+      abrirModalCartilha();
+      break;
+    case 'abrir-especies':
+      e.preventDefault();
+      vibrar(25);
+      abrirModalEspecies();
+      break;
+    case 'abrir-parcerias-pousadas':
+      e.preventDefault();
+      vibrar(25);
+      abrirModalParcerias('pousadas');
+      break;
+    case 'abrir-parcerias-piloteiros':
+      e.preventDefault();
+      vibrar(25);
+      abrirModalParcerias('piloteiros');
+      break;
+    case 'abrir-sobre':
+      e.preventDefault();
+      vibrar(25);
+      abrirModalSobre();
+      break;
+    case 'abrir-sos':
+      e.preventDefault();
+      vibrar(35);
+      abrirModalSos();
+      break;
+    case 'scroll-top':
+      e.preventDefault();
+      vibrar(20);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      break;
+    case 'sos-call-marinha':
+      e.preventDefault();
+      vibrar(35);
+      abrirConfirmacaoSos({ tipo: 'call', numero: '185', servico: 'Marinha do Brasil (Capitania Fluvial)' });
+      break;
+    default:
+      break;
+  }
+});
+
 // 20, 21. Cartilha PMA sob demanda e Prep Offline delegados para módulos ES6.
+
