@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v27';
+const CACHE_VERSION = 'geofish-shell-v28';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
