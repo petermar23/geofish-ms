@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v30';
+const CACHE_VERSION = 'geofish-shell-v31';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -201,4 +201,22 @@ self.addEventListener('fetch', (event) => {
       return cached || fetchPromise;
     })
   );
+});
+
+// Listener de mensagens para controle do Service Worker
+self.addEventListener('message', (event) => {
+  if (!event.data) return;
+
+  if (event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  } else if (event.data.type === 'PRECACHE_CHECK') {
+    // Garante validação dos assets fundamentais
+    caches.open(CACHE_VERSION).then((cache) => {
+      cache.match('./index.html').then((resp) => {
+        if (!resp) {
+          cache.addAll(SHELL_ASSETS).catch((e) => console.warn('[SW] Falha ao pre-cachear:', e));
+        }
+      });
+    });
+  }
 });

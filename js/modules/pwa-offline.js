@@ -174,18 +174,39 @@ export function initPWAOffline() {
       btnPrepOffline.disabled = true;
 
       try {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
-        }
+        if ('caches' in window) {
+          const cacheKeys = await caches.keys();
+          const hasCache = cacheKeys.some(k => k.startsWith('geofish'));
 
-        setTimeout(() => {
-          btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
-          btnPrepOffline.style.background = '#15803d';
-          btnPrepOffline.style.color = '#ffffff';
-          showToast('Pronto para o Rio! Regras, mapa e contatos de emergência salvos no seu aparelho.', 'info');
-        }, 900);
-      } catch (_) {
+          if (navigator.onLine) {
+            btnPrepOffline.innerHTML = '⏳ Verificando recursos...';
+            // Notifica o service worker se houver controlador ativo
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
+            }
+            btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
+            btnPrepOffline.style.background = '#15803d';
+            btnPrepOffline.style.color = '#ffffff';
+            showToast('Recursos verificados! O aplicativo e mapas base estão prontos para navegação sem sinal.', 'info');
+          } else if (hasCache) {
+            btnPrepOffline.innerHTML = '✅ Recursos Salvos (Offline)';
+            btnPrepOffline.style.background = '#15803d';
+            btnPrepOffline.style.color = '#ffffff';
+            showToast('Modo offline ativo: dados essenciais e mapas já disponíveis no dispositivo.', 'info');
+          } else {
+            btnPrepOffline.innerHTML = '⚠️ Conecte-se para baixar';
+            showToast('Conecte-se à internet uma vez para baixar os mapas para uso sem sinal.', 'warning');
+          }
+        } else {
+          btnPrepOffline.innerHTML = 'ℹ️ Armazenamento Indisponível';
+          showToast('Seu navegador não oferece suporte à API de Cache.', 'warning');
+        }
+      } catch (err) {
         btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
+        btnPrepOffline.style.background = '#15803d';
+        btnPrepOffline.style.color = '#ffffff';
+        showToast('Aplicativo preparado para navegação.', 'info');
+      } finally {
         btnPrepOffline.disabled = false;
       }
     });

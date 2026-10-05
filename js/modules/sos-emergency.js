@@ -12,9 +12,15 @@ let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico 
 
 export function gerarTextoResgate() {
   const dataHora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
+  const coordsTexto = (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number')
+    ? `📍 Coordenadas GPS: ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (Precisão: ±${Math.round(pos.precisao || 10)}m)`
+    : `📍 Localização GPS: Não detectada no dispositivo (informe sua referência local)`;
+
   return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
          `📍 Região: Bacia do Rio Miranda (Pantanal/MS)\n` +
-         `⏰ Horário: ${dataHora}\n` +
+         `${coordsTexto}\n` +
+         `⏰ Horário do Alerta: ${dataHora}\n` +
          `🆘 Solicito apoio emergencial para embarcação/pescador na calha do rio.\n\n` +
          `Canais de Acionamento Imediato:\n` +
          `• Marinha do Brasil (Capitania Fluvial): 185\n` +
@@ -27,6 +33,18 @@ export function abrirModalSos() {
   modalSosInstancia = abrirModalDeTemplate('template-modal-sos', {
     modalId: 'modal-sos',
     onMount: (modalEl) => {
+      // Exibe coordenadas reais no card de SOS se disponíveis
+      const coordsDisplay = modalEl.querySelector('#sos-coords-display');
+      if (coordsDisplay) {
+        const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
+        if (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number') {
+          const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          coordsDisplay.innerHTML = `<span style="color: #047857; font-weight: 700;">📍 Sua Posição GPS Atual:</span> ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} <span style="font-size:0.75rem; color:#64748b;">(±${Math.round(pos.precisao || 10)}m, às ${hora})</span>.<br>Informe estas coordenadas ou seu ponto de referência ao atendente de socorro:`;
+        } else {
+          coordsDisplay.innerHTML = `Em caso de pane de motor, acidente náutico ou socorro médico na calha do Rio Miranda e Aquidauana, acione as forças públicas de segurança pelos números abaixo:`;
+        }
+      }
+
       const btnCopiar = modalEl.querySelector('#btn-copiar-resgate');
       if (btnCopiar) {
         btnCopiar.addEventListener('click', () => {
@@ -77,16 +95,23 @@ export function abrirConfirmacaoSos(acao) {
       const btnExecutarSosCall = modalEl.querySelector('#btn-executar-sos-call');
       const btnCancelarSosCall = modalEl.querySelector('#btn-cancelar-sos-call');
 
+      const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
+      const temGps = pos && typeof pos.lat === 'number' && typeof pos.lng === 'number';
+
       if (confirmSosText) {
         if (acao.tipo === 'call') {
           confirmSosText.innerHTML = `Você está prestes a discar para <strong>${escapeHTML(acao.servico)} (${escapeHTML(acao.numero)})</strong>.<br><br>` +
             `<span style="color: #991b1b; font-weight: 700;">⚠️ Confirme apenas se estiver em situação real de risco à vida ou à navegação. Trote aos serviços de emergência é crime (Art. 340 do Código Penal).</span>`;
           if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📞 Ligar para ${acao.numero}`;
         } else if (acao.tipo === 'copy') {
-          confirmSosText.innerHTML = `Deseja copiar o texto oficial de socorro com as suas coordenadas GPS atuais para a área de transferência?`;
+          confirmSosText.innerHTML = temGps
+            ? `Deseja copiar o texto de emergência com as suas coordenadas GPS reais (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}) e contatos para a área de transferência?`
+            : `Deseja copiar o texto de emergência e lista de contatos para a área de transferência? (GPS do aparelho não ativado).`;
           if (btnExecutarSosCall) btnExecutarSosCall.textContent = `📋 Sim, Copiar Mensagem`;
         } else if (acao.tipo === 'wpp') {
-          confirmSosText.innerHTML = `Deseja abrir o aplicativo do WhatsApp com a mensagem de emergência e suas coordenadas GPS atuais pré-preenchidas?`;
+          confirmSosText.innerHTML = temGps
+            ? `Deseja abrir o WhatsApp com mensagem de socorro contendo suas coordenadas GPS reais pré-preenchidas para você enviar a um contato ou grupo de apoio?`
+            : `Deseja abrir o WhatsApp com mensagem de emergência pré-formatada para enviar a um contato ou grupo de apoio?`;
           if (btnExecutarSosCall) btnExecutarSosCall.textContent = `💬 Sim, Abrir WhatsApp`;
         }
       }

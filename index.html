@@ -243,9 +243,9 @@
         </div>
         <div class="partners-header-row">
           <h2 class="partners-title">Onde Ficar &amp; Serviços Náuticos no Pantanal</h2>
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20anunciar%20minha%20pousada/servi%C3%A7o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-partners-anuncie">
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partners-anuncie" style="border: none; cursor: pointer;">
             <span>Anuncie sua Empresa Aqui &rarr;</span>
-          </a>
+          </button>
         </div>
         <p class="partners-desc">
           Conecte-se com pousadas pesqueiras, barcos-hotéis e comércios náuticos credenciados ao longo do Rio Miranda, Passo do Lontra e Aquidauana.
@@ -266,9 +266,9 @@
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Miranda &bull; Passo do Lontra</span>
-              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20as%20pousadas%20parceiras%20no%20Rio%20Miranda." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
-                <span>💬 Falar no WhatsApp</span>
-              </a>
+              <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+                <span>💬 Informações &amp; Parcerias</span>
+              </button>
             </div>
           </div>
         </article>
@@ -286,9 +286,9 @@
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Rio Miranda &bull; Rio Paraguai</span>
-              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Gostaria%20de%20pacotes%20de%20barco-hotel%20no%20Pantanal." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
-                <span>💬 Consultar Pacotes</span>
-              </a>
+              <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+                <span>💬 Consultar Parcerias</span>
+              </button>
             </div>
           </div>
         </article>
@@ -306,9 +306,9 @@
             </p>
             <div class="partner-card-footer">
               <span class="partner-loc">📍 Estrada Parque &bull; Postos Náuticos</span>
-              <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Preciso%20de%20iscas%2C%20apoio%20n%C3%A1utico%20ou%20piloteiro%20em%20Miranda." target="_blank" rel="noopener noreferrer" class="btn-partner-wpp">
-                <span>💬 Contatar Fornecedores</span>
-              </a>
+              <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-partner-wpp" style="border: none; cursor: pointer;">
+                <span>💬 Piloteiros &amp; Apoio</span>
+              </button>
             </div>
           </div>
         </article>
@@ -418,20 +418,20 @@
           </div>
         </article>
 
-        <!-- BLOCO 5 (MÉDIO COM FOTO): S.O.S FLUVIAL & SEGURANÇA -->
+        <!-- BLOCO 5 (MÉDIO COM FOTO): CONTATOS DE EMERGÊNCIA & APOIO FLUVIAL -->
         <article class="mosaic-card card-sos">
           <div class="mosaic-card-image-wrap">
             <img src="images/rio/estrada_parque_miranda.jpg" alt="Estrada Parque e ponte sobre o Rio Miranda" class="mosaic-card-img" loading="lazy">
-            <span class="mosaic-card-tag tag-red">EMERGÊNCIA 24H</span>
+            <span class="mosaic-card-tag tag-red">EMERGÊNCIA FLUVIAL</span>
           </div>
           <div class="mosaic-card-body">
-            <h3 class="mosaic-card-title">S.O.S Fluvial &amp; Resgate no Rio</h3>
+            <h3 class="mosaic-card-title">Contatos de Emergência &amp; Apoio no Rio</h3>
             <p class="mosaic-card-text">
-              Coordenadas de satélite para envio rápido à Marinha do Brasil (Capitania Fluvial 185), Polícia Militar Ambiental e Bombeiros em caso de pane ou acidente.
+              Acesso rápido aos telefones de socorro: Marinha do Brasil (185), Polícia Militar Ambiental (190), Bombeiros (193) e pronto atendimento de Miranda.
             </p>
             <button type="button" onclick="abrirModalSos()" class="mosaic-btn-action btn-danger">
               <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
-              <span>Abrir Central S.O.S Fluvial</span>
+              <span>Ver Telefones de Emergência</span>
             </button>
           </div>
         </article>
@@ -975,8 +975,8 @@
             </div>
           </div>
           <div class="sos-coords-actions">
-            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Contatos de Socorro</button>
-            <a href="https://api.whatsapp.com/send?phone=5567999990001&text=EMERGENCIA%20NO%20RIO%20MIRANDA" target="_blank" rel="noopener noreferrer" class="btn-sos-action btn-wpp-action" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">📱 Plantão de Apoio</a>
+            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Mensagem de Emergência</button>
+            <button type="button" id="btn-wpp-resgate" class="btn-sos-action btn-wpp-action" style="cursor: pointer;">💬 Compartilhar via WhatsApp</button>
           </div>
         </div>
 
@@ -1031,7 +1031,7 @@
         <button id="btn-fechar-diario" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Registre seu troféu offline. Os dados ajudarão na pesquisa de repovoamento estadual quando sincronizados.</p>
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Guarde o registro fotográfico dos seus peixes no seu celular. Armazenamento 100% local e privado.</p>
         
         <input type="file" id="input-foto-diario" accept="image/*" capture="environment" style="display: none;">
         <div id="preview-box-diario" class="photo-preview-box">
@@ -1103,7 +1103,7 @@
         <div class="lgpd-container">
           <input type="checkbox" id="cb-lgpd-diario" class="lgpd-checkbox">
           <label for="cb-lgpd-diario" class="lgpd-text">
-            <strong>Termo de Consentimento (LGPD):</strong> Autorizo o uso anônimo desta foto e localização para o banco de dados estatístico de pesquisa e repovoamento ambiental (ex: IMASUL), sem a coleta de meus dados pessoais identificáveis.
+            <strong>Armazenamento Local e Privado:</strong> Confirmo que este registro é pessoal e fica guardado exclusivamente na memória do meu navegador/aparelho, para consulta própria no mapa.
           </label>
         </div>
 
@@ -1121,11 +1121,11 @@
   <div id="modal-denuncia" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2500;">
     <div class="modal-dialog">
       <div class="modal-header" style="background-color: #b91c1c;">
-        <h2 style="font-size: 1.15rem;">🚨 Denúncia Anônima</h2>
+        <h2 style="font-size: 1.15rem;">🚨 Registro de Evidência Ambiental</h2>
         <button id="btn-fechar-denuncia" class="modal-close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Presenciou crime ambiental? Fotografe offline. O envio será feito automaticamente e anonimamente à PMA assim que houver sinal 4G.</p>
+        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Presenciou crime ambiental? Fotografe e guarde a evidência com coordenadas na memória do seu celular. Para denunciar aos órgãos oficiais, ligue para a Polícia Militar Ambiental: <strong>190</strong> ou <strong>(67) 3357-1500</strong>.</p>
         
         <input type="file" id="input-foto-denuncia" accept="image/*" capture="environment" style="display: none;">
         <div id="preview-box-denuncia" class="photo-preview-box" style="border-color: #fca5a5;">
@@ -1149,12 +1149,12 @@
         <div class="lgpd-container" style="background: #fef2f2; border-color: #fca5a5;">
           <input type="checkbox" id="cb-lgpd-denuncia" class="lgpd-checkbox">
           <label for="cb-lgpd-denuncia" class="lgpd-text">
-            <strong>Aceite Legal:</strong> Confirmo a veracidade da imagem e autorizo o envio seguro e 100% anônimo à PMA-MS. Declaro ciência de que falsa comunicação de crime constitui infração penal (Art. 340 do CP).
+            <strong>Registro de Evidência Local:</strong> Confirmo a veracidade da imagem e declaro ciência de que ela fica salva neste aparelho como registro pessoal para apresentação às autoridades competentes (PMA / MPF). Falsa comunicação de crime constitui infração penal (Art. 340 do CP).
           </label>
         </div>
 
         <button id="btn-salvar-denuncia" class="btn-cta" style="background: #dc2626; border: none; min-height: 48px; margin-top: 8px;">
-          🔒 Salvar Evidência & Denunciar
+          💾 Guardar Evidência no Dispositivo
         </button>
       </div>
     </div>
@@ -1297,19 +1297,13 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
-                <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
-                  <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
-                  <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
-                  <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
-                </select>
-              </div>
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nº Carteira / RGP:</label>
-                <input type="text" id="guia-rgp" class="checker-input" placeholder="Ex: RGP 12345678" style="margin-bottom: 0;">
-              </div>
+            <div style="margin-bottom: 10px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
+              <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
+                <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
+                <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
+                <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
+              </select>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
@@ -1369,10 +1363,11 @@
           O <strong>GeoFish MS</strong> é um projeto independente de código aberto mantido sem verba pública, criado para proteger o Pantanal e apoiar os pescadores no rio.
         </p>
         <div style="background: #ecfdf5; border: 1px dashed #059669; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
-          <div style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Chave PIX (Apoio Voluntário)</div>
-          <div id="pix-chave-texto" style="font-size: 0.95rem; font-weight: 800; color: #047857; letter-spacing: 0.5px;">geofishms@pantanal.org</div>
+          <div style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Iniciativa Cidadã &bull; Peterson Martins da Costa</div>
+          <div id="pix-chave-texto" style="font-size: 0.88rem; font-weight: 700; color: #047857; line-height: 1.4; padding: 4px 0;">Apoio direto ao mantenedor voluntário para custeio de mapas e servidores</div>
+          <p style="font-size: 0.78rem; color: #334155; margin: 6px 0 0 0;">Para apoiar ou patrocinar este projeto sem fins lucrativos, solicite os dados bancários diretamente ao idealizador Peterson Martins da Costa.</p>
           <button id="btn-copiar-chave-pix" class="btn-cta" style="background: #059669; font-size: 0.8rem; padding: 8px 12px; margin-top: 8px;">
-            📋 Copiar Chave PIX
+            📋 Copiar Informações de Apoio
           </button>
         </div>
         <small style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block;">
@@ -1552,7 +1547,7 @@
           <div id="panel-cartilha-petrechos" class="cartilha-tab-panel">
             <div class="cartilha-box alert-red-box">
               <h4>🚫 Petrechos e Métodos Proibidos ao Pescador Amador (Pág. 12)</h4>
-              <p>A utilização destes métodos é <strong>CRIME AMBIENTAL</strong> inafiançável com perda imediata do barco e tralhas:</p>
+              <p>A utilização destes métodos constitui <strong>CRIME AMBIENTAL</strong> (Lei Federal nº 9.605/98), sujeito a detenção, multa e apreensão imediata de embarcação, motor e petrechos:</p>
               <ul class="cartilha-list">
                 <li>❌ <strong>CEVA:</strong> É proibido o emprego de qualquer processo que facilite a concentração artificial de cardumes (como a "ceva").</li>
                 <li>❌ <strong>CAVALO-DE-PAU:</strong> É proibida a prática de pesca embarcada com motor ligado em movimento circular ("cavalo-de-pau").</li>
@@ -1766,9 +1761,9 @@
           <strong>Quer divulgar os roteiros ou pacotes da sua agência no GeoFish MS?</strong>
           <span>Apareça em posição de honra no guia oficial mais consultado da região pantaneira.</span>
         </div>
-        <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Sou%20de%20uma%20ag%C3%AAncia%20de%20turismo/operadora%20e%20gostaria%20de%20anunciar%20nossos%20pacotes%20no%20GeoFish%20MS.%20Poderia%20me%20passar%20as%20op%C3%A7%C3%B5es?" target="_blank" rel="noopener noreferrer" class="btn-ad-wpp" style="background: #0284c7; color: #ffffff;">
-          <span>💬 Anunciar Agência no WhatsApp</span>
-        </a>
+        <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="background: #0284c7; color: #ffffff; border: none; cursor: pointer;">
+          <span>💬 Divulgar Pacotes da Agência</span>
+        </button>
       </div>
     </article>
 
@@ -1783,9 +1778,9 @@
           </p>
         </div>
         <div class="ad-banner-cta">
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Tenho%20um%20com%C3%A9rcio/servi%C3%A7o%20n%C3%A1utico%20e%20gostaria%20de%20anunciar%20no%20GeoFish%20MS.%20Poderia%20me%20passar%20as%20op%C3%A7%C3%B5es?" target="_blank" rel="noopener noreferrer" class="btn-ad-wpp" style="background: #38bdf8; color: #082f49;">
-            <span>💬 Divulgar meu Negócio no WhatsApp</span>
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="background: #38bdf8; color: #082f49; border: none; cursor: pointer;">
+            <span>💬 Divulgar meu Negócio no Portal</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -1923,9 +1918,9 @@
         </p>
       </div>
       <div class="ad-banner-cta">
-        <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Tenho%20interesse%20em%20anunciar%20meu%20estabelecimento%20nos%20espa%C3%A7os%20de%20destaque%20do%20portal%20GeoFish%20MS.%20Gostaria%20de%20saber%20os%20formatos%20dispon%C3%ADveis!" target="_blank" rel="noopener noreferrer" class="btn-ad-wpp">
-          <span>💬 Negociar Espaço no WhatsApp</span>
-        </a>
+        <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-ad-wpp" style="border: none; cursor: pointer;">
+          <span>💬 Propor Parceria ou Anúncio</span>
+        </button>
       </div>
     </div>
   </aside>
@@ -2095,9 +2090,9 @@
           <span>🚫 0% de Comissão</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Tenho%20interesse%20no%20Espa%C3%A7o%20Publicit%C3%A1rio%20VIP%20na%20vitrine%20do%20GeoFish%20MS.%20Gostaria%20de%20negociar%20o%20an%C3%BAncio%20da%20minha%20empresa!" target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp btn-showcase-ad">
-            📲 Anuncie Aqui no WhatsApp
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp btn-showcase-ad" style="border: none; cursor: pointer;">
+            📲 Anuncie Aqui na Vitrine
+          </button>
         </div>
       </article>
 
@@ -2118,9 +2113,9 @@
           <span>📶 Wi-Fi</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990001&text=Ol%C3%A1!%20Vi%20sua%20pousada%20no%20GeoFish%20MS%20e%20gostaria%20de%20informa%C3%A7%C3%B5es%20de%20reserva." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contatar via WhatsApp
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+            💬 Informações &amp; Parcerias
+          </button>
         </div>
       </article>
 
@@ -2141,21 +2136,21 @@
           <span>🍽️ Pensão Completa</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990002&text=Ol%C3%A1!%20Vi%20o%20Passo%20do%20Lontra%20no%20GeoFish%20MS%20e%20gostaria%20de%20reservar." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contatar via WhatsApp
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('pousadas')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+            💬 Informações &amp; Parcerias
+          </button>
         </div>
       </article>
 
-      <!-- Piloteiro 1: Colônia Z-1 -->
+      <!-- Piloteiro Comunitário: Colônia Z-1 -->
       <article class="showcase-card card-guide">
         <div class="showcase-card-header">
           <span class="showcase-type badge-z1">COLÔNIA Z-1 MIRANDA</span>
-          <h3 class="showcase-name">Mestre Dico (Piloteiro Nativo)</h3>
-          <span class="showcase-location">📍 Porto Geral de Miranda</span>
+          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-1</h3>
+          <span class="showcase-location">📍 Porto Geral de Miranda &bull; Rio Miranda</span>
         </div>
         <p class="showcase-desc">
-          28 anos de navegação profissional na Bacia do Rio Miranda. Especialista em pesca de rodada de pintado no canal principal, batida de pacu no fruto e condução segura nos balseiros pantaneiros. No Rio Salobra, atua exclusivamente em Pesque e Solte esportivo com motor 4 tempos.
+          Navegadores ribeirinhos tradicionais da Bacia do Rio Miranda. Conhecimento dos canais, poços de pintado, pesca de rodada e condução segura nos balseiros pantaneiros. Espaço comunitário aberto e gratuito para os guias da Colônia Z-1.
         </p>
         <div class="showcase-amenities">
           <span>📜 Colônia Z-1</span>
@@ -2163,31 +2158,31 @@
           <span>🎯 Conhecimento do Rio</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990003&text=Ol%C3%A1%20Mestre%20Dico!%20Vi%20seu%20contato%20na%20Col%C3%B4nia%20Z-1%20do%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contratar Piloteiro
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+            💬 Cadastrar / Ver Piloteiros Z-1
+          </button>
         </div>
       </article>
 
-      <!-- Piloteiro 2: Colônia Z-7 -->
+      <!-- Piloteiro Comunitário: Colônia Z-7 -->
       <article class="showcase-card card-guide">
         <div class="showcase-card-header">
           <span class="showcase-type badge-z7">COLÔNIA Z-7 AQUIDAUANA</span>
-          <h3 class="showcase-name">Capitão Zé Maria (Piloteiro Nativo)</h3>
-          <span class="showcase-location">📍 Aquidauana / Corredor das Corredeiras</span>
+          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-7</h3>
+          <span class="showcase-location">📍 Aquidauana &bull; Anastácio &bull; Corredeiras</span>
         </div>
         <p class="showcase-desc">
-          Condutor ribeirinho experiente em trechos de corredeiras e restingas do Rio Aquidauana. Condução segura, pesca com anzol sem farpa e boas práticas de soltura.
+          Condutores ribeirinhos com vasta experiência nas corredeiras e restingas do Rio Aquidauana. Prática de pesca esportiva responsável, condução segura e respeito aos ciclos do Pantanal. Cadastro 100% gratuito.
         </p>
         <div class="showcase-amenities">
           <span>📜 Colônia Z-7</span>
-          <span>🚤 Voadeira 25hp</span>
-          <span>🐟 Pesque & Solte</span>
+          <span>🚤 Voadeira &amp; Motor</span>
+          <span>🐟 Pesque &amp; Solte</span>
         </div>
         <div class="showcase-footer">
-          <a href="https://api.whatsapp.com/send?phone=5567999990004&text=Ol%C3%A1%20Capit%C3%A3o%20Z%C3%A9%20Maria!%20Vi%20seu%20contato%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-showcase-wpp">
-            💬 Contratar Piloteiro
-          </a>
+          <button type="button" onclick="abrirModalParceriasTab('piloteiros')" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
+            💬 Cadastrar / Ver Piloteiros Z-7
+          </button>
         </div>
       </article>
 

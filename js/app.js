@@ -99,8 +99,8 @@ const relevoEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/serv
   crossOrigin: true
 });
 
-// Atribuição oficial dos dados geoespaciais e governança (SEMADESC / IMASUL / Colônias Z-1 e Z-7)
-map.attributionControl.addAttribution('Dados Oficiais: <a href="https://www.imasul.ms.gov.br" target="_blank" rel="noopener noreferrer">SEMADESC / IMASUL / Colônias Z-1 e Z-7</a>');
+// Atribuição de governança cartográfica e autoria cidadã
+map.attributionControl.addAttribution('Iniciativa Cidadã: Peterson Martins da Costa | Cartografia Base: Fontes Públicas (SEMADESC / IMASUL)');
 
 // 4. Criação dos Panes do Leaflet com zIndex estrito (Regras de Empilhamento)
 const PANES = [
@@ -1406,7 +1406,7 @@ function abrirModalDiario() {
             especie: nomeEspecie,
             tamanho: parseFloat(inputTamanhoDiario.value),
             foto: currentBase64Diario,
-            synced: 1
+            local: true
           };
 
           const sucesso = await GeoFishDB.salvarTrofeu(trofeu);
@@ -1414,7 +1414,7 @@ function abrirModalDiario() {
           btnSalvarDiario.innerHTML = '💾 Salvar Troféu (Offline)';
 
           if (sucesso) {
-            showToast(trofeu.lat ? 'Troféu salvo com localização GPS!' : 'Troféu salvo no seu diário!');
+            showToast(trofeu.lat ? 'Troféu salvo com localização GPS no seu diário de bordo!' : 'Troféu salvo no seu diário de bordo!');
             destroy();
             currentBase64Diario = null;
             renderizarTrofeusNoMapa();
@@ -1453,10 +1453,10 @@ function abrirModalDenuncia() {
       if (btnSalvarDenuncia) {
         btnSalvarDenuncia.addEventListener('click', async () => {
           if (!currentBase64Denuncia) return showToast('Você precisa fotografar a evidência.');
-          if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
+          if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar a confirmação da evidência.');
 
           btnSalvarDenuncia.disabled = true;
-          btnSalvarDenuncia.innerText = 'Salvando evidência...';
+          btnSalvarDenuncia.innerText = 'Salvando evidência no dispositivo...';
 
           const optCrime = selectCrimeDenuncia && selectCrimeDenuncia.selectedIndex >= 0
             ? selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex]
@@ -1470,15 +1470,15 @@ function abrirModalDenuncia() {
             precisao: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.precisao === 'number') ? ultimaPosicaoUsuario.precisao : null,
             tipo: tipoCrime,
             foto: currentBase64Denuncia,
-            synced: 0
+            local: true
           };
 
           const sucesso = await GeoFishDB.salvarDenuncia(denuncia);
           btnSalvarDenuncia.disabled = false;
-          btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência';
+          btnSalvarDenuncia.innerHTML = '💾 Salvar Evidência no Dispositivo';
 
           if (sucesso) {
-            showToast('Evidência salva com segurança no seu dispositivo.');
+            showToast('Evidência salva com segurança na memória do seu dispositivo. Para denunciar oficialmente, ligue 190 ou Plantão PMA.');
             destroy();
             currentBase64Denuncia = null;
           }
@@ -1529,32 +1529,7 @@ async function renderizarTrofeusNoMapa() {
   });
 }
 
-// Sincronização em Segundo Plano (Background Sync Simulado)
-window.addEventListener('online', async () => {
-  console.log('Online novamente! Iniciando sincronização em background...');
-  
-  // Sincroniza Diários Pendentes
-  const diariosPendentes = await GeoFishDB.obterRegistrosPendentesDeSincronizacao('diario_pesca');
-  for (const diario of diariosPendentes) {
-    simularEnvioAoServidor(diario, 'IMASUL Repovoamento');
-    await GeoFishDB.marcarComoSincronizado('diario_pesca', diario.id);
-  }
-
-  // Sincroniza Denúncias Pendentes
-  const denunciasPendentes = await GeoFishDB.obterRegistrosPendentesDeSincronizacao('denuncias_pma');
-  for (const denuncia of denunciasPendentes) {
-    simularEnvioAoServidor(denuncia, 'Servidor Secreto da PMA');
-    await GeoFishDB.marcarComoSincronizado('denuncias_pma', denuncia.id);
-    showToast('Alerta: Uma denúncia salva offline acaba de ser transmitida à PMA.');
-  }
-});
-
-function simularEnvioAoServidor(dados, destino) {
-  console.log(`[Sincronização 4G Ativa] Enviando dados anonimizados para ${destino}:`, dados);
-  // Na vida real, seria um fetch() POST.
-}
-
-// Carga inicial
+// Carga inicial dos troféus locais
 setTimeout(renderizarTrofeusNoMapa, 1000);
 
 // ========================================================
@@ -1630,7 +1605,7 @@ function abrirModalParcerias(aba = 'pousadas') {
 
       const btnEnviarPropostaPousada = modalEl.querySelector('#btn-enviar-proposta-pousada');
       if (btnEnviarPropostaPousada) {
-        btnEnviarPropostaPousada.addEventListener('click', () => {
+        btnEnviarPropostaPousada.addEventListener('click', async () => {
           const nome = modalEl.querySelector('#pousada-nome')?.value.trim();
           const rio = modalEl.querySelector('#pousada-rio')?.value;
           const wpp = modalEl.querySelector('#pousada-wpp')?.value.trim();
@@ -1642,33 +1617,32 @@ function abrirModalParcerias(aba = 'pousadas') {
           const comodidades = [];
           modalEl.querySelectorAll('input[name="pousada-amenity"]:checked').forEach(cb => comodidades.push(cb.value));
 
-          if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarSolicitacaoPousada === 'function') {
-            window.GeoFishFirebase.salvarSolicitacaoPousada({ nome, rio, whatsapp: wpp, rampa, comodidades }).catch(err => console.warn('[Firebase] Aviso Pousada:', err));
-          }
-
           const texto = `*SOLICITAÇÃO DE ANÚNCIO - GEOFISH MS (Pousadas & Ranchos)*\n\n` +
             `🏨 *Estabelecimento:* ${nome}\n` +
             `📍 *Localização:* ${rio}\n` +
             `💬 *WhatsApp Reservas:* ${wpp}\n` +
             `⚓ *Rampa/Estrutura:* ${rampa || 'A informar'}\n` +
             `✨ *Comodidades:* ${comodidades.length > 0 ? comodidades.join(', ') : 'Padrão'}\n\n` +
-            `Olá! Tenho interesse no plano comercial de divulgação da temporada para destacar meu estabelecimento no WebGIS da Bacia do Miranda!`;
+            `Olá Peterson! Tenho interesse em cadastrar meu estabelecimento no WebGIS da Bacia do Rio Miranda!`;
 
-          const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try { await navigator.clipboard.writeText(texto); } catch (_) {}
+          }
+
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
-          showToast('Proposta registrada e abrindo WhatsApp para confirmação...');
+          showToast('Proposta gerada! Compartilhe com o mantenedor Peterson Martins da Costa via WhatsApp.');
           destroy();
         });
       }
 
       const btnEnviarCadastroGuia = modalEl.querySelector('#btn-enviar-cadastro-guia');
       if (btnEnviarCadastroGuia) {
-        btnEnviarCadastroGuia.addEventListener('click', () => {
+        btnEnviarCadastroGuia.addEventListener('click', async () => {
           const nome = modalEl.querySelector('#guia-nome')?.value.trim();
           const apelido = modalEl.querySelector('#guia-apelido')?.value.trim();
           const colonia = modalEl.querySelector('#guia-colonia')?.value;
-          const rgp = modalEl.querySelector('#guia-rgp')?.value.trim();
           const porto = modalEl.querySelector('#guia-porto')?.value.trim();
           const wpp = modalEl.querySelector('#guia-wpp')?.value.trim();
 
@@ -1679,23 +1653,22 @@ function abrirModalParcerias(aba = 'pousadas') {
           const diferenciais = [];
           modalEl.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
 
-          if (window.GeoFishFirebase && typeof window.GeoFishFirebase.salvarCadastroPiloteiro === 'function') {
-            window.GeoFishFirebase.salvarCadastroPiloteiro({ nome, apelido, colonia, rgp, porto, whatsapp: wpp, diferenciais }).catch(err => console.warn('[Firebase] Aviso Piloteiro:', err));
-          }
-
-          const texto = `*CADASTRO GRATUITO DE PILOTEIRO - GEOFISH MS*\n\n` +
+          const texto = `*CADASTRO COMUNITÁRIO DE PILOTEIRO - GEOFISH MS*\n\n` +
             `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
             `📜 *Colônia de Filiação:* ${colonia}\n` +
-            `🆔 *RGP / Carteira:* ${rgp || 'Em regularização / Apresentará'}\n` +
             `📍 *Porto de Saída:* ${porto}\n` +
             `💬 *WhatsApp Turistas:* ${wpp}\n` +
             `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
-            `Olá! Sou piloteiro da região e gostaria de ativar meu ponto e contato GRATUITAMENTE no mapa do GeoFish MS!`;
+            `Olá! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
 
-          const urlWpp = `https://api.whatsapp.com/send?phone=5567999990001&text=${encodeURIComponent(texto)}`;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try { await navigator.clipboard.writeText(texto); } catch (_) {}
+          }
+
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
-          showToast('Cadastro registrado e abrindo WhatsApp para homologação...');
+          showToast('Dados formatados! Encaminhe a mensagem ao mantenedor ou diretoria da Colônia Z-1/Z-7.');
           destroy();
         });
       }

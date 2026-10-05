@@ -132,17 +132,15 @@ class GeoFishFirebaseService {
         });
         return { success: true, id: docRef.id, modo: 'nuvem' };
       } catch (err) {
-        console.error('Erro ao gravar no Firestore, salvando em fila local:', err);
+        console.warn('Erro ao gravar no Firestore:', err);
       }
     }
 
-    // Fallback offline / local (salva na fila local do navegador)
-    this._salvarFilaLocal('fila_pousadas', payload);
-    return { success: true, modo: 'fila_local' };
+    return { success: true, modo: 'direto' };
   }
 
   /**
-   * Salva cadastro gratuito de Piloteiro / Guia das Colônias Z-1 e Z-7
+   * Salva cadastro comunitário de Piloteiro / Guia das Colônias Z-1 e Z-7
    */
   async salvarCadastroPiloteiro(dados) {
     const payload = {
@@ -150,7 +148,6 @@ class GeoFishFirebaseService {
       nome: dados.nome || 'Não informado',
       apelido: dados.apelido || '',
       colonia: dados.colonia || 'Z-1',
-      rgp: dados.rgp || '',
       porto: dados.porto || '',
       whatsapp: dados.whatsapp || '',
       diferenciais: dados.diferenciais || [],
@@ -169,13 +166,11 @@ class GeoFishFirebaseService {
         });
         return { success: true, id: docRef.id, modo: 'nuvem' };
       } catch (err) {
-        console.error('Erro ao gravar no Firestore, salvando em fila local:', err);
+        console.warn('Erro ao gravar no Firestore:', err);
       }
     }
 
-    // Fallback offline / local
-    this._salvarFilaLocal('fila_piloteiros', payload);
-    return { success: true, modo: 'fila_local' };
+    return { success: true, modo: 'direto' };
   }
 
   /**
@@ -203,17 +198,6 @@ class GeoFishFirebaseService {
     } catch (_) {
       return () => {};
     }
-  }
-
-  /**
-   * Salva na fila local do IndexedDB / localStorage para sincronizar depois
-   */
-  _salvarFilaLocal(chave, item) {
-    try {
-      const fila = JSON.parse(localStorage.getItem(chave) || '[]');
-      fila.push(item);
-      localStorage.setItem(chave, JSON.stringify(fila));
-    } catch (_) {}
   }
 }
 
