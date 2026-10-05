@@ -24,7 +24,8 @@ export function gerarTextoResgate() {
          `🆘 Solicito apoio emergencial para embarcação/pescador na calha do rio.\n\n` +
          `Canais de Acionamento Imediato:\n` +
          `• Marinha do Brasil (Capitania Fluvial): 185\n` +
-         `• Polícia Militar Ambiental (Pelotão Miranda): 190 / (67) 3242-4344\n` +
+         `• Polícia Militar Ambiental (Pelotão Miranda): (67) 3242-4344\n` +
+         `• Polícia Militar Ambiental (Plantão Estadual MS): (67) 3357-1500 / 190\n` +
          `• Corpo de Bombeiros Militar: 193\n` +
          `• Hospital Municipal de Miranda: (67) 3242-1222`;
 }
