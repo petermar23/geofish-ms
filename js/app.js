@@ -515,7 +515,7 @@ async function carregarTodasCamadas() {
                 const g = feature.properties;
                 const waUrl = normalizeWhatsApp(g.contato_wa);
                 abrirPainel(`
-                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca Credenciado</span>
+                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca &bull; Piloteiro Local</span>
                   <h2 class="sheet-title">${escapeHTML(g.nome_operacional)}</h2>
                   <div class="data-group">
                     <div class="data-item">
@@ -531,9 +531,12 @@ async function carregarTodasCamadas() {
                       <div class="data-value">${escapeHTML(g.tipo_barco)}</div>
                     </div>
                   </div>
+                  <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.4;">
+                    🤝 <strong>Contato Direto:</strong> Você combina disponibilidade, roteiro e valores diretamente com o profissional. Sem taxas nem intermediação.
+                  </div>
                   ${waUrl ? `
                     <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp">
-                      💬 Chamar no WhatsApp
+                      💬 Conversar pelo WhatsApp
                     </a>
                   ` : ''}
                 `);
@@ -546,10 +549,11 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'apoioPane',
             pointToLayer: (feature, latlng) => {
+              const isRampa = feature.properties && feature.properties.tipo && feature.properties.tipo.toLowerCase().includes('rampa');
               return L.circleMarker(latlng, {
                 pane: 'apoioPane',
                 radius: 7,
-                fillColor: '#d32f2f',
+                fillColor: isRampa ? '#0284c7' : '#d32f2f',
                 color: '#ffffff',
                 weight: 2,
                 fillOpacity: 1
@@ -559,9 +563,10 @@ async function carregarTodasCamadas() {
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 const a = feature.properties;
-                const telUrl = sanitizeTel(a.telefone_emergencia);
+                const isRampa = a.tipo && a.tipo.toLowerCase().includes('rampa');
+                const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
                 abrirPainel(`
-                  <span class="badge-tag" style="background-color: #d32f2f;">Apoio e Emergência</span>
+                  <span class="badge-tag" style="background-color: ${isRampa ? '#0284c7' : '#d32f2f'};">${isRampa ? 'Apoio Náutico &bull; Rampa' : 'Apoio e Emergência'}</span>
                   <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
                   <div class="data-group">
                     <div class="data-item">
@@ -572,10 +577,16 @@ async function carregarTodasCamadas() {
                       <div class="data-label">Rampa de Barco</div>
                       <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
                     </div>
-                    ${a.telefone_emergencia ? `
+                    ${(!isRampa && a.telefone_emergencia) ? `
                       <div class="data-item">
                         <div class="data-label">Telefone de Emergência</div>
                         <div class="data-value">${escapeHTML(a.telefone_emergencia)}</div>
+                      </div>
+                    ` : ''}
+                    ${a.endereco ? `
+                      <div class="data-item">
+                        <div class="data-label">Localização</div>
+                        <div class="data-value">${escapeHTML(a.endereco)}</div>
                       </div>
                     ` : ''}
                   </div>
@@ -1055,6 +1066,51 @@ function aplicarFiltroRapido(tipo) {
     showToast('Filtro: Unidades de Conservação e Áreas Restritas.');
   }
 }
+
+// Ações de Entrada Rápida e Filtros Regionais (Fase 1 do Produto)
+const btnHeroVerGuias = document.getElementById('btn-hero-ver-guias');
+if (btnHeroVerGuias) {
+  btnHeroVerGuias.addEventListener('click', (e) => {
+    e.preventDefault();
+    aplicarFiltroRapido('guias');
+    const secaoMapa = document.getElementById('secao-mapa');
+    if (secaoMapa) secaoMapa.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+document.querySelectorAll('.btn-filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-filter-chip').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = 'rgba(15,23,42,0.45)';
+      b.style.borderColor = 'rgba(255,255,255,0.25)';
+    });
+    btn.classList.add('active');
+    btn.style.background = 'rgba(255,255,255,0.25)';
+    btn.style.borderColor = 'rgba(255,255,255,0.5)';
+
+    const regiao = btn.getAttribute('data-regiao');
+    const secaoMapa = document.getElementById('secao-mapa');
+    if (secaoMapa) secaoMapa.scrollIntoView({ behavior: 'smooth' });
+
+    if (camadasInstanciadas['guias_credenciados'] && !map.hasLayer(camadasInstanciadas['guias_credenciados'])) {
+      map.addLayer(camadasInstanciadas['guias_credenciados']);
+    }
+
+    if (regiao === 'z1') {
+      map.flyTo([-20.35, -56.65], 11, { duration: 1.2 });
+      showToast('Profissionais: Miranda & Passo do Lontra (Colônia Z-1)');
+    } else if (regiao === 'z7') {
+      map.flyTo([-20.48, -55.79], 12, { duration: 1.2 });
+      showToast('Profissionais: Aquidauana & Anastácio (Colônia Z-7)');
+    } else if (regiao === 'z11') {
+      map.flyTo([-20.89, -56.12], 12, { duration: 1.2 });
+      showToast('Profissionais: Bonito & Águas do Miranda (Colônia Z-11)');
+    } else {
+      aplicarFiltroRapido('guias');
+    }
+  });
+});
 
 // 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
