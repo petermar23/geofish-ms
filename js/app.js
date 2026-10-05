@@ -740,10 +740,77 @@ async function carregarTodasCamadas() {
   }
 }
 
-// 8. Navegação Territorial do WebGIS (Foco Comunitário e Exploração Livre)
+// 8. Navegação Territorial do WebGIS & GPS sob demanda (leitura única e eficiente)
 let marcadorPosicao = null;
 let circuloPrecisao = null;
-const btnLocalizacao = null; // Sensor de GPS descontinuado em prol de economia de bateria e foco em contatos
+let ultimaPosicaoUsuario = null;
+
+export function obterLocalizacao() {
+  if (!('geolocation' in navigator)) {
+    showToast('Geolocalização não suportada neste dispositivo.');
+    return;
+  }
+  showToast('Obtendo sua posição no rio...');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = pos.coords.accuracy;
+      ultimaPosicaoUsuario = { lat, lng, precisao: acc };
+
+      if (map) {
+        if (marcadorPosicao) {
+          marcadorPosicao.setLatLng([lat, lng]);
+        } else {
+          marcadorPosicao = L.circleMarker([lat, lng], {
+            radius: 8,
+            fillColor: '#22c55e',
+            color: '#ffffff',
+            weight: 2,
+            fillOpacity: 0.95
+          }).addTo(map);
+        }
+
+        if (circuloPrecisao) {
+          circuloPrecisao.setLatLng([lat, lng]).setRadius(acc);
+        } else {
+          circuloPrecisao = L.circle([lat, lng], {
+            radius: acc,
+            color: '#22c55e',
+            fillColor: '#86efac',
+            fillOpacity: 0.15,
+            weight: 1
+          }).addTo(map);
+        }
+
+        marcadorPosicao.bindPopup(`<strong>Sua posição aproximada</strong><br>Precisão: ±${acc.toFixed(0)}m`).openPopup();
+        map.setView([lat, lng], Math.max(map.getZoom(), 14));
+      }
+      showToast(`Posição obtida com sucesso (±${acc.toFixed(0)}m)`);
+    },
+    (err) => {
+      console.warn('[GPS] Erro ao obter posição:', err.message);
+      showToast('Não foi possível obter a posição GPS. Verifique se o GPS está ativo.');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+  );
+}
+
+function atualizarLocalizacaoOculta() {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        ultimaPosicaoUsuario = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          precisao: pos.coords.accuracy
+        };
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+    );
+  }
+}
 
 // 9. Modal "Sobre os Dados" e Governança Territorial (Instanciado sob demanda via <template>)
 let modalSobreInstancia = null;
@@ -832,23 +899,12 @@ window.addEventListener('popstate', () => {
     document.body.classList.remove('sheet-open');
     return;
   }
-  const modalEspecies = document.getElementById('modal-especies');
-  if (modalEspecies && !modalEspecies.classList.contains('hidden')) {
-    modalEspecies.classList.add('hidden');
-    return;
-  }
-  if (modalSobre && !modalSobre.classList.contains('hidden')) {
-    modalSobre.classList.add('hidden');
-    return;
-  }
-  if (modalInstall && !modalInstall.classList.contains('hidden')) {
-    modalInstall.classList.add('hidden');
-    return;
-  }
   const searchResults = document.getElementById('local-search-results');
   if (searchResults && !searchResults.classList.contains('hidden')) {
     searchResults.classList.add('hidden');
+    return;
   }
+  fecharModalAtivo();
 });
 
 // Barra de Navegação Inferior de Polegar para Android
@@ -1337,14 +1393,20 @@ function abrirModalDiario() {
           btnSalvarDiario.disabled = true;
           btnSalvarDiario.innerText = 'Salvando...';
 
+          const optSelected = selectEspecieDiario && selectEspecieDiario.selectedIndex >= 0
+            ? selectEspecieDiario.options[selectEspecieDiario.selectedIndex]
+            : null;
+          const nomeEspecie = optSelected ? optSelected.text : 'Espécie não informada';
+
           const trofeu = {
             id: new Date().toISOString(),
-            lat: ultimaPosicaoUsuario?.lat || -20.24,
-            lng: ultimaPosicaoUsuario?.lng || -56.38,
-            especie: selectEspecieDiario.options[selectEspecieDiario.selectedIndex].text,
+            lat: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.lat === 'number') ? ultimaPosicaoUsuario.lat : null,
+            lng: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.lng === 'number') ? ultimaPosicaoUsuario.lng : null,
+            precisao: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.precisao === 'number') ? ultimaPosicaoUsuario.precisao : null,
+            especie: nomeEspecie,
             tamanho: parseFloat(inputTamanhoDiario.value),
             foto: currentBase64Diario,
-            synced: navigator.onLine ? 1 : 0
+            synced: 1
           };
 
           const sucesso = await GeoFishDB.salvarTrofeu(trofeu);
@@ -1352,10 +1414,9 @@ function abrirModalDiario() {
           btnSalvarDiario.innerHTML = '💾 Salvar Troféu (Offline)';
 
           if (sucesso) {
-            showToast('Troféu salvo no seu diário!');
+            showToast(trofeu.lat ? 'Troféu salvo com localização GPS!' : 'Troféu salvo no seu diário!');
             destroy();
             currentBase64Diario = null;
-            if (trofeu.synced === 1) simularEnvioAoServidor(trofeu, 'Pesquisa de Repovoamento');
             renderizarTrofeusNoMapa();
           }
         });
@@ -1395,26 +1456,31 @@ function abrirModalDenuncia() {
           if (cbLgpdDenuncia && !cbLgpdDenuncia.checked) return showToast('Você precisa marcar o Aceite Legal.');
 
           btnSalvarDenuncia.disabled = true;
-          btnSalvarDenuncia.innerText = 'Criptografando...';
+          btnSalvarDenuncia.innerText = 'Salvando evidência...';
+
+          const optCrime = selectCrimeDenuncia && selectCrimeDenuncia.selectedIndex >= 0
+            ? selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex]
+            : null;
+          const tipoCrime = optCrime ? optCrime.text : 'Crime não especificado';
 
           const denuncia = {
             id: new Date().toISOString(),
-            lat: ultimaPosicaoUsuario?.lat || -20.24,
-            lng: ultimaPosicaoUsuario?.lng || -56.38,
-            tipo: selectCrimeDenuncia.options[selectCrimeDenuncia.selectedIndex].text,
+            lat: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.lat === 'number') ? ultimaPosicaoUsuario.lat : null,
+            lng: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.lng === 'number') ? ultimaPosicaoUsuario.lng : null,
+            precisao: (ultimaPosicaoUsuario && typeof ultimaPosicaoUsuario.precisao === 'number') ? ultimaPosicaoUsuario.precisao : null,
+            tipo: tipoCrime,
             foto: currentBase64Denuncia,
-            synced: navigator.onLine ? 1 : 0
+            synced: 0
           };
 
           const sucesso = await GeoFishDB.salvarDenuncia(denuncia);
           btnSalvarDenuncia.disabled = false;
-          btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência & Denunciar';
+          btnSalvarDenuncia.innerHTML = '🔒 Salvar Evidência';
 
           if (sucesso) {
-            showToast(denuncia.synced ? 'Denúncia enviada à PMA!' : 'Salvo offline. Envio pendente.');
+            showToast('Evidência salva com segurança no seu dispositivo.');
             destroy();
             currentBase64Denuncia = null;
-            if (denuncia.synced === 1) simularEnvioAoServidor(denuncia, 'Servidor da PMA-MS');
           }
         });
       }
@@ -1444,6 +1510,9 @@ async function renderizarTrofeusNoMapa() {
   const trofeus = await GeoFishDB.obterTodosTrofeus();
   
   trofeus.forEach(t => {
+    if (typeof t.lat !== 'number' || typeof t.lng !== 'number' || isNaN(t.lat) || isNaN(t.lng)) {
+      return;
+    }
     const iconeTrofeu = L.divIcon({
       html: '<div style="font-size: 24px; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));">📸</div>',
       className: 'custom-trofeu-icon',
@@ -1451,8 +1520,11 @@ async function renderizarTrofeusNoMapa() {
       iconAnchor: [15, 30]
     });
     
+    const fotoSrc = typeof t.foto === 'string' && (t.foto.startsWith('data:image/') || t.foto.startsWith('blob:') || t.foto.startsWith('https://')) ? t.foto : '';
+    const imgTag = fotoSrc ? `<br><img src="${fotoSrc}" alt="Troféu" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">` : '';
+
     L.marker([t.lat, t.lng], { icon: iconeTrofeu })
-     .bindPopup(`<strong style="color:#0b4f6c;">${t.especie}</strong><br>${t.tamanho} cm<br><img src="${t.foto}" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">`)
+     .bindPopup(`<strong style="color:#0b4f6c;">${escapeHTML(t.especie || 'Peixe')}</strong><br>${escapeHTML(String(t.tamanho || ''))} cm${imgTag}`)
      .addTo(trofeusLayerGroup);
   });
 }
@@ -1715,6 +1787,7 @@ if (footerBtnReplicar) {
 
 // Aliases para chamadas inline e módulos externos
 window.obterPosicaoRio = obterLocalizacao;
+window.obterLocalizacao = obterLocalizacao;
 window.mostrarToast = showToast;
 window.abrirModalSos = abrirModalSos;
 window.abrirModalEspecies = abrirModalEspecies;
@@ -1722,6 +1795,8 @@ window.abrirModalSobre = abrirModalSobre;
 window.abrirConfirmacaoSos = abrirConfirmacaoSos;
 window.abrirModalParceiros = abrirModalParceiros;
 window.abrirModalPix = abrirModalPix;
+window.abrirModalCartilha = abrirModalCartilha;
+window.fecharModalAtivo = fecharModalAtivo;
 
 // Botão adicional na seção de espécies que abre o verificador de medidas oficial
 const btnPortalOpenSpecies = document.getElementById('btn-portal-open-species');
