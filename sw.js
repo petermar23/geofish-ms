@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v35';
+const CACHE_VERSION = 'geofish-shell-v36';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -121,10 +121,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // A. Mapa base (Tiles da Esri): Cache-First com limite de ~1.500 tiles
+  // Requisições com cabeçalho Range (áudio/vídeo/mídia parcial) são tratadas nativamente pelo navegador
+  // pois a Cache API não suporta respostas HTTP 206 (Partial Content)
+  if (request.headers.has('range')) {
+    return;
+  }
+
+  // A. Mapa base (Tiles da Esri): Cache-First com limite LRU de ~1.500 tiles
   if (url.hostname.includes('arcgisonline.com')) {
     event.respondWith(
-      caches.open(TILES_CACHE_NAME).then(async (cache) => {
+      (async () => {
+        const cache = await caches.open(TILES_CACHE_NAME);
         const cached = await cache.match(request);
         if (cached) {
           return cached;
@@ -132,11 +139,12 @@ self.addEventListener('fetch', (event) => {
 
         try {
           const networkResponse = await fetch(request);
-          // Só armazena respostas válidas status 200 (não opacas status 0)
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
-            // Gerencia limite do cache em segundo plano
-            trimCache(TILES_CACHE_NAME, MAX_TILES);
+            event.waitUntil(
+              cache.put(request, networkResponse.clone()).then(() => {
+                trimCache(TILES_CACHE_NAME, MAX_TILES);
+              })
+            );
           }
           return networkResponse;
         } catch (err) {
@@ -149,57 +157,102 @@ self.addEventListener('fetch', (event) => {
             }
           });
         }
-      })
+      })()
     );
     return;
   }
 
-  // B. Camadas de dados GeoJSON: Rede primeiro com chave sem query string
+  // B. Camadas de dados GeoJSON: Rede com timeout (2.5s) para conexões lentas no rio e fallback imediato ao cache
   if (url.pathname.endsWith('.geojson')) {
     const cleanUrl = url.origin + url.pathname;
     event.respondWith(
-      caches.open(GEOJSON_CACHE_NAME).then(async (cache) => {
+      (async () => {
+        const cache = await caches.open(GEOJSON_CACHE_NAME);
+
+        // Timeout para evitar congelamento de 60s+ em sinal fraco (2G/EDGE) no Pantanal
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
+
         try {
-          const networkResponse = await fetch(request, { cache: 'no-cache' });
+          const networkResponse = await fetch(request, {
+            cache: 'no-cache',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(cleanUrl, networkResponse.clone());
+            event.waitUntil(cache.put(cleanUrl, networkResponse.clone()));
           }
           return networkResponse;
         } catch (err) {
+          clearTimeout(timeoutId);
           const cached = await cache.match(cleanUrl);
           if (cached) {
             return cached;
           }
-          throw err;
+          // Se não há cache nem rede, retorna GeoJSON vazio válido (200) para evitar quebrar o Leaflet
+          return new Response(JSON.stringify({ type: 'FeatureCollection', features: [] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
-      })
+      })()
     );
     return;
   }
 
-  // C. App Shell (HTML, CSS, JS, Leaflet, Icons): Stale-While-Revalidate
+  // C. App Shell (HTML, CSS, JS, Leaflet, Ícones e Fontes): Stale-While-Revalidate com fallbacks seguros
   event.respondWith(
-    caches.open(CACHE_VERSION).then(async (cache) => {
+    (async () => {
+      const cache = await caches.open(CACHE_VERSION);
       const cached = await cache.match(request);
 
-      // Dispara revalidação em segundo plano
-      const fetchPromise = fetch(request, { cache: 'no-cache' })
-        .then((networkResponse) => {
+      const fetchPromise = (async () => {
+        try {
+          const networkResponse = await fetch(request, { cache: 'no-cache' });
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
+            event.waitUntil(cache.put(request, networkResponse.clone()));
           }
           return networkResponse;
-        })
-        .catch(() => {
-          // Fallback para index.html em navegações offline
-          if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
-            return cache.match('./index.html');
-          }
-        });
+        } catch (err) {
+          return null;
+        }
+      })();
 
-      // Retorna o cache imediatamente (Stale), se disponível; caso contrário, espera a rede
-      return cached || fetchPromise;
-    })
+      // Se temos em cache, entrega imediatamente e atualiza em segundo plano
+      if (cached) {
+        event.waitUntil(fetchPromise);
+        return cached;
+      }
+
+      // Se não temos em cache, aguarda a rede
+      const networkResponse = await fetchPromise;
+      if (networkResponse) {
+        return networkResponse;
+      }
+
+      // Se offline e o recurso não estava no cache, NUNCA retorna undefined (evita TypeError no respondWith)
+      // 1. Navegação de página -> index.html em cache
+      if (request.mode === 'navigate' || (request.headers.get('accept') && request.headers.get('accept').includes('text/html'))) {
+        const fallbackHtml = await cache.match('./index.html');
+        if (fallbackHtml) return fallbackHtml;
+      }
+
+      // 2. Imagens -> PNG transparente
+      if (request.headers.get('accept') && request.headers.get('accept').includes('image/')) {
+        return new Response(TRANSPARENT_PNG, {
+          status: 200,
+          headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' }
+        });
+      }
+
+      // 3. Demais recursos -> 503 Service Unavailable (Offline)
+      return new Response('Recurso indisponível em modo offline.', {
+        status: 503,
+        statusText: 'Service Unavailable (Offline)',
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      });
+    })()
   );
 });
 

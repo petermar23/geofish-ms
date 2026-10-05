@@ -22,6 +22,8 @@ export function atualizarStatusRede() {
 
 export function registrarServiceWorker() {
   if ('serviceWorker' in navigator) {
+    const hadController = Boolean(navigator.serviceWorker.controller);
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
         .then((reg) => {
@@ -32,12 +34,13 @@ export function registrarServiceWorker() {
         });
     });
 
-    let reloading = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!reloading) {
-        reloading = true;
-        window.location.reload();
+      // Primeira instalação: assume controle em segundo plano sem recarregar a tela
+      if (!hadController) {
+        return;
       }
+      // Atualização com formulário em preenchimento: notifica o usuário sem recarregar destrutivamente
+      showToast('O GeoFish MS foi atualizado em segundo plano.', 'info');
     });
   }
 }
@@ -64,6 +67,11 @@ export function fecharModalInstall() {
 
 export function initPWAOffline() {
   atualizarStatusRede();
+
+  // Solicita persistência de dados no dispositivo para evitar expurgo de cache/IndexedDB
+  if (typeof window !== 'undefined' && window.GeoFishDB) {
+    window.GeoFishDB.solicitarPersistencia();
+  }
 
   window.addEventListener('online', () => {
     atualizarStatusRede();
