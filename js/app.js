@@ -358,8 +358,8 @@ async function carregarCamada(layerKey, url) {
 
   try {
     const fetchHeaders = {};
-    if (cached && cached.etag) {
-      fetchHeaders['If-None-Match'] = cached.etag;
+    if (cached && (cached.etag || cached.versao)) {
+      fetchHeaders['If-None-Match'] = cached.etag || cached.versao;
     }
 
     const response = await fetch(url, {
@@ -376,14 +376,26 @@ async function carregarCamada(layerKey, url) {
       origem = 'cache_validado';
       dataAtualizacao = cached.atualizado_em;
     } else if (response.ok) {
-      dados = await response.json();
-      origem = 'rede';
-      dataAtualizacao = new Date().toISOString();
-      const novoEtag = response.headers.get('ETag') || '1.0';
+      const jsonRecebido = await response.json();
+      const temFeicoesReais = Boolean(jsonRecebido?.features?.length > 0);
+      const cacheTinhaFeicoes = Boolean(cached?.data?.features?.length > 0);
 
-      // Salva no IndexedDB apenas se ETag mudou ou não havia cache
-      if (window.GeoFishDB && (!cached || cached.etag !== novoEtag)) {
-        await window.GeoFishDB.salvarCamada(layerKey, dados, novoEtag);
+      // Previne substituição acidental de dados locais válidos por respostas vazias
+      if (!temFeicoesReais && cacheTinhaFeicoes) {
+        console.warn(`[GeoFish] Resposta vazia recebida para [${layerKey}]. Preservando dados válidos do IndexedDB.`);
+        dados = cached.data;
+        origem = 'offline';
+        dataAtualizacao = cached.atualizado_em;
+      } else {
+        dados = jsonRecebido;
+        origem = 'rede';
+        dataAtualizacao = new Date().toISOString();
+        const novoEtag = response.headers.get('ETag') || '1.0';
+
+        // Salva no IndexedDB apenas se contiver feições reais
+        if (window.GeoFishDB && temFeicoesReais) {
+          await window.GeoFishDB.salvarCamada(layerKey, dados, novoEtag, novoEtag);
+        }
       }
     } else {
       throw new Error(`HTTP ${response.status}`);

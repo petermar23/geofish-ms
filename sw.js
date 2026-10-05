@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v37';
+const CACHE_VERSION = 'geofish-shell-v38';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -190,10 +190,15 @@ self.addEventListener('fetch', (event) => {
           if (cached) {
             return cached;
           }
-          // Se não há cache nem rede, retorna GeoJSON vazio válido (200) para evitar quebrar o Leaflet
-          return new Response(JSON.stringify({ type: 'FeatureCollection', features: [] }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
+          // Se não há cache nem rede, retorna 503 com cabeçalho explícito para que a aplicação
+          // saiba que o recurso está offline e JAMAIS sobrescreva dados úteis existentes no IndexedDB
+          return new Response(JSON.stringify({ type: 'FeatureCollection', features: [], offline_fallback: true }), {
+            status: 503,
+            statusText: 'Service Unavailable (Offline Layer)',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-GeoFish-Fallback': 'offline-empty'
+            }
           });
         }
       })()

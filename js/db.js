@@ -124,7 +124,7 @@ class GeoFishDB {
     });
   }
 
-  static async salvarCamada(layerKey, dataJson, versaoStr = '1.0') {
+  static async salvarCamada(layerKey, dataJson, versaoStr = '1.0', etagStr = null) {
     const db = await this.open();
     if (!db) return false;
     return new Promise((resolve) => {
@@ -134,6 +134,7 @@ class GeoFishDB {
           layerKey: layerKey,
           data: dataJson,
           versao: versaoStr,
+          etag: etagStr || versaoStr,
           atualizado_em: new Date().toISOString()
         });
 

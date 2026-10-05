@@ -163,47 +163,108 @@ export function initPWAOffline() {
     showToast('GeoFish MS instalado com sucesso no seu aparelho!', 'info');
   });
 
-  // Botão "Salvar para o Barco" (Modo 100% Offline)
+  // Catálogo oficial de camadas vetoriais fundamentais para navegação fluvial offline
+  const CAMADAS_PARA_OFFLINE = [
+    { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: 'Regras de Pesca' },
+    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias Credenciados' },
+    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Apoio e Emergência' },
+    { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: 'Áreas Restritas (UCs)' },
+    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: 'Rios Principais' },
+    { key: 'bacias_uepgrh', url: 'data/processed/bacias_uepgrh.geojson', nome: 'Bacias Hidrográficas' },
+    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: 'Bacias Especiais' },
+    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: 'Aglomerados Rurais' }
+  ];
+
+  // Botão "Salvar para o Barco" (Modo 100% Offline Verificável)
   const btnPrepOffline = document.getElementById('btn-prep-offline');
   if (btnPrepOffline) {
     btnPrepOffline.addEventListener('click', async () => {
       vibrar([40, 60, 40]);
-      btnPrepOffline.innerHTML = '⏳ Verificando dados offline...';
       btnPrepOffline.disabled = true;
 
       try {
-        if ('caches' in window) {
-          const cacheKeys = await caches.keys();
-          const hasCache = cacheKeys.some(k => k.startsWith('geofish'));
+        if (navigator.onLine) {
+          let baixadas = 0;
+          const total = CAMADAS_PARA_OFFLINE.length;
 
-          if (navigator.onLine) {
-            btnPrepOffline.innerHTML = '⏳ Verificando recursos...';
-            // Notifica o service worker se houver controlador ativo
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-              navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
+          // Notifica service worker para garantir os assets shell
+          if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
+          }
+
+          // Solicita armazenamento persistente no navegador
+          if (window.GeoFishDB) {
+            await window.GeoFishDB.solicitarPersistencia();
+          }
+
+          for (let i = 0; i < total; i++) {
+            const c = CAMADAS_PARA_OFFLINE[i];
+            btnPrepOffline.innerHTML = `⏳ Baixando ${c.nome} (${i + 1}/${total})...`;
+
+            try {
+              const resp = await fetch(c.url, { cache: 'no-cache' });
+              if (resp.ok) {
+                const json = await resp.json();
+                if (json && json.features && json.features.length > 0) {
+                  const etag = resp.headers.get('ETag') || '1.0';
+                  if (window.GeoFishDB) {
+                    await window.GeoFishDB.salvarCamada(c.key, json, etag, etag);
+                  }
+                  if ('caches' in window) {
+                    const cache = await caches.open('geofish-geojson-v2');
+                    const fullUrl = new URL(c.url, window.location.href).href;
+                    await cache.put(fullUrl, new Response(JSON.stringify(json), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    }));
+                  }
+                  baixadas++;
+                }
+              }
+            } catch (errCamada) {
+              console.warn(`[PWA Offline] Falha ao baixar camada ${c.key}:`, errCamada);
             }
-            btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
+          }
+
+          if (baixadas === total) {
+            btnPrepOffline.innerHTML = `✅ Pronto para o Rio! (${baixadas}/${total} Salvas)`;
             btnPrepOffline.style.background = '#15803d';
             btnPrepOffline.style.color = '#ffffff';
-            showToast('Recursos verificados! O aplicativo e mapas base estão prontos para navegação sem sinal.', 'info');
-          } else if (hasCache) {
-            btnPrepOffline.innerHTML = '✅ Recursos Salvos (Offline)';
-            btnPrepOffline.style.background = '#15803d';
-            btnPrepOffline.style.color = '#ffffff';
-            showToast('Modo offline ativo: dados essenciais e mapas já disponíveis no dispositivo.', 'info');
+            showToast(`Sucesso! Todas as ${total} camadas e mapas estão salvos no aparelho para navegação sem sinal.`, 'info');
           } else {
-            btnPrepOffline.innerHTML = '⚠️ Conecte-se para baixar';
-            showToast('Conecte-se à internet uma vez para baixar os mapas para uso sem sinal.', 'warning');
+            btnPrepOffline.innerHTML = `⚠️ ${baixadas} de ${total} Salvas (Tentar de novo)`;
+            btnPrepOffline.style.background = '#b45309';
+            btnPrepOffline.style.color = '#ffffff';
+            showToast(`${baixadas} de ${total} camadas salvas. Toque novamente para completar o download.`, 'warning');
           }
         } else {
-          btnPrepOffline.innerHTML = 'ℹ️ Armazenamento Indisponível';
-          showToast('Seu navegador não oferece suporte à API de Cache.', 'warning');
+          // Usuário já está offline: checa quantas camadas de fato existem no IndexedDB
+          let salvasOffline = 0;
+          if (window.GeoFishDB) {
+            for (const c of CAMADAS_PARA_OFFLINE) {
+              const cached = await window.GeoFishDB.obterCamada(c.key);
+              if (cached && cached.data && cached.data.features && cached.data.features.length > 0) {
+                salvasOffline++;
+              }
+            }
+          }
+
+          if (salvasOffline === CAMADAS_PARA_OFFLINE.length) {
+            btnPrepOffline.innerHTML = `✅ Recursos Salvos (${salvasOffline}/${CAMADAS_PARA_OFFLINE.length})`;
+            btnPrepOffline.style.background = '#15803d';
+            btnPrepOffline.style.color = '#ffffff';
+            showToast(`Modo offline ativo: todas as ${salvasOffline} camadas estão disponíveis no celular.`, 'info');
+          } else {
+            btnPrepOffline.innerHTML = `⚠️ ${salvasOffline} de ${CAMADAS_PARA_OFFLINE.length} Salvas`;
+            btnPrepOffline.style.background = '#b45309';
+            btnPrepOffline.style.color = '#ffffff';
+            showToast(`Modo offline: ${salvasOffline} de ${CAMADAS_PARA_OFFLINE.length} camadas prontas. Conecte-se para baixar o restante.`, 'warning');
+          }
         }
       } catch (err) {
-        btnPrepOffline.innerHTML = '✅ Pronto para o Rio!';
-        btnPrepOffline.style.background = '#15803d';
-        btnPrepOffline.style.color = '#ffffff';
-        showToast('Aplicativo preparado para navegação.', 'info');
+        console.warn('[PWA Offline] Erro no preparo offline:', err);
+        btnPrepOffline.innerHTML = '⚠️ Erro ao verificar';
+        showToast('Não foi possível verificar os recursos offline.', 'warning');
       } finally {
         btnPrepOffline.disabled = false;
       }
