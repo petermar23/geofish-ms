@@ -25,7 +25,10 @@ import {
 
 import {
   abrirModalDeTemplate,
-  fecharModalAtivo
+  fecharModalAtivo,
+  fecharModalPorId,
+  registrarOverlayExterno,
+  desregistrarOverlayExterno
 } from './modules/modal-manager.js';
 
 import {
@@ -133,19 +136,29 @@ function abrirPainel(htmlContent) {
   bottomSheet.setAttribute('aria-hidden', 'false');
   document.body.classList.add('sheet-open');
   vibrar(25);
-  try {
-    history.pushState({ painelAberto: true }, '');
-  } catch (_) {}
+
+  const prevFocus = document.activeElement;
+  registrarOverlayExterno({
+    id: 'bottom-sheet',
+    fechar: () => {
+      bottomSheet.classList.add('hidden');
+      bottomSheet.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('sheet-open');
+    },
+    returnFocusEl: prevFocus
+  });
+
   if (closeSheetBtn) {
     closeSheetBtn.focus();
   }
 }
 
 function fecharPainel() {
-  if (!bottomSheet) return;
+  if (!bottomSheet || bottomSheet.classList.contains('hidden')) return;
   bottomSheet.classList.add('hidden');
   bottomSheet.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('sheet-open');
+  desregistrarOverlayExterno('bottom-sheet', true);
 }
 
 if (closeSheetBtn) {
@@ -155,14 +168,6 @@ if (closeSheetBtn) {
 // Fecha o painel ao clicar em área vazia do mapa
 map.on('click', () => {
   fecharPainel();
-});
-
-// Fecha o painel com a tecla Escape
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharPainel();
-    fecharModalSobre();
-  }
 });
 
 // 6. Controle de Camadas no Canto Superior Direito
@@ -937,21 +942,7 @@ if (btnAbrirSobre) {
   btnAbrirSobre.addEventListener('click', abrirModalSobre);
 }
 // 10, 11, 12. Gestão PWA & Offline delegada para o submódulo js/modules/pwa-offline.js
-
-// Suporte ao Botão Físico/Gesto de Voltar do Android (Samsung / Motorola)
-window.addEventListener('popstate', () => {
-  if (bottomSheet && !bottomSheet.classList.contains('hidden')) {
-    bottomSheet.classList.add('hidden');
-    document.body.classList.remove('sheet-open');
-    return;
-  }
-  const searchResults = document.getElementById('local-search-results');
-  if (searchResults && !searchResults.classList.contains('hidden')) {
-    searchResults.classList.add('hidden');
-    return;
-  }
-  fecharModalAtivo();
-});
+// Gestão de Histórico e Popstate unificada em js/modules/modal-manager.js
 
 // Barra de Navegação Inferior de Polegar para Android
 const navBtnGuias = document.getElementById('nav-btn-guias');
@@ -1056,14 +1047,7 @@ function aplicarFiltroRapido(tipo) {
 // 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
 
-// Fechamento de todos os modais com Escape
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharModalEspecies();
-    fecharModalSobre();
-    fecharPainel();
-  }
-});
+
 
 // 15. Busca Rápida de Feições Locais na Bacia do Rio Miranda (100% Offline e Instantânea)
 let marcadorBusca = null;

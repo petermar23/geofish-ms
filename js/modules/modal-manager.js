@@ -1,12 +1,77 @@
 /**
- * GeoFish MS - Gerenciador Universal de Modais via Templates HTML Nativos (<template>)
- * Instancia o modal no DOM sob demanda via cloneNode e o destrói completamente ao fechar via remove().
+ * GeoFish MS - Gerenciador Universal de Modais e Overlays
+ * Arquitetura de Pilha Única (LIFO) com sincronização bidirecional do Histórico (Android Back / popstate)
+ * e Gerenciamento Acessível de Foco.
  */
 
 import { vibrar } from './utils.js';
 
-let modalAtivo = null; // { id, element, destroy }
-const pilhaModais = []; // Suporte a modais empilhados (ex: confirmação SOS sobreposta)
+// Pilha universal de modais e overlays ativos no aplicativo
+const pilhaModais = [];
+
+// Contador de eventos popstate disparados pelo próprio modalManager (via history.back())
+let pendentesHistoryBack = 0;
+
+/**
+ * Fecha uma entrada da pilha (modal ou overlay externo)
+ * @param {Object} entry - Objeto da entrada
+ * @param {boolean} vindoDePopstate - Se true, originado pelo botão físico/gesto de voltar do Android
+ */
+function fecharEntrada(entry, vindoDePopstate = false) {
+  if (!entry || entry.destruido) return;
+  entry.destruido = true;
+
+  // 1. Remove da pilha universal
+  const idx = pilhaModais.indexOf(entry);
+  if (idx !== -1) {
+    pilhaModais.splice(idx, 1);
+  }
+
+  // 2. Executa callback onDestroy
+  if (typeof entry.onDestroy === 'function') {
+    try {
+      entry.onDestroy(entry.element);
+    } catch (err) {
+      console.error(`[ModalManager] Erro no onDestroy de #${entry.id}:`, err);
+    }
+  }
+
+  // 3. Limpeza do DOM e de listeners caso seja elemento de template
+  if (entry.element) {
+    if (typeof entry.element._cleanupListeners === 'function') {
+      try { entry.element._cleanupListeners(); } catch (_) {}
+    }
+    if (entry.element.parentNode) {
+      entry.element.remove();
+    }
+  }
+
+  // 4. Se for overlay externo (ex: bottomSheet), chama sua rotina de fechamento
+  if (typeof entry.onExternalClose === 'function') {
+    try {
+      entry.onExternalClose();
+    } catch (err) {
+      console.error(`[ModalManager] Erro no onExternalClose de #${entry.id}:`, err);
+    }
+  }
+
+  // 5. Sincronização do Histórico do Navegador / Android:
+  // Se o fechamento foi disparado pela interface ("X", backdrop, Escape ou código),
+  // e havia pushState associado, desfaz a entrada no history sem travar a navegação.
+  if (entry.hasHistoryState && !vindoDePopstate) {
+    try {
+      pendentesHistoryBack++;
+      window.history.back();
+    } catch (_) {}
+  }
+
+  // 6. Devolução de Foco para Acessibilidade
+  if (entry.returnFocusEl && typeof entry.returnFocusEl.focus === 'function' && document.body.contains(entry.returnFocusEl)) {
+    try {
+      entry.returnFocusEl.focus();
+    } catch (_) {}
+  }
+}
 
 /**
  * Instancia um modal a partir de uma tag <template id="..."> no DOM
@@ -21,11 +86,12 @@ export function abrirModalDeTemplate(templateId, options = {}) {
     return null;
   }
 
-  // Se já houver um modal ativo e a opção 'empilhar' não for solicitada, fecha o anterior
-  if (modalAtivo && !options.empilhar) {
-    try {
-      modalAtivo.destroy();
-    } catch (_) {}
+  // Se não for empilhado e já existirem modais abertos, fecha os anteriores
+  if (!options.empilhar && pilhaModais.length > 0) {
+    while (pilhaModais.length > 0) {
+      const topo = pilhaModais[pilhaModais.length - 1];
+      topo.destroy(false);
+    }
   }
 
   // Clona o fragmento nativo do template
@@ -36,148 +102,232 @@ export function abrirModalDeTemplate(templateId, options = {}) {
     return null;
   }
 
-  // Garante que qualquer instância anterior órfã com o mesmo ID seja removida do DOM
-  if (modalEl.id) {
-    const orfao = document.getElementById(modalEl.id);
-    if (orfao) orfao.remove();
-  }
+  // Lê e aplica o modalId configurado
+  const effectiveId = options.modalId || modalEl.id || `modal-${templateId}`;
+  modalEl.id = effectiveId;
 
-  // Exibe o modal removendo 'hidden' e ajustando atributos de acessibilidade
+  // Garante que qualquer elemento órfão anterior com o mesmo ID seja removido do DOM
+  const orfao = document.getElementById(effectiveId);
+  if (orfao) orfao.remove();
+
+  // Exibe o modal removendo 'hidden' e ajustando acessibilidade
   modalEl.classList.remove('hidden');
   modalEl.setAttribute('aria-hidden', 'false');
 
-  // Adiciona o elemento diretamente ao DOM no final do <body>
+  // Salva o elemento com foco ativo para devolução posterior
+  const returnFocusEl = options.returnFocusEl ||
+    (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+
+  // Injeta o elemento no DOM
   document.body.appendChild(modalEl);
 
-  let destruido = false;
-
-  // Função central de destruição: remove os listeners e desanexa o modal do DOM
-  const destroy = () => {
-    if (destruido || !modalEl) return;
-    destruido = true;
-
-    // Dispara hook de limpeza pré-destruição
-    if (typeof options.onDestroy === 'function') {
-      try {
-        options.onDestroy(modalEl);
-      } catch (err) {
-        console.error(`[ModalManager] Erro no onDestroy de #${templateId}:`, err);
-      }
-    }
-
-    modalEl.removeEventListener('click', handleBackdropClick);
-    window.removeEventListener('keydown', handleEscape);
-
-    // DESTRUIÇÃO TOTAL DO ELEMENTO NO DOM
-    if (modalEl.parentNode) {
-      modalEl.remove();
-    }
-
-    // Gerencia a pilha de modais
-    if (options.empilhar) {
-      const idx = pilhaModais.indexOf(infoModal);
-      if (idx !== -1) pilhaModais.splice(idx, 1);
-    } else if (modalAtivo && modalAtivo.element === modalEl) {
-      modalAtivo = null;
-    }
-
-    // Restaura foco de acessibilidade ao botão disparador, se fornecido
-    if (options.returnFocusEl && typeof options.returnFocusEl.focus === 'function') {
-      try { options.returnFocusEl.focus(); } catch (_) {}
+  // Cria a estrutura de dados da entrada do modal
+  const infoModal = {
+    id: effectiveId,
+    element: modalEl,
+    onDestroy: options.onDestroy,
+    returnFocusEl,
+    hasHistoryState: true,
+    destruido: false,
+    destroy: (vindoDePopstate = false) => {
+      fecharEntrada(infoModal, vindoDePopstate);
     }
   };
 
+  // Configura listeners de clique dentro do modal (Backdrop e botões com atributos de fechar)
   const handleBackdropClick = (e) => {
     if (e.target === modalEl) {
       vibrar(20);
-      destroy();
+      infoModal.destroy(false);
     }
   };
 
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-      destroy();
-    }
-  };
-
-  // Botões de fechar automáticos dentro do modal
   const closeBtns = modalEl.querySelectorAll('.modal-close-btn, [data-modal-close], .btn-cancelar-modal, .btn-confirm-cancel');
-  closeBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      vibrar(20);
-      destroy();
-    });
-  });
+  const handleCloseBtnClick = (e) => {
+    e.preventDefault();
+    vibrar(20);
+    infoModal.destroy(false);
+  };
 
+  closeBtns.forEach((btn) => btn.addEventListener('click', handleCloseBtnClick));
   modalEl.addEventListener('click', handleBackdropClick);
-  window.addEventListener('keydown', handleEscape);
 
-  const infoModal = { id: modalEl.id, element: modalEl, destroy };
+  modalEl._cleanupListeners = () => {
+    modalEl.removeEventListener('click', handleBackdropClick);
+    closeBtns.forEach((btn) => btn.removeEventListener('click', handleCloseBtnClick));
+  };
 
-  if (options.empilhar) {
-    pilhaModais.push(infoModal);
-  } else {
-    modalAtivo = infoModal;
-  }
+  // Registra na pilha universal
+  pilhaModais.push(infoModal);
 
-  // Suporte a navegação por botão físico/gesto de voltar do Android
+  // Registra no histórico do navegador (para o botão Voltar do Android)
   try {
-    history.pushState({ modal: modalEl.id }, '');
+    history.pushState({ geofishModal: effectiveId }, '');
   } catch (_) {}
 
-  // Dispara hook de inicialização com os elementos recém-injetados no DOM
+  // Dispara hook onMount
   if (typeof options.onMount === 'function') {
     try {
-      options.onMount(modalEl, destroy);
+      options.onMount(modalEl, () => infoModal.destroy(false));
     } catch (err) {
-      console.error(`[ModalManager] Erro no onMount de #${templateId}:`, err);
+      console.error(`[ModalManager] Erro no onMount de #${effectiveId}:`, err);
     }
   }
+
+  // Foco inicial acessível
+  requestAnimationFrame(() => {
+    if (infoModal.destruido || !modalEl) return;
+    const focusable = modalEl.querySelector(
+      'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]):not(.modal-close-btn), [tabindex="0"]'
+    ) || modalEl.querySelector('.modal-close-btn') || modalEl;
+
+    if (focusable && typeof focusable.focus === 'function') {
+      try {
+        if (modalEl.getAttribute('tabindex') === null && focusable === modalEl) {
+          modalEl.setAttribute('tabindex', '-1');
+        }
+        focusable.focus();
+      } catch (_) {}
+    }
+  });
 
   vibrar(25);
   return infoModal;
 }
 
 /**
- * Fecha e destrói o modal ativo atualmente no DOM
+ * Fecha e destrói o modal ou overlay do topo da pilha
  */
 export function fecharModalAtivo() {
   if (pilhaModais.length > 0) {
-    const topo = pilhaModais.pop();
-    if (topo) topo.destroy();
-    return;
+    const topo = pilhaModais[pilhaModais.length - 1];
+    topo.destroy(false);
+    return true;
   }
-  if (modalAtivo) {
-    modalAtivo.destroy();
-    modalAtivo = null;
+  return false;
+}
+
+/**
+ * Fecha e destrói um modal pelo seu ID específico, chamando adequadamente o onDestroy
+ */
+export function fecharModalPorId(id) {
+  const idx = pilhaModais.findIndex(m => m.id === id || (m.element && m.element.id === id));
+  if (idx !== -1) {
+    const entry = pilhaModais[idx];
+    entry.destroy(false);
+    return true;
+  }
+  // Fallback para elemento órfão caso não esteja na pilha
+  const el = document.getElementById(id);
+  if (el) {
+    el.remove();
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Registra um overlay externo (ex: bottomSheet) na pilha universal de navegação
+ * @param {Object} config - { id, fechar, returnFocusEl }
+ */
+export function registrarOverlayExterno({ id, fechar, returnFocusEl }) {
+  // Se já existir entrada com o mesmo ID, fecha a anterior sem push extra
+  desregistrarOverlayExterno(id, false);
+
+  const prevFocus = returnFocusEl ||
+    (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+
+  const entry = {
+    id,
+    element: null,
+    hasHistoryState: true,
+    destruido: false,
+    returnFocusEl: prevFocus,
+    onExternalClose: fechar,
+    destroy: (vindoDePopstate = false) => {
+      fecharEntrada(entry, vindoDePopstate);
+    }
+  };
+
+  pilhaModais.push(entry);
+
+  try {
+    history.pushState({ geofishOverlay: id }, '');
+  } catch (_) {}
+
+  return entry;
+}
+
+/**
+ * Remove um overlay externo da pilha universal
+ * @param {string} id - ID do overlay
+ * @param {boolean} viaUsuario - Se true, dispara history.back()
+ */
+export function desregistrarOverlayExterno(id, viaUsuario = true) {
+  const idx = pilhaModais.findIndex(m => m.id === id);
+  if (idx !== -1) {
+    const entry = pilhaModais[idx];
+    entry.destroy(!viaUsuario);
   }
 }
 
 /**
- * Fecha e destrói um modal pelo seu ID específico
+ * Retorna se há algum modal ou overlay aberto
  */
-export function fecharModalPorId(id) {
-  const el = document.getElementById(id);
-  if (el) el.remove();
-  if (modalAtivo && modalAtivo.id === id) {
-    modalAtivo = null;
-  }
+export function temModalOuOverlayAberto() {
+  return pilhaModais.length > 0;
 }
 
-// Escuta evento popstate do Android para fechar/destruir o modal aberto
-window.addEventListener('popstate', () => {
-  if (pilhaModais.length > 0) {
-    const topo = pilhaModais.pop();
-    if (topo) topo.destroy();
-  } else if (modalAtivo) {
-    modalAtivo.destroy();
-    modalAtivo = null;
+// ========================================================
+// LISTENERS UNIVERSAIS ÚNICOS DE TECLADO E HISTÓRICO
+// ========================================================
+
+// 1. Escuta única para tecla Escape (fecha apenas o elemento do topo da pilha LIFO)
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    // Se a caixa de busca rápida local estiver aberta, fecha primeiro
+    const searchResults = document.getElementById('local-search-results');
+    if (searchResults && !searchResults.classList.contains('hidden')) {
+      searchResults.classList.add('hidden');
+      return;
+    }
+
+    if (pilhaModais.length > 0) {
+      e.preventDefault();
+      const topo = pilhaModais[pilhaModais.length - 1];
+      topo.destroy(false);
+    }
   }
 });
 
-// Retrocompatibilidade no objeto window
+// 2. Escuta única para evento popstate do navegador / botão físico de voltar do Android
+window.addEventListener('popstate', () => {
+  // Se o evento foi disparado pelo nosso próprio history.back(), decrementa e encerra
+  if (pendentesHistoryBack > 0) {
+    pendentesHistoryBack--;
+    return;
+  }
+
+  // Se a busca rápida local estiver aberta, fecha
+  const searchResults = document.getElementById('local-search-results');
+  if (searchResults && !searchResults.classList.contains('hidden')) {
+    searchResults.classList.add('hidden');
+    return;
+  }
+
+  // Fecha o elemento do topo da pilha informando que veio de popstate
+  if (pilhaModais.length > 0) {
+    const topo = pilhaModais[pilhaModais.length - 1];
+    topo.destroy(true);
+  }
+});
+
+// Retrocompatibilidade no objeto global window
 if (typeof window !== 'undefined') {
   window.abrirModalDeTemplate = abrirModalDeTemplate;
   window.fecharModalAtivo = fecharModalAtivo;
   window.fecharModalPorId = fecharModalPorId;
+  window.registrarOverlayExterno = registrarOverlayExterno;
+  window.desregistrarOverlayExterno = desregistrarOverlayExterno;
+  window.temModalOuOverlayAberto = temModalOuOverlayAberto;
 }

@@ -79,8 +79,6 @@ export function initPWAOffline() {
 
   // Controle de Instalação PWA
   const btnInstallPWA = document.getElementById('btn-install-pwa');
-  const btnFecharInstall = document.getElementById('btn-fechar-install');
-  const modalInstall = document.getElementById('modal-install');
   const androidBanner = document.getElementById('android-install-banner');
   const btnAndroidInstall = document.getElementById('btn-android-install');
   const btnAndroidDismiss = document.getElementById('btn-android-dismiss');
@@ -107,14 +105,6 @@ export function initPWAOffline() {
         }
       });
     }
-  }
-
-  if (btnFecharInstall) btnFecharInstall.addEventListener('click', fecharModalInstall);
-
-  if (modalInstall) {
-    modalInstall.addEventListener('click', (e) => {
-      if (e.target === modalInstall) fecharModalInstall();
-    });
   }
 
   // Captura o evento nativo de instalação no Android (Google Chrome & Samsung Internet)
@@ -212,13 +202,6 @@ export function initPWAOffline() {
     });
   }
 }
-
-// Fechamento com Escape
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    fecharModalInstall();
-  }
-});
 
 // Retrocompatibilidade global
 if (typeof window !== 'undefined') {
