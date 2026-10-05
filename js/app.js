@@ -13,7 +13,8 @@ import {
   obterCorPorRegra,
   vibrar,
   manterTelaAtiva,
-  showToast
+  showToast,
+  estaEmDefeso
 } from './modules/utils.js';
 
 import {
@@ -108,6 +109,7 @@ const PANES = [
   { name: 'especiaisPane', zIndex: 420 },
   { name: 'aglomeradosPane', zIndex: 430 },
   { name: 'restritasPane', zIndex: 440 },
+  { name: 'hidrografiaBasePane', zIndex: 445 },
   { name: 'riosPane', zIndex: 450 },
   { name: 'apoioPane', zIndex: 460 },
   { name: 'guiasPane', zIndex: 465 },
@@ -190,34 +192,27 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Distância perpendicular ponto-a-segmento de rio
+// Distância perpendicular ponto-a-segmento com correção de cosseno da latitude
 function distanciaPontoSegmentoKm(pLat, pLng, aLat, aLng, bLat, bLng) {
-  const dAB2 = (bLat - aLat) * (bLat - aLat) + (bLng - aLng) * (bLng - aLng);
+  const rad = Math.PI / 180;
+  const cosLat = Math.cos(((aLat + bLat) / 2) * rad);
+  const dx = (bLng - aLng) * cosLat;
+  const dy = bLat - aLat;
+  const dAB2 = dx * dx + dy * dy;
   if (dAB2 === 0) {
     return calcularDistanciaKm(pLat, pLng, aLat, aLng);
   }
-  let t = ((pLat - aLat) * (bLat - aLat) + (pLng - aLng) * (bLng - aLng)) / dAB2;
+  const px = (pLng - aLng) * cosLat;
+  const py = pLat - aLat;
+  let t = (px * dx + py * dy) / dAB2;
   t = Math.max(0, Math.min(1, t));
   const projLat = aLat + t * (bLat - aLat);
   const projLng = aLng + t * (bLng - aLng);
   return calcularDistanciaKm(pLat, pLng, projLat, projLng);
 }
 
-// Ray-casting otimizado com verificação prévia de Bounding Box O(1)
-function pontoEmPoligono(lat, lng, coords) {
-  let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
-  for (let i = 0; i < coords.length; i++) {
-    const pt = coords[i];
-    if (pt[0] < minLng) minLng = pt[0];
-    if (pt[0] > maxLng) maxLng = pt[0];
-    if (pt[1] < minLat) minLat = pt[1];
-    if (pt[1] > maxLat) maxLat = pt[1];
-  }
-  // Se estiver fora da caixa delimitadora, descarta imediatamente
-  if (lng < minLng || lng > maxLng || lat < minLat || lat > maxLat) {
-    return false;
-  }
-
+// Ray-casting para um anel simples de coordenadas
+function pontoEmAnel(lat, lng, coords) {
   let inside = false;
   for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
     const xi = coords[i][0], yi = coords[i][1];
@@ -229,12 +224,23 @@ function pontoEmPoligono(lat, lng, coords) {
   return inside;
 }
 
-// Verificação do Período Anual de Defeso da Piracema no Pantanal (05/Nov a 28/Fev)
+// Ray-casting com suporte a anel exterior e exclusão de buracos (interior rings)
+function pontoEmPoligono(lat, lng, rings) {
+  if (!rings || rings.length === 0) return false;
+  // Deve estar dentro do anel exterior (rings[0])
+  if (!pontoEmAnel(lat, lng, rings[0])) return false;
+  // E NÃO pode estar contido em nenhum buraco interno
+  for (let b = 1; b < rings.length; b++) {
+    if (pontoEmAnel(lat, lng, rings[b])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Verificação do Período Anual de Defeso da Piracema no Pantanal (05/Nov a 28/29 Fev)
 function verificarPeriodoDefeso() {
-  const hoje = new Date();
-  const mes = hoje.getMonth() + 1;
-  const dia = hoje.getDate();
-  const emDefeso = (mes === 11 && dia >= 5) || (mes === 12) || (mes === 1) || (mes === 2 && dia <= 28);
+  const emDefeso = estaEmDefeso();
   const banner = document.getElementById('banner-defeso');
   const bannerText = document.getElementById('banner-defeso-text');
   if (banner && bannerText) {
@@ -247,6 +253,8 @@ function verificarPeriodoDefeso() {
   }
   return emDefeso;
 }
+
+const LIMITE_PROXIMIDADE_TRECHO_KM = 0.5; // Limite de 500m para considerar o usuário no trecho
 
 function avaliarConformidadePosicao(userLat, userLng) {
   let trechoMaisProximo = null;
@@ -276,24 +284,26 @@ function avaliarConformidadePosicao(userLat, userLng) {
     }
   }
 
-  let ucAtual = null;
+  const trechoAtivo = (menorDistanciaTrecho <= LIMITE_PROXIMIDADE_TRECHO_KM) ? trechoMaisProximo : null;
+
+  // Detecta todas as UCs em que a posição se encontra
+  const ucsPresentes = [];
   const dadosUcs = dadosCarregados['areas_restritas'];
   if (dadosUcs && dadosUcs.features) {
     for (const feat of dadosUcs.features) {
       const geom = feat.geometry;
       let polyList = [];
       if (geom.type === 'Polygon') {
-        polyList = [geom.coordinates[0]];
+        polyList = [geom.coordinates];
       } else if (geom.type === 'MultiPolygon') {
-        polyList = geom.coordinates.map(p => p[0]);
+        polyList = geom.coordinates;
       }
-      for (const ring of polyList) {
-        if (pontoEmPoligono(userLat, userLng, ring)) {
-          ucAtual = feat.properties;
+      for (const rings of polyList) {
+        if (pontoEmPoligono(userLat, userLng, rings)) {
+          ucsPresentes.push(feat.properties);
           break;
         }
       }
-      if (ucAtual) break;
     }
   }
 
@@ -312,9 +322,12 @@ function avaliarConformidadePosicao(userLat, userLng) {
   }
 
   return {
-    trecho: trechoMaisProximo,
+    noTrecho: Boolean(trechoAtivo),
+    trecho: trechoAtivo,
+    trechoMaisProximo: trechoMaisProximo,
     distanciaTrechoKm: menorDistanciaTrecho,
-    uc: ucAtual,
+    ucs: ucsPresentes,
+    emDefeso: estaEmDefeso(),
     apoio: apoioMaisProximo
   };
 }
@@ -339,21 +352,33 @@ async function carregarCamada(layerKey, url) {
   }
 
   try {
+    const fetchHeaders = {};
+    if (cached && cached.etag) {
+      fetchHeaders['If-None-Match'] = cached.etag;
+    }
+
     const response = await fetch(url, {
+      headers: fetchHeaders,
       cache: 'no-cache',
       signal: controller.signal
     });
 
     if (timeoutId) clearTimeout(timeoutId);
 
-    if (response.ok) {
+    if (response.status === 304 && cached && cached.data) {
+      // 304 Not Modified: reutiliza os dados em cache sem reescrever no IndexedDB
+      dados = cached.data;
+      origem = 'cache_validado';
+      dataAtualizacao = cached.atualizado_em;
+    } else if (response.ok) {
       dados = await response.json();
       origem = 'rede';
       dataAtualizacao = new Date().toISOString();
+      const novoEtag = response.headers.get('ETag') || '1.0';
 
-      // Salva no IndexedDB apenas se houve alteração
-      if (window.GeoFishDB) {
-        await window.GeoFishDB.salvarCamada(layerKey, dados, response.headers.get('ETag') || '1.0');
+      // Salva no IndexedDB apenas se ETag mudou ou não havia cache
+      if (window.GeoFishDB && (!cached || cached.etag !== novoEtag)) {
+        await window.GeoFishDB.salvarCamada(layerKey, dados, novoEtag);
       }
     } else {
       throw new Error(`HTTP ${response.status}`);
@@ -586,7 +611,7 @@ async function carregarTodasCamadas() {
 
         case 'rios_principais':
           camadaLeaflet = L.geoJSON(dados, {
-            pane: 'riosPane',
+            pane: 'hidrografiaBasePane',
             style: {
               color: '#0288d1',
               weight: 5,
@@ -783,7 +808,28 @@ export function obterLocalizacao() {
           }).addTo(map);
         }
 
-        marcadorPosicao.bindPopup(`<strong>Sua posição aproximada</strong><br>Precisão: ±${acc.toFixed(0)}m`).openPopup();
+        const radar = avaliarConformidadePosicao(lat, lng);
+        let infoPopup = `<strong>📍 Sua Posição no Rio</strong><br><span style="font-size:0.75rem; color:#64748b;">Precisão: ±${acc.toFixed(0)}m</span>`;
+
+        if (radar.emDefeso) {
+          infoPopup += `<br><span style="color:#dc2626; font-weight:700;">⚠️ Defeso da Piracema em Vigor!</span>`;
+        }
+
+        if (radar.noTrecho && radar.trecho) {
+          infoPopup += `<br><strong>Trecho:</strong> ${escapeHTML(radar.trecho.rio || 'Rio')}<br><strong>Regra:</strong> ${escapeHTML(radar.trecho.regra || '')}`;
+        } else if (radar.distanciaTrechoKm < 10) {
+          infoPopup += `<br><span style="font-size:0.8rem; color:#475569;">Aprox. ${radar.distanciaTrechoKm.toFixed(1)}km do Rio</span>`;
+        }
+
+        if (radar.ucs && radar.ucs.length > 0) {
+          infoPopup += `<br><span style="color:#b45309; font-weight:700;">⚠️ Área Restrita:</span> ${escapeHTML(radar.ucs.map(u => u.nome).join(', '))}`;
+        }
+
+        if (radar.apoio) {
+          infoPopup += `<br><span style="font-size:0.75rem; color:#0369a1;">Apoio próximo: ${escapeHTML(radar.apoio.nome)} (${radar.apoio.distanciaKm.toFixed(1)} km)</span>`;
+        }
+
+        marcadorPosicao.bindPopup(infoPopup).openPopup();
         map.setView([lat, lng], Math.max(map.getZoom(), 14));
       }
       showToast(`Posição obtida com sucesso (±${acc.toFixed(0)}m)`);
@@ -987,35 +1033,25 @@ function aplicarFiltroRapido(tipo) {
     if (camadasInstanciadas['guias_credenciados']) {
       map.addLayer(camadasInstanciadas['guias_credenciados']);
       const bounds = camadasInstanciadas['guias_credenciados'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
-    showToast('Filtro: Guias Credenciados Z-1 e Z-7.');
+    showToast('Filtro: Guias Credenciados Z-1, Z-7 e Z-11.');
   } else if (tipo === 'apoio') {
     if (camadasInstanciadas['pontos_emergencia']) {
       map.addLayer(camadasInstanciadas['pontos_emergencia']);
       const bounds = camadasInstanciadas['pontos_emergencia'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
     showToast('Filtro: Pontos de Apoio, Rampas e Emergência.');
   } else if (tipo === 'restritas') {
     if (camadasInstanciadas['areas_restritas']) {
       map.addLayer(camadasInstanciadas['areas_restritas']);
       const bounds = camadasInstanciadas['areas_restritas'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40] });
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
     showToast('Filtro: Unidades de Conservação e Áreas Restritas.');
   }
 }
-
-const chipsFiltro = document.querySelectorAll('.filter-chip');
-chipsFiltro.forEach(chip => {
-  chip.addEventListener('click', () => {
-    chipsFiltro.forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    const filtro = chip.getAttribute('data-filter');
-    aplicarFiltroRapido(filtro);
-  });
-});
 
 // 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
@@ -1315,6 +1351,12 @@ function abrirModalDiario() {
       const selectEspecieDiario = modalEl.querySelector('#select-especie-diario');
       const inputTamanhoDiario = modalEl.querySelector('#input-tamanho-diario');
       const cbLgpdDiario = modalEl.querySelector('#cb-lgpd-diario');
+
+      if (selectEspecieDiario) {
+        selectEspecieDiario.innerHTML = ESPECIES_MS.map(esp => {
+          return `<option value="${esp.id}">${escapeHTML(esp.nome)}</option>`;
+        }).join('') + '<option value="outro">Outro peixe...</option>';
+      }
 
       const btnAbrirLens = modalEl.querySelector('#btn-abrir-lens');
       const btnCompartilharLens = modalEl.querySelector('#btn-compartilhar-lens');

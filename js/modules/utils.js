@@ -64,6 +64,16 @@ export function obterCorPorRegra(regra) {
   }
 }
 
+/**
+ * Verifica se uma data está dentro do Período de Defeso da Piracema em MS (05/Nov até fim de Fev)
+ * Cobre corretamente anos bissextos (29 de fevereiro).
+ */
+export function estaEmDefeso(data = new Date()) {
+  const mes = data.getMonth() + 1; // 1 a 12
+  const dia = data.getDate();
+  return (mes === 11 && dia >= 5) || mes === 12 || mes === 1 || mes === 2;
+}
+
 // Utilitário de Vibração Háptica para Celulares Android (Samsung / Motorola)
 export function vibrar(padrao = 35) {
   if ('vibrate' in navigator) {

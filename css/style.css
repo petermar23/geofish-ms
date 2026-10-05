@@ -1143,9 +1143,10 @@ body.sheet-open .btn-gps {
   white-space: nowrap;
 }
 
-.badge-cota-zero {
-  background: #fff3e0;
-  color: #e65100;
+.badge-cota-zero,
+.badge-faixa {
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 
 .badge-pesque-solte {
@@ -1156,6 +1157,16 @@ body.sheet-open .btn-gps {
 .badge-proibido {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.badge-especial {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-exotica {
+  background: #f0fdf4;
+  color: #15803d;
 }
 
 .species-measures {
