@@ -111,66 +111,58 @@ class GeoFishFirebaseService {
    * Salva solicitação de anúncio comercial de Pousada / Rancho
    */
   async salvarSolicitacaoPousada(dados) {
-    const payload = {
-      tipo: 'pousada_rancho',
-      nome: dados.nome || 'Não informado',
-      rio: dados.rio || 'Rio Miranda',
-      whatsapp: dados.whatsapp || '',
-      rampa: dados.rampa || '',
-      comodidades: dados.comodidades || [],
-      status: 'pendente',
-      criadoEm: new Date().toISOString(),
-      origem: 'webgis_pwa_v2'
-    };
-
     if (this.isInitialized && this.db) {
       try {
         const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js');
         const docRef = await addDoc(collection(this.db, 'solicitacoes_pousadas'), {
-          ...payload,
+          tipo: 'pousada_rancho',
+          nome: dados.nome || 'Não informado',
+          rio: dados.rio || 'Rio Miranda',
+          whatsapp: dados.whatsapp || '',
+          rampa: dados.rampa || '',
+          comodidades: dados.comodidades || [],
+          status: 'pendente',
+          criadoEm: new Date().toISOString(),
           timestampServidor: serverTimestamp()
         });
         return { success: true, id: docRef.id, modo: 'nuvem' };
       } catch (err) {
         console.warn('Erro ao gravar no Firestore:', err);
+        return { success: false, modo: 'falha_nuvem', erro: err.message };
       }
     }
 
-    return { success: true, modo: 'direto' };
+    return { success: false, modo: 'sem_nuvem', mensagem: 'Banco remoto desativado. Encaminhe diretamente via canal comunitário.' };
   }
 
   /**
-   * Salva cadastro comunitário de Piloteiro / Guia das Colônias Z-1 e Z-7
+   * Salva cadastro comunitário de Piloteiro / Guia das Colônias Z-1, Z-7 e Z-11
    */
   async salvarCadastroPiloteiro(dados) {
-    const payload = {
-      tipo: 'piloteiro_comunitario',
-      nome: dados.nome || 'Não informado',
-      apelido: dados.apelido || '',
-      colonia: dados.colonia || 'Z-1',
-      porto: dados.porto || '',
-      whatsapp: dados.whatsapp || '',
-      diferenciais: dados.diferenciais || [],
-      status: 'pendente_homologacao',
-      gratuito: true,
-      criadoEm: new Date().toISOString(),
-      origem: 'webgis_pwa_v2'
-    };
-
     if (this.isInitialized && this.db) {
       try {
         const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js');
         const docRef = await addDoc(collection(this.db, 'piloteiros_comunitarios'), {
-          ...payload,
+          tipo: 'piloteiro_comunitario',
+          nome: dados.nome || 'Não informado',
+          apelido: dados.apelido || '',
+          colonia: dados.colonia || 'Z-1',
+          porto: dados.porto || '',
+          whatsapp: dados.whatsapp || '',
+          diferenciais: dados.diferenciais || [],
+          status: 'pendente_homologacao',
+          gratuito: true,
+          criadoEm: new Date().toISOString(),
           timestampServidor: serverTimestamp()
         });
         return { success: true, id: docRef.id, modo: 'nuvem' };
       } catch (err) {
         console.warn('Erro ao gravar no Firestore:', err);
+        return { success: false, modo: 'falha_nuvem', erro: err.message };
       }
     }
 
-    return { success: true, modo: 'direto' };
+    return { success: false, modo: 'sem_nuvem', mensagem: 'Banco remoto desativado. Encaminhe diretamente via canal comunitário.' };
   }
 
   /**

@@ -250,6 +250,56 @@ class GeoFishDB {
       }
     });
   }
+
+  // ================= LIMPEZA DE DADOS & PRIVACIDADE LGPD =================
+
+  static async excluirTrofeu(id) {
+    const db = await this.open();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(STORE_DIARIO, 'readwrite');
+        tx.objectStore(STORE_DIARIO).delete(id);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+        tx.onabort = () => resolve(false);
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  }
+
+  static async limparTodosTrofeus() {
+    const db = await this.open();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(STORE_DIARIO, 'readwrite');
+        tx.objectStore(STORE_DIARIO).clear();
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+        tx.onabort = () => resolve(false);
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  }
+
+  static async limparTodasDenuncias() {
+    const db = await this.open();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(STORE_DENUNCIAS, 'readwrite');
+        tx.objectStore(STORE_DENUNCIAS).clear();
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+        tx.onabort = () => resolve(false);
+      } catch (err) {
+        resolve(false);
+      }
+    });
+  }
 }
 
 // Expõe globalmente

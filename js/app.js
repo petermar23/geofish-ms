@@ -1409,6 +1409,27 @@ function abrirModalDiario() {
         });
       }
 
+      const btnLimparDiario = modalEl.querySelector('#btn-limpar-diario');
+      if (btnLimparDiario) {
+        btnLimparDiario.addEventListener('click', async () => {
+          const trofeus = await GeoFishDB.obterTodosTrofeus();
+          if (!trofeus || trofeus.length === 0) {
+            return showToast('Não há troféus salvos para apagar.');
+          }
+          const confirma = confirm(`Deseja apagar todos os ${trofeus.length} troféus salvos na memória deste aparelho? Esta ação é irreversível.`);
+          if (!confirma) return;
+
+          const ok = await GeoFishDB.limparTodosTrofeus();
+          if (ok) {
+            showToast('Todos os troféus foram apagados da memória local.');
+            renderizarTrofeusNoMapa();
+            destroy();
+          } else {
+            showToast('Erro ao tentar apagar os troféus.');
+          }
+        });
+      }
+
       atualizarLocalizacaoOculta();
     },
     onDestroy: () => {
@@ -1471,6 +1492,26 @@ function abrirModalDenuncia() {
           }
         });
       }
+
+      const btnLimparDenuncias = modalEl.querySelector('#btn-limpar-denuncias');
+      if (btnLimparDenuncias) {
+        btnLimparDenuncias.addEventListener('click', async () => {
+          const denuncias = await GeoFishDB.obterTodasDenuncias();
+          if (!denuncias || denuncias.length === 0) {
+            return showToast('Não há evidências salvas para apagar.');
+          }
+          const confirma = confirm(`Deseja apagar todas as ${denuncias.length} evidências salvas na memória deste aparelho? Esta ação é irreversível.`);
+          if (!confirma) return;
+
+          const ok = await GeoFishDB.limparTodasDenuncias();
+          if (ok) {
+            showToast('Todas as evidências locais foram apagadas com sucesso.');
+            destroy();
+          } else {
+            showToast('Erro ao apagar evidências locais.');
+          }
+        });
+      }
     },
     onDestroy: () => {
       modalDenunciaInstancia = null;
@@ -1491,6 +1532,19 @@ if (btnAbrirDiario) btnAbrirDiario.addEventListener('click', abrirModalDiario);
 const btnAbrirDenuncia = document.getElementById('btn-abrir-denuncia');
 if (btnAbrirDenuncia) btnAbrirDenuncia.addEventListener('click', abrirModalDenuncia);
 
+// Exclusão individual de troféu do mapa e IndexedDB
+window.excluirTrofeuLocal = async function(id) {
+  if (!confirm('Deseja excluir este registro de troféu do mapa e da memória local?')) return;
+  const ok = await GeoFishDB.excluirTrofeu(id);
+  if (ok) {
+    showToast('Troféu excluído com sucesso.');
+    map.closePopup();
+    renderizarTrofeusNoMapa();
+  } else {
+    showToast('Erro ao excluir troféu.');
+  }
+};
+
 // Renderiza troféus pessoais no mapa
 async function renderizarTrofeusNoMapa() {
   trofeusLayerGroup.clearLayers();
@@ -1510,8 +1564,21 @@ async function renderizarTrofeusNoMapa() {
     const fotoSrc = typeof t.foto === 'string' && (t.foto.startsWith('data:image/') || t.foto.startsWith('blob:') || t.foto.startsWith('https://')) ? t.foto : '';
     const imgTag = fotoSrc ? `<br><img src="${fotoSrc}" alt="Troféu" style="width:100px; height:100px; object-fit:cover; margin-top:5px; border-radius:4px;">` : '';
 
+    const popupHtml = `
+      <div style="font-family: sans-serif; font-size: 0.85rem; min-width: 130px;">
+        <strong style="color:#0b4f6c; font-size: 0.95rem;">${escapeHTML(t.especie || 'Peixe')}</strong><br>
+        <span>${escapeHTML(String(t.tamanho || ''))} cm</span>
+        ${imgTag}
+        <div style="margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px; text-align: right;">
+          <button type="button" onclick="window.excluirTrofeuLocal('${escapeHTML(String(t.id))}')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+            🗑️ Excluir
+          </button>
+        </div>
+      </div>
+    `;
+
     L.marker([t.lat, t.lng], { icon: iconeTrofeu })
-     .bindPopup(`<strong style="color:#0b4f6c;">${escapeHTML(t.especie || 'Peixe')}</strong><br>${escapeHTML(String(t.tamanho || ''))} cm${imgTag}`)
+     .bindPopup(popupHtml)
      .addTo(trofeusLayerGroup);
   });
 }
