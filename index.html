@@ -215,15 +215,15 @@
             </div>
           </div>
 
-          <!-- 3. Licença Digital e Emergência SOS -->
+          <!-- 3. Ações: Licença Digital e Cartilha PMA -->
           <div class="panel-dual-actions">
-            <a href="https://www.imasul.ms.gov.br/" target="_blank" rel="noopener noreferrer" class="panel-dual-btn btn-licenca" title="Emissão da Licença Digital de Pesca no IMASUL">
+            <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="panel-dual-btn btn-licenca" title="Emissão da Licença Digital de Pesca no IMASUL">
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               <span>Licença IMASUL</span>
             </a>
-            <button type="button" id="btn-quick-sos" class="panel-dual-btn btn-sos" title="Central S.O.S Fluvial e Telefones de Emergência">
-              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>S.O.S Fluvial</span>
+            <button type="button" onclick="abrirModalCartilha()" class="panel-dual-btn btn-cartilha-panel" title="Consultar a Cartilha Oficial do Pescador PMA">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              <span>Cartilha PMA</span>
             </button>
           </div>
         </aside>
@@ -937,10 +937,6 @@
 
 
 
-  <!-- Botão Flutuante de Emergência S.O.S (Área do Polegar) -->
-  <button id="btn-sos" class="btn-sos" title="Emergência e Utilidade Pública" aria-label="Botão de emergência S.O.S">
-    <span style="font-size: 1.2rem;">🆘</span> S.O.S
-  </button>
 
   <!-- FAB Container (Ações Secundárias Direita) -->
   <div class="fab-container">

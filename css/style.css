@@ -2595,15 +2595,16 @@ body.sheet-open .fab-container {
   border-color: #ffffff;
 }
 
-.btn-sos {
-  background: rgba(220, 38, 38, 0.85);
-  color: #ffffff;
-  border: 1px solid rgba(248, 113, 113, 0.4);
+.btn-cartilha-panel {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(134, 239, 172, 0.35);
 }
 
-.btn-sos:hover {
-  background: #dc2626;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+.btn-cartilha-panel:hover {
+  background: rgba(34, 197, 94, 0.35);
+  color: #ffffff;
+  border-color: #86efac;
 }
 
 /* ========================================================
