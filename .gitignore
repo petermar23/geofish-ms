@@ -1,7 +1,28 @@
-﻿.DS_Store
+# Dependências
+node_modules/
+package-lock.json
+
+# Compilação e Distribuição
+dist/
+dist-ssr/
+*.local
+
+# Variáveis de ambiente e segredos locais
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários e do sistema operacional
+.DS_Store
 Thumbs.db
 *.tmp
 __pycache__/
-.env
-.vscode/
 
+# IDEs e Editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
