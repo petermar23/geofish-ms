@@ -1247,85 +1247,61 @@ function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
   });
 }
 
-function obterChaveGemini() {
-  return localStorage.getItem('geofish_gemini_api_key') || 
-         (typeof window.GEMINI_API_KEY === 'string' ? window.GEMINI_API_KEY : '');
+function dataURLtoFile(dataurl, filename = 'peixe-pantanal.jpg') {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
 }
 
-async function redimensionarImagemParaIa(base64Image, maxDimension = 1024) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      let { width, height } = img;
-      if (width <= maxDimension && height <= maxDimension) {
-        return resolve(base64Image);
-      }
-      if (width > height) {
-        height = Math.round((height * maxDimension) / width);
-        width = maxDimension;
-      } else {
-        width = Math.round((width * maxDimension) / height);
-        height = maxDimension;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
-    };
-    img.onerror = () => resolve(base64Image);
-    img.src = base64Image;
-  });
+function abrirGoogleLensWeb() {
+  vibrar(25);
+  window.open('https://lens.google.com/', '_blank', 'noopener,noreferrer');
+  showToast('Google Lens aberto! No celular, você também pode usar a câmera do Google ou o Google Fotos.');
 }
 
-async function consultarGeminiVision(base64Image, apiKey) {
-  // Redimensiona para no máximo 1024px no canvas, poupando pacote de dados do pescador
-  const resizedBase64 = await redimensionarImagemParaIa(base64Image, 1024);
-  const cleanBase64 = resizedBase64.replace(/^data:image\/[a-z]+;base64,/, '');
-  const mimeTypeMatch = resizedBase64.match(/^data:(image\/[a-z]+);base64,/);
-  const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
-
-  const prompt = `Você é um biólogo especialista na ictiofauna de água doce da Bacia do Rio Miranda e Pantanal (Mato Grosso do Sul).
-Analise a foto deste peixe e forneça APENAS a identificação taxonômica preliminar e características morfológicas visíveis.
-NÃO emita veredito legal sobre pesca, pois regras oficiais dependem de medição em régua homologada e trecho do rio.
-Responda EXCLUSIVAMENTE em formato JSON puro, sem formatação markdown:
-{
-  "especie": "Nome Comum (ex: Pintado, Pacu, Cachara, Jaú, Dourado, Piraputanga, Curimbatá, Piranha)",
-  "nomeCientifico": "Gênero e espécie em latim",
-  "idSugerido": "pintado | pacu | cachara | jau | dourado | piraputanga | curimbata | piavucu | barbado | piranha | outro",
-  "confianca": "alta | media | baixa",
-  "caracteristicasVisuais": "Descrição concisa dos detalhes observados (ex: barbilhões, manchas, formato do corpo, nadadeiras).",
-  "notaBiologica": "Observação ecológica de 1 frase para pescadores do Pantanal."
-}`;
-
-  // Utiliza modelo moderno gemini-2.5-flash com autenticação em cabeçalho x-goog-api-key (chave oculta da URL)
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: mimeType, data: cleanBase64 } }
-        ]
-      }],
-      generationConfig: { response_mime_type: "application/json" }
-    })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error?.message || `Erro HTTP ${response.status}`);
+async function compartilharFotoGoogleLens(base64Image) {
+  vibrar(25);
+  if (!base64Image) {
+    showToast('Tire ou escolha uma foto do peixe primeiro!');
+    return;
   }
 
-  const data = await response.json();
-  const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  return JSON.parse(textResponse);
+  try {
+    const file = dataURLtoFile(base64Image, 'peixe-pantanal-geofish.jpg');
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Identificar Peixe - GeoFish MS',
+        text: 'Identificar espécie de peixe do Pantanal com Google Lens / Google Fotos'
+      });
+      showToast('Compartilhando com o app de imagens/Lens!');
+      return;
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+  }
+
+  // Fallback para dispositivos que não suportam navigator.share com arquivos
+  try {
+    const a = document.createElement('a');
+    a.href = base64Image;
+    a.download = 'peixe-geofish-miranda.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Foto salva! Carregue-a no Google Lens para identificar a espécie.');
+    setTimeout(() => {
+      window.open('https://lens.google.com/', '_blank', 'noopener,noreferrer');
+    }, 600);
+  } catch (_) {
+    abrirGoogleLensWeb();
+  }
 }
 
 function abrirModalDiario() {
@@ -1340,86 +1316,20 @@ function abrirModalDiario() {
       const inputTamanhoDiario = modalEl.querySelector('#input-tamanho-diario');
       const cbLgpdDiario = modalEl.querySelector('#cb-lgpd-diario');
 
-      const btnIaIdentificar = modalEl.querySelector('#btn-ia-identificar');
-      const btnConfigGemini = modalEl.querySelector('#btn-config-gemini');
-      const aiKeyBox = modalEl.querySelector('#ai-key-box');
-      const btnFecharKeyBox = modalEl.querySelector('#btn-fechar-key-box');
-      const inputGeminiKey = modalEl.querySelector('#input-gemini-key');
-      const btnSalvarGeminiKey = modalEl.querySelector('#btn-salvar-gemini-key');
-      const aiLoadingBox = modalEl.querySelector('#ai-loading-box');
-      const aiResultadoBox = modalEl.querySelector('#ai-resultado-box');
+      const btnAbrirLens = modalEl.querySelector('#btn-abrir-lens');
+      const btnCompartilharLens = modalEl.querySelector('#btn-compartilhar-lens');
 
       setupPhotoInput(previewBoxDiario, inputFotoDiario, imgDiario, (b64) => { currentBase64Diario = b64; });
 
-      if (btnConfigGemini && aiKeyBox) {
-        btnConfigGemini.addEventListener('click', () => {
-          aiKeyBox.classList.toggle('hidden');
-          if (!aiKeyBox.classList.contains('hidden') && inputGeminiKey) {
-            inputGeminiKey.value = obterChaveGemini();
-            inputGeminiKey.focus();
-          }
+      if (btnAbrirLens) {
+        btnAbrirLens.addEventListener('click', () => {
+          abrirGoogleLensWeb();
         });
       }
 
-      if (btnFecharKeyBox && aiKeyBox) {
-        btnFecharKeyBox.addEventListener('click', () => aiKeyBox.classList.add('hidden'));
-      }
-
-      if (btnSalvarGeminiKey && inputGeminiKey && aiKeyBox) {
-        btnSalvarGeminiKey.addEventListener('click', () => {
-          const key = inputGeminiKey.value.trim();
-          if (key) {
-            localStorage.setItem('geofish_gemini_api_key', key);
-            showToast('Chave Google Gemini salva com sucesso!');
-            aiKeyBox.classList.add('hidden');
-          } else {
-            localStorage.removeItem('geofish_gemini_api_key');
-            showToast('Chave removida.');
-          }
-        });
-      }
-
-      if (btnIaIdentificar) {
-        btnIaIdentificar.addEventListener('click', async () => {
-          vibrar(25);
-          if (!currentBase64Diario) {
-            return showToast('Tire ou escolha uma foto do peixe primeiro!');
-          }
-          const apiKey = obterChaveGemini();
-          if (!apiKey) {
-            if (aiKeyBox) aiKeyBox.classList.remove('hidden');
-            return showToast('Configure sua chave gratuita do Google Gemini.');
-          }
-          if (aiLoadingBox) aiLoadingBox.classList.remove('hidden');
-          if (aiResultadoBox) aiResultadoBox.classList.add('hidden');
-
-          try {
-            const analise = await consultarGeminiVision(currentBase64Diario, apiKey);
-            if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
-            if (aiResultadoBox) {
-              aiResultadoBox.classList.remove('hidden');
-              aiResultadoBox.innerHTML = `
-                <div class="ai-result-title">✨ Sugestão Morfológica (Google Gemini)</div>
-                <div class="ai-result-body">
-                  <strong>Espécie Provável:</strong> ${escapeHTML(analise.especie || 'Não identificada')}<br>
-                  <strong>Nome Científico:</strong> <em>${escapeHTML(analise.nomeCientifico || 'N/A')}</em><br>
-                  <strong>Grau de Confiança:</strong> ${escapeHTML(analise.confianca || 'Média')}<br>
-                  <strong>Características Visuais:</strong> ${escapeHTML(analise.caracteristicasVisuais || 'Análise visual padrão')}<br>
-                  <p style="margin-top: 6px; font-size: 0.82rem; color: #334155;"><strong>Nota Ecológica:</strong> ${escapeHTML(analise.notaBiologica || '')}</p>
-                  <p style="margin-top: 6px; font-size: 0.72rem; color: #64748b; font-style: italic;">⚠️ <strong>Aviso Educativo:</strong> A identificação por IA é meramente informativa e não substitui a medição em régua oficial e o cumprimento das normas da SEMADESC / IMASUL / PMA.</p>
-                </div>
-              `;
-            }
-            if (selectEspecieDiario && analise.idSugerido) {
-              const matchingOption = selectEspecieDiario.querySelector(`option[value="${analise.idSugerido}"]`);
-              if (matchingOption) {
-                selectEspecieDiario.value = analise.idSugerido;
-              }
-            }
-          } catch (err) {
-            if (aiLoadingBox) aiLoadingBox.classList.add('hidden');
-            showToast('Falha ao consultar IA: ' + (err.message || 'Verifique a chave'));
-          }
+      if (btnCompartilharLens) {
+        btnCompartilharLens.addEventListener('click', () => {
+          compartilharFotoGoogleLens(currentBase64Diario);
         });
       }
 

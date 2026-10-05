@@ -3883,168 +3883,76 @@ body.map-fullscreen .local-search-container {
 }
 
 /* ========================================================
-   ICTIÓLOGO VIRTUAL COM IA NATIVA (GOOGLE GEMINI)
+   IDENTIFICAÇÃO VISUAL COM GOOGLE LENS (SEM CHAVES)
    ======================================================== */
-.ai-id-section {
-  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+.lens-id-section {
+  background: linear-gradient(180deg, #f0fdf4 0%, #e0f2fe 100%);
   border: 1px solid #bae6fd;
   border-radius: var(--radius-sm);
   padding: 12px;
   margin-bottom: 14px;
 }
 
-.btn-ia-analisar {
-  flex: 1;
+.lens-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-lens-action {
+  flex: 1.2;
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff;
   border: none;
   border-radius: 8px;
   padding: 10px 14px;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
   transition: all var(--transition-fast);
 }
 
-.btn-ia-analisar:hover {
+.btn-lens-action:hover {
   background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   transform: translateY(-1px);
 }
 
-.btn-ia-analisar:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.ai-sparkle {
-  font-size: 1rem;
-  animation: pulse-sparkle 1.8s infinite ease-in-out;
-}
-
-@keyframes pulse-sparkle {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.25); }
-}
-
-.btn-ia-config {
+.btn-lens-secondary {
+  flex: 1;
   background: #ffffff;
-  border: 1px solid #94a3b8;
-  color: #334155;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
   border-radius: 8px;
-  width: 38px;
-  height: 38px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  gap: 6px;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
-.btn-ia-config:hover {
-  background: #f1f5f9;
+.btn-lens-secondary:hover {
+  background: #f0f9ff;
+  border-color: #0284c7;
 }
 
-.ai-key-box {
-  background: #ffffff;
-  border: 1px solid #7dd3fc;
-  border-radius: 8px;
-  padding: 10px;
-  margin-top: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-}
-
-.btn-ia-save-key {
-  background: #0284c7;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 0 14px;
-  font-weight: 700;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.ai-loading-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: #ffffff;
-  border: 1px dashed #0284c7;
-  border-radius: 8px;
-  margin-top: 8px;
-  color: #0369a1;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.ai-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #bae6fd;
-  border-top-color: #0284c7;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.ai-resultado-box {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 12px;
+.lens-dica-box {
   margin-top: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  border-left: 4px solid #0284c7;
-  font-size: 0.85rem;
-  animation: fadeIn 0.3s ease;
-}
-
-.ai-resultado-box.legal {
-  border-left-color: #16a34a;
-}
-
-.ai-resultado-box.alerta {
-  border-left-color: #f59e0b;
-}
-
-.ai-resultado-box.proibido {
-  border-left-color: #dc2626;
-}
-
-.ai-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.ai-badge.badge-permitido {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.ai-badge.badge-atencao {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.ai-badge.badge-proibido {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.74rem;
+  color: #475569;
+  line-height: 1.4;
 }
 
 /* ========================================================

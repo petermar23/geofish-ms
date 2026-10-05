@@ -1,27 +1,20 @@
-# 📱 Guia de Empacotamento para Google Play Store & IA Gemini
+# 📱 Guia de Empacotamento para Google Play Store & Reconhecimento Visual
 
-Este guia orienta como transformar o **GeoFish MS** em um aplicativo publicado na **Google Play Store** e como utilizar a **Inteligência Artificial Nativa com Gemini** para identificação morfológica de peixes no barco.
+Este guia orienta como transformar o **GeoFish MS** em um aplicativo publicado na **Google Play Store** e como funciona a **Identificação de Espécies com Google Lens** de forma 100% gratuita para os pescadores.
 
 ---
 
-## 1. 🤖 Ictiólogo Virtual com IA Gemini (Visão Multimodal)
+## 1. 🔍 Reconhecimento Visual de Peixes com Google Lens
+
+O GeoFish MS optou por integrar a busca visual nativa do **Google Lens**, eliminando a necessidade de chaves de API, cobranças ou cadastros em plataformas de desenvolvedores:
 
 ### Como funciona no aplicativo:
 1. No menu inferior ou no mapa, o pescador abre o **📸 Meu Diário de Troféus** (`#modal-diario`).
 2. Tira uma foto ou escolhe uma imagem da captura.
-3. Clica no botão **✨ Identificar Peixe com IA (Gemini)**.
-4. O app otimiza e redimensiona a imagem no canvas local (máximo 1024px) para economizar o pacote de dados móveis do pescador.
-5. Consulta o modelo `gemini-2.5-flash` do Google com conhecimento ictiológico da Bacia do Rio Miranda (Pantanal de Mato Grosso do Sul).
-6. O retorno traz:
-   - Nome comum e nome científico da espécie (ex: *Pintado / Pseudoplatystoma corruscans*);
-   - Grau de confiança da identificação morfológica;
-   - Características anatômicas visuais observadas (pintas, barbilhões, nadadeiras);
-   - Nota biológica/ecológica de manuseio seguro e preservação da espécie;
-   - Alerta educativo de que a IA não substitui a régua oficial de medição nem a fiscalização ambiental (SEMADESC / IMASUL / PMA).
-
-### Configuração da Chave da API:
-- Na engrenagem ⚙️ ao lado do botão de IA, o usuário pode inserir sua chave gratuita do [Google AI Studio](https://aistudio.google.com/app/apikey).
-- A chave é salva apenas no armazenamento local (`localStorage`) do dispositivo, enviada em cabeçalho seguro (`x-goog-api-key`) e com custo R$ 0,00.
+3. No card de identificação visual, tem duas opções:
+   - **🔍 Abrir Google Lens:** Abre diretamente a ferramenta oficial do Google no navegador.
+   - **📲 Enviar Foto p/ Lens:** Utiliza o compartilhamento nativo do smartphone (`navigator.share`) para enviar a foto ao Google Fotos / Pesquisa de Imagem do Google.
+4. **No celular Android:** O pescador também pode abrir a foto na Galeria / Google Fotos e tocar no ícone **Lens** para reconhecer a espécie instantaneamente, sem consumir créditos nem exigir chave.
 
 ---
 
