@@ -594,6 +594,28 @@
           </div>
         </div>
 
+        <!-- Barra de Controle Rápido de Camadas & Modo Lista (Fase 2) -->
+        <div class="quick-filters-bar" role="toolbar" aria-label="Filtro rápido de camadas no mapa">
+          <button type="button" class="filter-chip active" data-camada-filtro="guias" aria-pressed="true">
+            <span>🚤</span> <span>Piloteiros &amp; Guias</span>
+          </button>
+          <button type="button" class="filter-chip" data-camada-filtro="apoio" aria-pressed="false">
+            <span>⚓</span> <span>Rampas &amp; Apoio</span>
+          </button>
+          <button type="button" class="filter-chip" data-camada-filtro="regras" aria-pressed="false">
+            <span>🎣</span> <span>Trechos &amp; Cotas</span>
+          </button>
+          <button type="button" class="filter-chip" data-camada-filtro="restritas" aria-pressed="false">
+            <span>⚠️</span> <span>Áreas Restritas</span>
+          </button>
+          <button type="button" class="filter-chip" data-camada-filtro="all" aria-pressed="false">
+            <span>🗺️</span> <span>Todas as Camadas</span>
+          </button>
+          <button type="button" id="btn-abrir-lista-guias" class="filter-chip" style="margin-left: auto; background: #0284c7; color: #ffffff; border-color: #0284c7;" aria-label="Abrir lista de profissionais">
+            <span>📋</span> <span>Ver em Lista</span>
+          </button>
+        </div>
+
         <div class="portal-map-section">
           <!-- Busca Flutuante Instantânea de Feições, Profissionais e Rios -->
           <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca no Mapa">
@@ -606,6 +628,16 @@
           </div>
 
           <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
+        </div>
+
+        <!-- Legenda Simples e Acessível do WebGIS (Fase 2) -->
+        <div class="webgis-legend-strip" role="region" aria-label="Legenda do Mapa">
+          <div class="legend-item"><span class="legend-marker marker-guia">🚤</span> <span>Piloteiro Local (Colônias Z-1, Z-7, Z-11)</span></div>
+          <div class="legend-item"><span class="legend-marker marker-rampa">⚓</span> <span>Rampa Náutica de Apoio</span></div>
+          <div class="legend-item"><span class="legend-marker marker-pma">🚨</span> <span>Posto PMA / Fiscalização</span></div>
+          <div class="legend-item"><span class="legend-line line-cota"></span> <span>Trecho c/ Cota Permitida</span></div>
+          <div class="legend-item"><span class="legend-line line-pesque-solte"></span> <span>Pesque e Solte Exclusivo</span></div>
+          <div class="legend-item"><span class="legend-box box-restrita"></span> <span>Área Restrita / Parque</span></div>
         </div>
       </div>
     </div>
@@ -1685,6 +1717,27 @@
         </div>
       </div>
     </div>
+  </template>
+
+  <!-- Modal Lista de Profissionais / Alternativa Textual ao Mapa (Fase 2) -->
+  <template id="template-modal-lista-guias">
+  <div id="modal-lista-guias" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Lista de Piloteiros e Guias de Pesca">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <h2>
+          <span aria-hidden="true">🚤</span>
+          <span>Piloteiros &amp; Guias Locais</span>
+        </h2>
+        <button id="btn-fechar-lista-guias" class="modal-close-btn" aria-label="Fechar lista de profissionais">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.4;">
+          Profissionais nativos das <strong>Colônias Z-1, Z-7 e Z-11</strong> na Bacia do Rio Miranda. O contato é direto via WhatsApp, sem intermediários nem taxas.
+        </p>
+        <div id="container-lista-guias-itens" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      </div>
+    </div>
+  </div>
   </template>
 
 

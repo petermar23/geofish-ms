@@ -944,25 +944,67 @@ body.sheet-open .btn-gps {
   flex-shrink: 0;
 }
 
-/* Barra de Filtros Rápidos no Topo do Mapa */
+/* Barra de Filtros Rápidos e Camadas do Mapa (Fase 2) */
 .quick-filters-bar {
-  display: none !important;
-  position: absolute;
-  top: 66px;
-  left: 0;
-  right: 0;
-  z-index: 998;
   display: flex;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 8px 14px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  pointer-events: auto;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
 }
 
 .quick-filters-bar::-webkit-scrollbar {
   display: none;
+}
+
+/* Legenda Simples e Acessível do WebGIS */
+.webgis-legend-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.webgis-legend-strip .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.webgis-legend-strip .legend-line {
+  display: inline-block;
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.webgis-legend-strip .line-cota {
+  background-color: #16a34a;
+}
+
+.webgis-legend-strip .line-pesque-solte {
+  background-color: #ea580c;
+}
+
+.webgis-legend-strip .legend-box {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.webgis-legend-strip .box-restrita {
+  background-color: rgba(245, 124, 0, 0.35);
+  border: 1.5px solid #f57c00;
 }
 
 .filter-chip {

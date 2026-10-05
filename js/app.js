@@ -500,14 +500,28 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'guiasPane',
             pointToLayer: (feature, latlng) => {
-              return L.circleMarker(latlng, {
-                pane: 'guiasPane',
-                radius: 8,
-                fillColor: '#0b4f6c',
-                color: '#ffffff',
-                weight: 2.5,
-                fillOpacity: 1
+              const iconeGuia = L.divIcon({
+                className: 'custom-guia-marker',
+                html: `
+                  <div style="
+                    background: #0284c7;
+                    color: #ffffff;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+                    border: 2px solid #ffffff;
+                    cursor: pointer;
+                  ">🚤</div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
               });
+              return L.marker(latlng, { icon: iconeGuia, pane: 'guiasPane' });
             },
             onEachFeature: (feature, layer) => {
               layer.on('click', (e) => {
@@ -550,14 +564,28 @@ async function carregarTodasCamadas() {
             pane: 'apoioPane',
             pointToLayer: (feature, latlng) => {
               const isRampa = feature.properties && feature.properties.tipo && feature.properties.tipo.toLowerCase().includes('rampa');
-              return L.circleMarker(latlng, {
-                pane: 'apoioPane',
-                radius: 7,
-                fillColor: isRampa ? '#0284c7' : '#d32f2f',
-                color: '#ffffff',
-                weight: 2,
-                fillOpacity: 1
+              const iconePonto = L.divIcon({
+                className: isRampa ? 'custom-rampa-marker' : 'custom-sos-marker',
+                html: `
+                  <div style="
+                    background: ${isRampa ? '#0d9488' : '#dc2626'};
+                    color: #ffffff;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    border: 2px solid #ffffff;
+                    cursor: pointer;
+                  ">${isRampa ? '⚓' : '🚨'}</div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
               });
+              return L.marker(latlng, { icon: iconePonto, pane: 'apoioPane' });
             },
             onEachFeature: (feature, layer) => {
               layer.on('click', (e) => {
@@ -1111,6 +1139,109 @@ document.querySelectorAll('.btn-filter-chip').forEach(btn => {
     }
   });
 });
+
+// Controle da Barra de Filtros Rápidos do Mapa (Fase 2)
+document.querySelectorAll('.quick-filters-bar button[data-camada-filtro]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.quick-filters-bar button[data-camada-filtro]').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+    const tipo = btn.getAttribute('data-camada-filtro');
+    aplicarFiltroRapido(tipo);
+  });
+});
+
+// Modal Alternativo em Lista para Guias e Piloteiros (Fase 2 - Acessibilidade Mobile)
+let modalListaGuiasInstancia = null;
+
+function abrirModalListaGuias() {
+  modalListaGuiasInstancia = abrirModalDeTemplate('template-modal-lista-guias', {
+    modalId: 'modal-lista-guias',
+    onMount: (modalEl, destroy) => {
+      const btnFechar = modalEl.querySelector('#btn-fechar-lista-guias');
+      if (btnFechar) btnFechar.addEventListener('click', destroy);
+
+      const container = modalEl.querySelector('#container-lista-guias-itens');
+      if (!container) return;
+
+      const dados = dadosCarregados['guias_credenciados'];
+      if (!dados || !dados.features || dados.features.length === 0) {
+        container.innerHTML = '<div style="color: #64748b; padding: 12px;">Nenhum guia carregado no momento.</div>';
+        return;
+      }
+
+      container.innerHTML = dados.features.map(feat => {
+        const p = feat.properties || {};
+        const coords = feat.geometry ? feat.geometry.coordinates : null;
+        const waUrl = normalizeWhatsApp(p.contato_wa);
+        const lat = coords ? coords[1] : null;
+        const lng = coords ? coords[0] : null;
+
+        return `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+              <div>
+                <strong style="color: #0b4f6c; font-size: 1.05rem;">${escapeHTML(p.nome_operacional || 'Guia de Pesca')}</strong>
+                <div style="font-size: 0.82rem; color: #475569; margin-top: 2px;">
+                  📍 <strong>Colônia:</strong> ${escapeHTML(p.colonia || '')} &bull; <strong>Base:</strong> ${escapeHTML(p.porto_base || '')}
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                  ⛵ <strong>Barco:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
+                </div>
+              </div>
+              <span class="badge-tag" style="background: #0284c7; font-size: 0.7rem; margin: 0; white-space: nowrap;">Credenciado</span>
+            </div>
+            <div style="font-size: 0.78rem; color: #15803d; background: #f0fdf4; padding: 6px 10px; border-radius: 4px; border-left: 3px solid #16a34a;">
+              🤝 Contato direto com o profissional. Valores e disponibilidade combinados diretamente.
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              ${waUrl ? `
+                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none; padding: 8px 12px; font-size: 0.85rem;">
+                  💬 Conversar no WhatsApp
+                </a>
+              ` : ''}
+              ${(lat && lng) ? `
+                <button type="button" class="btn-ver-guia-mapa" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome_operacional || '')}" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #0f172a; border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer; white-space: nowrap;">
+                  🗺️ Ver no Mapa
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.btn-ver-guia-mapa').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lat = parseFloat(btn.getAttribute('data-lat'));
+          const lng = parseFloat(btn.getAttribute('data-lng'));
+          const nome = btn.getAttribute('data-nome');
+          destroy();
+
+          const secaoMapa = document.getElementById('secao-mapa');
+          if (secaoMapa) secaoMapa.scrollIntoView({ behavior: 'smooth' });
+
+          if (camadasInstanciadas['guias_credenciados'] && !map.hasLayer(camadasInstanciadas['guias_credenciados'])) {
+            map.addLayer(camadasInstanciadas['guias_credenciados']);
+          }
+
+          map.flyTo([lat, lng], 14, { duration: 1.2 });
+          showToast(`Navegando para: ${nome}`);
+        });
+      });
+    },
+    onDestroy: () => {
+      modalListaGuiasInstancia = null;
+    }
+  });
+}
+
+const btnAbrirListaGuias = document.getElementById('btn-abrir-lista-guias');
+if (btnAbrirListaGuias) {
+  btnAbrirListaGuias.addEventListener('click', abrirModalListaGuias);
+}
 
 // 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
