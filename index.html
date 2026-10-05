@@ -1364,7 +1364,7 @@
         <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1, Z-7 E Z-11) -->
         <div id="tab-pane-piloteiros" class="tab-pane hidden">
           <div class="parceria-callout-box parceria-callout-social">
-            <strong>🚤 Compromisso Social Ribeirinho:</strong> Piloteiros e guias profissionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> <strong>NÃO PAGAM NADA</strong>. O cadastro no mapa com seu WhatsApp direto é 100% gratuito e livre de qualquer taxa ou mensalidade.
+            <strong>🚤 Compromisso Social com os Pescadores do Rio:</strong> Piloteiros e guias das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> têm cadastro <strong>100% GRATUITO</strong>. Não cobramos mensalidade, taxa de inscrição nem comissão sobre passeios.
           </div>
 
           <form id="form-parceria-guia">
@@ -1395,9 +1395,14 @@
                 <input type="text" id="guia-porto" class="checker-input" placeholder="Ex: Porto Geral de Miranda" required style="margin-bottom: 0;">
               </div>
               <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Turistas:</label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Contato de Turistas:</label>
                 <input type="tel" id="guia-wpp" class="checker-input" placeholder="(67) 99999-9999" required style="margin-bottom: 0;">
               </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Embarcação e Motor:</label>
+              <input type="text" id="guia-barco" class="checker-input" placeholder="Ex: Bote de alumínio 6m com motor 25HP" style="margin-bottom: 0;">
             </div>
 
             <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Diferenciais Náuticos e Atendimento:</label>
@@ -1416,10 +1421,23 @@
               </label>
             </div>
 
+            <div style="margin: 12px 0 10px 0; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.78rem; color: #475569; line-height: 1.4;">
+              <div style="font-weight: 700; color: #1e293b; margin-bottom: 3px;">📋 Como funciona a publicação:</div>
+              • <strong>Sem classificação paga:</strong> A ordem dos profissionais no mapa é puramente geográfica. Não vendemos posições de destaque.<br>
+              • <strong>Revisão comunitária:</strong> Novos contatos são validados antes da inserção no mapa para evitar números incorretos.<br>
+              • <strong>Atualização ou remoção a qualquer momento:</strong> Caso queira alterar seu telefone, porto ou remover seu perfil, basta solicitar pelo canal oficial.
+            </div>
+
             <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="background: #2563eb; font-size: 0.9rem; padding: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
               <span>🚤</span>
-              <span>Solicitar Ativação Gratuita no WebGIS</span>
+              <span>Solicitar Inclusão no WebGIS (Via WhatsApp)</span>
             </button>
+
+            <div style="text-align: center; margin-top: 10px;">
+              <button type="button" id="btn-cadastro-assistido" style="background: none; border: none; color: #0284c7; font-size: 0.8rem; text-decoration: underline; cursor: pointer; padding: 4px;">
+                💬 Dificuldade para preencher? Fazer cadastro assistido por áudio no WhatsApp
+              </button>
+            </div>
           </form>
         </div>
       </div>

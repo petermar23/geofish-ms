@@ -528,31 +528,42 @@ async function carregarTodasCamadas() {
                 L.DomEvent.stopPropagation(e);
                 const g = feature.properties;
                 const waUrl = normalizeWhatsApp(g.contato_wa);
+                const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
                 abrirPainel(`
-                  <span class="badge-tag" style="background-color: #0b4f6c;">Guia de Pesca &bull; Piloteiro Local</span>
-                  <h2 class="sheet-title">${escapeHTML(g.nome_operacional)}</h2>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span class="badge-tag" style="background-color: #0b4f6c; margin: 0;">Piloteiro Local &bull; Cadastro Comunitário</span>
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Declarado</span>
+                  </div>
+                  <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(g.nome_operacional)}</h2>
                   <div class="data-group">
                     <div class="data-item">
                       <div class="data-label">Colônia de Pescadores</div>
-                      <div class="data-value">${escapeHTML(g.colonia)}</div>
+                      <div class="data-value">${escapeHTML(g.colonia || 'Não informada')}</div>
                     </div>
                     <div class="data-item">
                       <div class="data-label">Porto / Base de Saída</div>
-                      <div class="data-value">${escapeHTML(g.porto_base)}</div>
+                      <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
                     </div>
                     <div class="data-item">
                       <div class="data-label">Embarcação / Motor</div>
-                      <div class="data-value">${escapeHTML(g.tipo_barco)}</div>
+                      <div class="data-value">${escapeHTML(g.tipo_barco || 'Barco homologado')}</div>
                     </div>
                   </div>
-                  <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.4;">
-                    🤝 <strong>Contato Direto:</strong> Você combina disponibilidade, roteiro e valores diretamente com o profissional. Sem taxas nem intermediação.
+                  <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.45;">
+                    🤝 <strong>Contato Direto:</strong> Você combina disponibilidade, roteiro e valores diretamente com o profissional. O GeoFish MS não faz reservas nem cobra taxas.
                   </div>
-                  ${waUrl ? `
-                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp">
-                      💬 Conversar pelo WhatsApp
-                    </a>
-                  ` : ''}
+                  <div style="display: flex; gap: 8px;">
+                    ${waUrl ? `
+                      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
+                        💬 Conversar pelo WhatsApp
+                      </a>
+                    ` : ''}
+                    ${telUrl ? `
+                      <a href="${telUrl}" class="btn-cta" style="background: #0284c7; padding: 0 16px; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center;" title="Ligar para o telefone convencional">
+                        📞 Ligar
+                      </a>
+                    ` : ''}
+                  </div>
                 `);
               });
             }
@@ -1177,6 +1188,7 @@ function abrirModalListaGuias() {
         const p = feat.properties || {};
         const coords = feat.geometry ? feat.geometry.coordinates : null;
         const waUrl = normalizeWhatsApp(p.contato_wa);
+        const telUrl = sanitizeTel(p.contato_tel || p.contato_wa);
         const lat = coords ? coords[1] : null;
         const lng = coords ? coords[0] : null;
 
@@ -1192,15 +1204,20 @@ function abrirModalListaGuias() {
                   ⛵ <strong>Barco:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
                 </div>
               </div>
-              <span class="badge-tag" style="background: #0284c7; font-size: 0.7rem; margin: 0; white-space: nowrap;">Credenciado</span>
+              <span class="badge-tag" style="background: #0b4f6c; font-size: 0.7rem; margin: 0; white-space: nowrap;">Comunitário &bull; Declarado</span>
             </div>
-            <div style="font-size: 0.78rem; color: #15803d; background: #f0fdf4; padding: 6px 10px; border-radius: 4px; border-left: 3px solid #16a34a;">
-              🤝 Contato direto com o profissional. Valores e disponibilidade combinados diretamente.
+            <div style="font-size: 0.78rem; color: #15803d; background: #f0fdf4; padding: 6px 10px; border-radius: 4px; border-left: 3px solid #16a34a; line-height: 1.4;">
+              🤝 <strong>Contato Direto:</strong> Você combina disponibilidade, valores e roteiro diretamente com o profissional. Sem taxas nem comissões.
             </div>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
               ${waUrl ? `
                 <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none; padding: 8px 12px; font-size: 0.85rem;">
                   💬 Conversar no WhatsApp
+                </a>
+              ` : ''}
+              ${telUrl ? `
+                <a href="${telUrl}" class="btn-cta" style="background: #0284c7; padding: 0 12px; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center;" title="Ligar para o telefone">
+                  📞 Ligar
                 </a>
               ` : ''}
               ${(lat && lng) ? `
@@ -1886,6 +1903,7 @@ function abrirModalParcerias(aba = 'pousadas') {
           const colonia = modalEl.querySelector('#guia-colonia')?.value;
           const porto = modalEl.querySelector('#guia-porto')?.value.trim();
           const wpp = modalEl.querySelector('#guia-wpp')?.value.trim();
+          const barco = modalEl.querySelector('#guia-barco')?.value.trim();
 
           if (!nome) { vibrar(30); return showToast('Informe o seu nome completo.'); }
           if (!porto) { vibrar(30); return showToast('Informe seu porto de saída habitual.'); }
@@ -1898,6 +1916,7 @@ function abrirModalParcerias(aba = 'pousadas') {
             `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
             `📜 *Colônia de Filiação:* ${colonia}\n` +
             `📍 *Porto de Saída:* ${porto}\n` +
+            `⛵ *Embarcação / Motor:* ${barco || 'Barco pantaneiro homologado'}\n` +
             `💬 *WhatsApp Turistas:* ${wpp}\n` +
             `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
             `Olá! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
@@ -1909,7 +1928,17 @@ function abrirModalParcerias(aba = 'pousadas') {
           const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
-          showToast('Dados formatados! Encaminhe a mensagem ao mantenedor ou diretoria da Colônia Z-1/Z-7.');
+          showToast('Dados formatados! Encaminhe a mensagem ao mantenedor ou diretoria das Colônias Z-1, Z-7 ou Z-11.');
+          destroy();
+        });
+      }
+
+      const btnCadastroAssistido = modalEl.querySelector('#btn-cadastro-assistido');
+      if (btnCadastroAssistido) {
+        btnCadastroAssistido.addEventListener('click', () => {
+          const textoAssistido = `Olá Peterson! Sou piloteiro da Bacia do Miranda e gostaria de ajuda para cadastrar meu barco e contato no GeoFish MS.`;
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAssistido)}`;
+          window.open(urlWpp, '_blank');
           destroy();
         });
       }
