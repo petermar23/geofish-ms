@@ -227,10 +227,10 @@ export function initPWAOffline() {
           }
 
           if (baixadas === total) {
-            btnPrepOffline.innerHTML = `✅ Pronto para o Rio! (${baixadas}/${total} Salvas)`;
+            btnPrepOffline.innerHTML = `✅ Pronto para o Rio! (${baixadas}/${total} Camadas)`;
             btnPrepOffline.style.background = '#15803d';
             btnPrepOffline.style.color = '#ffffff';
-            showToast(`Sucesso! Todas as ${total} camadas e mapas estão salvos no aparelho para navegação sem sinal.`, 'info');
+            showToast(`Sucesso! As ${total} camadas vetoriais estão salvas na memória local. O mapa base de satélite é salvo conforme você navega na região (até 1.500 quadrículas).`, 'info');
           } else {
             btnPrepOffline.innerHTML = `⚠️ ${baixadas} de ${total} Salvas (Tentar de novo)`;
             btnPrepOffline.style.background = '#b45309';

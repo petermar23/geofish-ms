@@ -319,7 +319,7 @@ export function verificarMedidaPescado(modalEl = null) {
   // 1. Verificação de Período de Defeso (Piracema)
   if (estaEmDefeso() && esp.status !== 'exotica') {
     measureResult.className = 'measure-result-box forbidden';
-    measureResult.innerHTML = `🚫 <strong>Período de Defeso da Piracema em Vigor (05/Nov a 28/Fev)!</strong><br>A captura, transporte e abate de peixes nativos (como o <strong>${escapeHTML(esp.nome)}</strong>) estão <strong>suspensos por lei estadual</strong> em toda a Bacia do Rio Miranda. O abate durante a piracema é crime ambiental. <strong>Solte o exemplar imediatamente no rio!</strong>`;
+    measureResult.innerHTML = `🚫 <strong>Período de Defeso da Piracema em Vigor (05/Nov a 28/Fev*)!</strong><br>A captura, transporte e estocagem de espécies nativas (como o <strong>${escapeHTML(esp.nome)}</strong>) estão <strong>suspensos por normas estaduais (SEMADESC/IMASUL)</strong> em toda a Bacia do Rio Miranda. O abate durante a reprodução natural constitui infração e crime ambiental (Lei Federal nº 9.605/1998 e Decreto nº 6.514/2008). <strong>Solte o exemplar vivo imediatamente no rio!</strong>`;
     return;
   }
 
@@ -352,11 +352,17 @@ export function verificarMedidaPescado(modalEl = null) {
     return;
   }
 
+  const avisoTrechoPesqueSolte = `
+    <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #86efac; font-size: 0.78rem; color: #166534; line-height: 1.4;">
+      ⚠️ <strong>Atenção Territorial aos Trechos de Pesca:</strong> Se capturado em trechos declarados de <strong>Pesque e Solte</strong> (como o <strong>Rio Salobra e afluentes</strong>, ou trechos protegidos da calha do Rio Miranda/Aquidauana — consulte a camada no mapa), o abate e transporte são <strong>PROIBIDOS</strong> para qualquer espécie nativa! Devolva vivo imediatamente à água.
+    </div>
+  `;
+
   // 5. Piraputanga: Medida geral 30cm + Alerta rigoroso do Rio Salobra
   if (esp.id === 'piraputanga') {
     if (valor >= 30) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo Geral!</strong> (${valor} cm &ge; 30 cm). Permitido para captura e transporte (1 exemplar nativo) na calha comum da bacia.<br><br>⚠️ <strong>Atenção Territorial Especial:</strong> Na calha do <strong>Rio Salobra e afluentes</strong>, a pesca é EXCLUSIVAMENTE na modalidade <strong>Pesque e Solte</strong> (Art. 12 do Decreto nº 15.166/19). Se capturado no Salobra, o abate é <strong>PROIBIDO</strong> independentemente do tamanho!`;
+      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo Geral!</strong> (${valor} cm &ge; 30 cm). Permitido para captura e transporte (1 exemplar nativo) na calha comum da bacia.${avisoTrechoPesqueSolte}`;
     } else {
       measureResult.className = 'measure-result-box forbidden';
       measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; 30 cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
@@ -368,7 +374,7 @@ export function verificarMedidaPescado(modalEl = null) {
   if (esp.min && esp.max) {
     if (valor >= esp.min && valor <= esp.max) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL). O peixe transportado deve estar <strong>inteiro no gelo com cabeça e cauda</strong>, lacrado pela PMA com a GCP!`;
+      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL). O peixe transportado deve estar <strong>inteiro no gelo com cabeça e cauda</strong>, lacrado pela PMA com a GCP!${avisoTrechoPesqueSolte}`;
     } else if (valor < esp.min) {
       measureResult.className = 'measure-result-box forbidden';
       measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave sujeita a apreensão do barco e multa. <strong>Solte imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
@@ -380,7 +386,7 @@ export function verificarMedidaPescado(modalEl = null) {
     // 7. Espécies com tamanho mínimo apenas
     if (valor >= esp.min) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (${valor} cm &ge; ${esp.min} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador licenciado).`;
+      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (${valor} cm &ge; ${esp.min} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador licenciado).${avisoTrechoPesqueSolte}`;
     } else {
       measureResult.className = 'measure-result-box forbidden';
       measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;

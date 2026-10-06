@@ -114,6 +114,33 @@ export function showToast(message, type = 'info') {
   }, 4000);
 }
 
+// Sistema de Compartilhamento de Posição GPS e Telemetria
+let _posicaoUsuario = null; // { lat, lng, precisao, timestamp }
+
+export function setPosicaoUsuario(pos) {
+  if (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number') {
+    _posicaoUsuario = {
+      lat: pos.lat,
+      lng: pos.lng,
+      precisao: typeof pos.precisao === 'number' ? pos.precisao : 10,
+      timestamp: pos.timestamp || Date.now()
+    };
+  } else {
+    _posicaoUsuario = null;
+  }
+  if (typeof window !== 'undefined') {
+    window.ultimaPosicaoUsuario = _posicaoUsuario;
+  }
+  return _posicaoUsuario;
+}
+
+export function getPosicaoUsuario() {
+  if (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) {
+    return window.ultimaPosicaoUsuario;
+  }
+  return _posicaoUsuario;
+}
+
 // Vincula ao window para retrocompatibilidade
 if (typeof window !== 'undefined') {
   window.escapeHTML = escapeHTML;
@@ -125,4 +152,7 @@ if (typeof window !== 'undefined') {
   window.vibrar = vibrar;
   window.manterTelaAtiva = manterTelaAtiva;
   window.showToast = showToast;
+  window.setPosicaoUsuario = setPosicaoUsuario;
+  window.getPosicaoUsuario = getPosicaoUsuario;
 }
+

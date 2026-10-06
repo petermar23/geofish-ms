@@ -17,7 +17,7 @@ let pendentesHistoryBack = 0;
  * @param {Object} entry - Objeto da entrada
  * @param {boolean} vindoDePopstate - Se true, originado pelo botão físico/gesto de voltar do Android
  */
-function fecharEntrada(entry, vindoDePopstate = false) {
+function fecharEntrada(entry, vindoDePopstate = false, substituindo = false) {
   if (!entry || entry.destruido) return;
   entry.destruido = true;
 
@@ -58,7 +58,8 @@ function fecharEntrada(entry, vindoDePopstate = false) {
   // 5. Sincronização do Histórico do Navegador / Android:
   // Se o fechamento foi disparado pela interface ("X", backdrop, Escape ou código),
   // e havia pushState associado, desfaz a entrada no history sem travar a navegação.
-  if (entry.hasHistoryState && !vindoDePopstate) {
+  // Se estiver sendo substituído por outro modal, ignora para evitar concorrência de history.
+  if (entry.hasHistoryState && !vindoDePopstate && !substituindo) {
     try {
       pendentesHistoryBack++;
       window.history.back();
@@ -86,11 +87,13 @@ export function abrirModalDeTemplate(templateId, options = {}) {
     return null;
   }
 
-  // Se não for empilhado e já existirem modais abertos, fecha os anteriores
+  // Se não for empilhado e já existirem modais abertos, substitui os anteriores sem duplicar histórico
+  let substituindo = false;
   if (!options.empilhar && pilhaModais.length > 0) {
+    substituindo = true;
     while (pilhaModais.length > 0) {
       const topo = pilhaModais[pilhaModais.length - 1];
-      topo.destroy(false);
+      topo.destroy(false, true);
     }
   }
 
@@ -129,8 +132,8 @@ export function abrirModalDeTemplate(templateId, options = {}) {
     returnFocusEl,
     hasHistoryState: true,
     destruido: false,
-    destroy: (vindoDePopstate = false) => {
-      fecharEntrada(infoModal, vindoDePopstate);
+    destroy: (vindoDePopstate = false, subt = false) => {
+      fecharEntrada(infoModal, vindoDePopstate, subt);
     }
   };
 
@@ -149,20 +152,50 @@ export function abrirModalDeTemplate(templateId, options = {}) {
     infoModal.destroy(false);
   };
 
+  // Prender foco no modal (Tab trapping para acessibilidade WCAG)
+  const handleKeyDownTrap = (e) => {
+    if (e.key === 'Tab') {
+      const focusables = modalEl.querySelectorAll(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const firstEl = focusables[0];
+      const lastEl = focusables[focusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl || document.activeElement === modalEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    }
+  };
+
   closeBtns.forEach((btn) => btn.addEventListener('click', handleCloseBtnClick));
   modalEl.addEventListener('click', handleBackdropClick);
+  modalEl.addEventListener('keydown', handleKeyDownTrap);
 
   modalEl._cleanupListeners = () => {
     modalEl.removeEventListener('click', handleBackdropClick);
+    modalEl.removeEventListener('keydown', handleKeyDownTrap);
     closeBtns.forEach((btn) => btn.removeEventListener('click', handleCloseBtnClick));
   };
 
   // Registra na pilha universal
   pilhaModais.push(infoModal);
 
-  // Registra no histórico do navegador (para o botão Voltar do Android)
+  // Registra no histórico do navegador (replaceState se estiver alternando, pushState se for nova abertura)
   try {
-    history.pushState({ geofishModal: effectiveId }, '');
+    if (substituindo) {
+      history.replaceState({ geofishModal: effectiveId }, '');
+    } else {
+      history.pushState({ geofishModal: effectiveId }, '');
+    }
   } catch (_) {}
 
   // Dispara hook onMount

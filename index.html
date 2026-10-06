@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="color-scheme" content="light">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com https://firestore.googleapis.com https://*.firebaseio.com; font-src 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
 
   <title>GeoFish MS - Bacia do Rio Miranda</title>
   <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Otimizado para celulares Android.">
@@ -121,7 +121,6 @@
     </div>
   </div>
 
-  <!-- ========================================================
   <!-- ========================================================
        HERO PRINCIPAL FOCADO: BUSCA DE GUIAS E MAPA NÁUTICO
        ======================================================== -->
@@ -628,6 +627,11 @@
           </div>
 
           <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
+          <!-- Botão Flutuante de GPS & Localização Náutica ("Onde estou no rio") -->
+          <button type="button" id="btn-gps" class="btn-gps" aria-label="Localizar minha posição no rio (GPS)" title="Onde estou no rio">
+            <span aria-hidden="true">📍</span>
+            <span>Onde estou</span>
+          </button>
         </div>
 
         <!-- Legenda Simples e Acessível do WebGIS (Fase 2) -->
@@ -698,7 +702,7 @@
             <p class="historia-desc">
               O saber secular dos pescadores profissionais de Miranda (Colônia Z-1), Aquidauana (Colônia Z-7) e Bonito (Colônia Z-11) na leitura dos balseiros, corixos e poços profundos onde habitam as grandes matrizes de pintado, pacu e jaú no Pantanal.
             </p>
-            <a href="javascript:void(0)" data-action="abrir-parcerias-piloteiros" class="historia-link">Contatar piloteiros &rarr;</a>
+            <a href="#" data-action="abrir-parcerias-piloteiros" class="historia-link">Contatar piloteiros &rarr;</a>
           </div>
         </article>
 
@@ -1051,6 +1055,7 @@
             </div>
           </div>
           <div class="sos-coords-actions">
+            <button type="button" id="btn-atualizar-gps-sos" class="btn-sos-action btn-gps-refresh" style="background: #0284c7; color: #ffffff; cursor: pointer; font-weight: 700;">📍 Obter / Atualizar GPS</button>
             <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Mensagem de Emergência</button>
             <button type="button" id="btn-wpp-resgate" class="btn-sos-action btn-wpp-action" style="cursor: pointer;">💬 Compartilhar via WhatsApp</button>
           </div>
@@ -2085,7 +2090,7 @@
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" data-action="scroll-top" class="resource-item-link">
+            <a href="#" data-action="scroll-top" class="resource-item-link">
               <div class="item-title">Onde Pescar: Trechos &amp; Zonas no WebGIS &rarr;</div>
               <div class="item-sub">Consulte no mapa se o trecho é Pesque e Solte, Cota Zero ou Reserva</div>
             </a>
@@ -2119,13 +2124,13 @@
 
         <ul class="column-resource-list">
           <li>
-            <a href="javascript:void(0)" data-action="sos-call-marinha" class="resource-item-link">
+            <a href="#" data-action="sos-call-marinha" class="resource-item-link">
               <div class="item-title">Capitania Fluvial &amp; Marinha (Emergência 185) &rarr;</div>
               <div class="item-sub">Normas da Capitania e fiscalização de habilitação na calha navegável</div>
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" data-action="abrir-parcerias-pousadas" class="resource-item-link">
+            <a href="#" data-action="abrir-parcerias-pousadas" class="resource-item-link">
               <div class="item-title">Guias Nativos Credenciados (Colônias Z-1, Z-7 e Z-11) &rarr;</div>
               <div class="item-sub">Piloteiros experientes para condução segura nos labirintos do Pantanal</div>
             </a>
@@ -2137,7 +2142,7 @@
             </a>
           </li>
           <li>
-            <a href="javascript:void(0)" data-action="abrir-sos" class="resource-item-link">
+            <a href="#" data-action="abrir-sos" class="resource-item-link">
               <div class="item-title">Central de Apoio &amp; Emergência Fluvial &rarr;</div>
               <div class="item-sub">Telefones e resgate com a Marinha, PMA e Bombeiros</div>
             </a>
@@ -2454,8 +2459,6 @@
   <script src="js/db.js"></script>
   <!-- Catálogo Centralizado de Imagens Territoriais -->
   <script type="module" src="js/geoFishImages.js"></script>
-  <!-- Firebase Service (Cloud Firestore Offline-First para o Pantanal) -->
-  <script type="module" src="js/firebase-service.js"></script>
   <!-- Núcleo da Aplicação WebGIS e Orquestrador em Módulos ES6 -->
   <script type="module" src="js/app.js"></script>
 </body>

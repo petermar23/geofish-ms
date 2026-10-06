@@ -6,12 +6,13 @@
       "geometry": { "type": "Point", "coordinates": [-56.523412, -20.512345] },
       "properties": {
         "id_guia": 1,
-        "nome_operacional": "João do Barco",
+        "nome_operacional": "Exemplo: Piloteiro Passo do Lontra",
         "colonia": "Z-1 (Miranda)",
-        "porto_base": "Passo do Lontra",
-        "contato_wa": "5567999999999",
+        "porto_base": "Passo do Lontra & Foz do Rio Vermelho",
+        "contato_wa": null,
         "tipo_barco": "Bote de Alumínio 6m / 25HP",
-        "status": 1
+        "status": 1,
+        "demonstrativo": true
       }
     },
     {
@@ -19,12 +20,13 @@
       "geometry": { "type": "Point", "coordinates": [-56.505000, -20.505000] },
       "properties": {
         "id_guia": 2,
-        "nome_operacional": "Guia Pantanal Sul",
-        "colonia": "Z-7 (Aquidauana)",
-        "porto_base": "Miranda - Centro",
-        "contato_wa": "5567988888888",
-        "tipo_barco": "Lancha Fibra 7m / 60HP",
-        "status": 1
+        "nome_operacional": "Exemplo: Piloteiro Porto Geral",
+        "colonia": "Z-1 (Miranda)",
+        "porto_base": "Miranda - Porto Geral",
+        "contato_wa": null,
+        "tipo_barco": "Barco Pantaneiro 6m / 30HP",
+        "status": 1,
+        "demonstrativo": true
       }
     },
     {
@@ -32,12 +34,13 @@
       "geometry": { "type": "Point", "coordinates": [-56.124500, -20.893200] },
       "properties": {
         "id_guia": 3,
-        "nome_operacional": "Piloteiro Águas do Miranda",
+        "nome_operacional": "Exemplo: Piloteiro Águas do Miranda",
         "colonia": "Z-11 (Bonito)",
         "porto_base": "Distrito de Águas do Miranda",
-        "contato_wa": "5567999990011",
+        "contato_wa": null,
         "tipo_barco": "Bote de Alumínio 6m / 30HP",
-        "status": 1
+        "status": 1,
+        "demonstrativo": true
       }
     }
   ]

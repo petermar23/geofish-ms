@@ -15,7 +15,7 @@ function copyStaticAssets() {
         fs.mkdirSync(distDir, { recursive: true });
       }
 
-      const items = ['data', 'images', 'lib', 'manifest.json', 'sw.js', 'favicon.ico'];
+      const items = ['data', 'images', 'lib', 'icons', 'docs', 'js', 'manifest.json', 'sw.js', 'favicon.ico'];
       for (const item of items) {
         const src = path.resolve(__dirname, item);
         const dest = path.resolve(distDir, item);
@@ -23,12 +23,13 @@ function copyStaticAssets() {
           fs.cpSync(src, dest, { recursive: true, force: true });
         }
       }
-      console.log('[Vite Build] Recursos estáticos (data, images, lib, sw.js, manifest.json) copiados para dist/.');
+      console.log('[Vite Build] Recursos estáticos (data, images, lib, icons, docs, js, sw.js, manifest.json) copiados para dist/.');
     }
   };
 }
 
 export default defineConfig({
+  base: './',
   root: '.',
   publicDir: false,
   plugins: [copyStaticAssets()],

@@ -3,7 +3,7 @@
  * Utiliza <template> nativo, instanciando no DOM sob demanda e destruindo ao fechar.
  */
 
-import { escapeHTML, vibrar, showToast } from './utils.js';
+import { escapeHTML, vibrar, showToast, getPosicaoUsuario, setPosicaoUsuario } from './utils.js';
 import { abrirModalDeTemplate } from './modal-manager.js';
 
 let modalSosInstancia = null;
@@ -12,10 +12,13 @@ let acaoPendenteSos = null; // { tipo: 'call' | 'copy' | 'wpp', numero, servico 
 
 export function gerarTextoResgate() {
   const dataHora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
-  const coordsTexto = (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number')
-    ? `📍 Coordenadas GPS: ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (Precisão: ±${Math.round(pos.precisao || 10)}m)`
-    : `📍 Localização GPS: Não detectada no dispositivo (informe sua referência local)`;
+  const pos = getPosicaoUsuario();
+  let coordsTexto = '📍 Localização GPS: Não detectada no dispositivo (informe sua referência local)';
+  if (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number') {
+    const diffMin = pos.timestamp ? Math.round((Date.now() - pos.timestamp) / 60000) : 0;
+    const avisoVelho = diffMin > 10 ? ` [⚠️ Coordenada obtida há ${diffMin} min]` : '';
+    coordsTexto = `📍 Coordenadas GPS: ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} (Precisão: ±${Math.round(pos.precisao || 10)}m)${avisoVelho}`;
+  }
 
   return `🚨 *S.O.S RESGATE FLUVIAL - PANTANAL MS*\n` +
          `📍 Região: Bacia do Rio Miranda (Pantanal/MS)\n` +
@@ -34,16 +37,78 @@ export function abrirModalSos() {
   modalSosInstancia = abrirModalDeTemplate('template-modal-sos', {
     modalId: 'modal-sos',
     onMount: (modalEl) => {
-      // Exibe coordenadas reais no card de SOS se disponíveis
-      const coordsDisplay = modalEl.querySelector('#sos-coords-display');
-      if (coordsDisplay) {
-        const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
+      // Exibe coordenadas reais e frescor no card de SOS
+      function atualizarViewCoordenadas() {
+        const coordsDisplay = modalEl.querySelector('#sos-coords-display');
+        if (!coordsDisplay) return;
+        const pos = getPosicaoUsuario();
         if (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number') {
-          const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          coordsDisplay.innerHTML = `<span style="color: #047857; font-weight: 700;">📍 Sua Posição GPS Atual:</span> ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} <span style="font-size:0.75rem; color:#64748b;">(±${Math.round(pos.precisao || 10)}m, às ${hora})</span>.<br>Informe estas coordenadas ou seu ponto de referência ao atendente de socorro:`;
+          const hora = pos.timestamp
+            ? new Date(pos.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          const diffMin = pos.timestamp ? Math.round((Date.now() - pos.timestamp) / 60000) : 0;
+          const avisoVelho = diffMin > 10
+            ? `<br><span style="color: #b45309; font-weight: 700;">⚠️ Coordenada obtida há ${diffMin} minutos. Se você se deslocou, toque em "Obter / Atualizar GPS" abaixo!</span>`
+            : '';
+          coordsDisplay.innerHTML = `<span style="color: #047857; font-weight: 700;">📍 Sua Posição GPS Atual:</span> ${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)} <span style="font-size:0.75rem; color:#64748b;">(±${Math.round(pos.precisao || 10)}m, às ${hora})</span>.${avisoVelho}<br>Informe estas coordenadas ou seu ponto de referência ao atendente de socorro:`;
         } else {
           coordsDisplay.innerHTML = `Em caso de pane de motor, acidente náutico ou socorro médico na calha do Rio Miranda e Aquidauana, acione as forças públicas de segurança pelos números abaixo:`;
         }
+      }
+
+      atualizarViewCoordenadas();
+
+      // Botão para obter ou renovar sinal GPS na central de SOS
+      const btnAtualizarGps = modalEl.querySelector('#btn-atualizar-gps-sos');
+      if (btnAtualizarGps) {
+        btnAtualizarGps.addEventListener('click', () => {
+          vibrar(25);
+          btnAtualizarGps.disabled = true;
+          btnAtualizarGps.textContent = 'Buscando satélites...';
+          if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              (p) => {
+                setPosicaoUsuario({
+                  lat: p.coords.latitude,
+                  lng: p.coords.longitude,
+                  precisao: p.coords.accuracy,
+                  timestamp: Date.now()
+                });
+                btnAtualizarGps.disabled = false;
+                btnAtualizarGps.textContent = '📍 Atualizar GPS';
+                atualizarViewCoordenadas();
+                showToast(`GPS do SOS atualizado (±${Math.round(p.coords.accuracy)}m)`, 'info');
+              },
+              (err) => {
+                btnAtualizarGps.disabled = false;
+                btnAtualizarGps.textContent = '📍 Tentar Novamente';
+                showToast('Falha ao obter sinal GPS. Certifique-se de que a localização está ativa.', 'warning');
+              },
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+          } else {
+            btnAtualizarGps.disabled = false;
+            btnAtualizarGps.textContent = 'GPS Não Suportado';
+            showToast('Dispositivo sem suporte a geolocalização.', 'warning');
+          }
+        });
+      }
+
+      // Tentativa de leitura em background caso o usuário ainda não tenha posição
+      if (!getPosicaoUsuario() && 'geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (p) => {
+            setPosicaoUsuario({
+              lat: p.coords.latitude,
+              lng: p.coords.longitude,
+              precisao: p.coords.accuracy,
+              timestamp: Date.now()
+            });
+            atualizarViewCoordenadas();
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+        );
       }
 
       const btnCopiar = modalEl.querySelector('#btn-copiar-resgate');
@@ -96,7 +161,7 @@ export function abrirConfirmacaoSos(acao) {
       const btnExecutarSosCall = modalEl.querySelector('#btn-executar-sos-call');
       const btnCancelarSosCall = modalEl.querySelector('#btn-cancelar-sos-call');
 
-      const pos = (typeof window !== 'undefined' && window.ultimaPosicaoUsuario) ? window.ultimaPosicaoUsuario : null;
+      const pos = getPosicaoUsuario();
       const temGps = pos && typeof pos.lat === 'number' && typeof pos.lng === 'number';
 
       if (confirmSosText) {

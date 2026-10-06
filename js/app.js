@@ -14,8 +14,14 @@ import {
   vibrar,
   manterTelaAtiva,
   showToast,
-  estaEmDefeso
+  estaEmDefeso,
+  setPosicaoUsuario,
+  getPosicaoUsuario
 } from './modules/utils.js';
+
+// Telefone oficial para recebimento das solicitações de parcerias e cadastros comunitários
+// Altere para o WhatsApp da Coordenação / Colônia Z-1 Miranda (DDI 55 + DDD 67)
+export const WHATSAPP_CONTATO_OFICIAL = '5567999881234';
 
 import {
   abrirModalCartilha,
@@ -529,6 +535,47 @@ async function carregarTodasCamadas() {
                 const g = feature.properties;
                 const waUrl = normalizeWhatsApp(g.contato_wa);
                 const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
+
+                if (g.demonstrativo) {
+                  abrirPainel(`
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span class="badge-tag" style="background-color: #d97706; margin: 0;">Ponto Demonstrativo &bull; Vaga Aberta</span>
+                      <span style="font-size: 0.72rem; color: #b45309; font-weight: 700;">Exemplo</span>
+                    </div>
+                    <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(g.nome_operacional)}</h2>
+                    <div class="data-group">
+                      <div class="data-item">
+                        <div class="data-label">Colônia de Pescadores</div>
+                        <div class="data-value">${escapeHTML(g.colonia || 'Não informada')}</div>
+                      </div>
+                      <div class="data-item">
+                        <div class="data-label">Porto / Base de Saída</div>
+                        <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
+                      </div>
+                      <div class="data-item">
+                        <div class="data-label">Embarcação Sugerida</div>
+                        <div class="data-value">${escapeHTML(g.tipo_barco || 'Barco homologado')}</div>
+                      </div>
+                    </div>
+                    <div style="margin: 12px 0; padding: 10px 12px; background: #fffbeb; border-left: 3px solid #d97706; border-radius: 4px; font-size: 0.8rem; color: #92400e; line-height: 1.45;">
+                      📢 <strong>Cadastro Comunitário Aberto:</strong> Este ponto exemplifica onde guias e piloteiros das Colônias Z-1, Z-7 e Z-11 aparecem no mapa. O cadastro é 100% gratuito para os condutores tradicionais.
+                    </div>
+                    <button type="button" class="btn-cta btn-cadastrar-vaga" style="width: 100%; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                      ✍️ Cadastrar Meu Barco Gratuitamente
+                    </button>
+                  `);
+                  const btnCadVaga = document.querySelector('.btn-cadastrar-vaga');
+                  if (btnCadVaga) {
+                    btnCadVaga.addEventListener('click', () => {
+                      fecharPainel();
+                      if (typeof window.abrirModalParceriasTab === 'function') {
+                        window.abrirModalParceriasTab('piloteiros');
+                      }
+                    });
+                  }
+                  return;
+                }
+
                 abrirPainel(`
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <span class="badge-tag" style="background-color: #0b4f6c; margin: 0;">Piloteiro Local &bull; Cadastro Comunitário</span>
@@ -848,7 +895,9 @@ export function obterLocalizacao() {
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
       const acc = pos.coords.accuracy;
-      ultimaPosicaoUsuario = { lat, lng, precisao: acc };
+      const ts = Date.now();
+      ultimaPosicaoUsuario = { lat, lng, precisao: acc, timestamp: ts };
+      setPosicaoUsuario(ultimaPosicaoUsuario);
 
       if (map) {
         if (marcadorPosicao) {
@@ -913,11 +962,12 @@ function atualizarLocalizacaoOculta() {
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        ultimaPosicaoUsuario = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          precisao: pos.coords.accuracy
-        };
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = pos.coords.accuracy;
+        const ts = Date.now();
+        ultimaPosicaoUsuario = { lat, lng, precisao: acc, timestamp: ts };
+        setPosicaoUsuario(ultimaPosicaoUsuario);
       },
       () => {},
       { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
@@ -973,6 +1023,9 @@ function abrirModalSobre() {
           if (status.origem === 'rede') {
             tagClass = 'status-online';
             tagTexto = 'Atualizada na sessão';
+          } else if (status.origem === 'cache_validado') {
+            tagClass = 'status-online';
+            tagTexto = `Confirmada (304 - ${formatarDataBR(status.atualizado_em)})`;
           } else if (status.origem === 'offline') {
             tagClass = 'status-cached';
             tagTexto = `Offline (${formatarDataBR(status.atualizado_em)})`;
@@ -1192,6 +1245,38 @@ function abrirModalListaGuias() {
         const lat = coords ? coords[1] : null;
         const lng = coords ? coords[0] : null;
 
+        if (p.demonstrativo) {
+          return `
+            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div>
+                  <strong style="color: #92400e; font-size: 1.05rem;">${escapeHTML(p.nome_operacional || 'Guia de Pesca')}</strong>
+                  <div style="font-size: 0.82rem; color: #78350f; margin-top: 2px;">
+                    📍 <strong>Colônia:</strong> ${escapeHTML(p.colonia || '')} &bull; <strong>Base:</strong> ${escapeHTML(p.porto_base || '')}
+                  </div>
+                  <div style="font-size: 0.8rem; color: #a16207; margin-top: 2px;">
+                    ⛵ <strong>Barco Sugerido:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
+                  </div>
+                </div>
+                <span class="badge-tag" style="background: #d97706; font-size: 0.7rem; margin: 0; white-space: nowrap;">Demonstrativo &bull; Vaga Aberta</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #92400e; line-height: 1.4;">
+                📢 Vaga comunitária demonstrativa. O cadastro é 100% gratuito para condutores e piloteiros tradicionais.
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button type="button" class="btn-cadastrar-vaga-lista" style="flex: 1; background: #0284c7; border: none; color: #ffffff; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+                  ✍️ Cadastrar Nesta Vaga
+                </button>
+                ${(lat && lng) ? `
+                  <button type="button" class="btn-ver-guia-mapa" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome_operacional || '')}" style="background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; border-radius: 6px; padding: 8px 12px; font-size: 0.85rem; cursor: pointer; white-space: nowrap;">
+                    🗺️ Ver no Mapa
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+
         return `
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
@@ -1229,6 +1314,15 @@ function abrirModalListaGuias() {
           </div>
         `;
       }).join('');
+
+      container.querySelectorAll('.btn-cadastrar-vaga-lista').forEach(btn => {
+        btn.addEventListener('click', () => {
+          destroy();
+          if (typeof window.abrirModalParceriasTab === 'function') {
+            window.abrirModalParceriasTab('piloteiros');
+          }
+        });
+      });
 
       container.querySelectorAll('.btn-ver-guia-mapa').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1469,14 +1563,40 @@ function setupPhotoInput(previewBox, inputElement, imgElement, callbackBase64) {
   previewBox.addEventListener('click', () => inputElement.click());
   
   inputElement.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        const base64 = ev.target.result;
-        imgElement.src = base64;
-        previewBox.classList.add('has-image');
-        callbackBase64(base64);
+        const rawBase64 = ev.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1280;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          // Exporta JPEG comprimido limpando metadados EXIF e dados sensíveis da câmera
+          const cleanBase64 = canvas.toDataURL('image/jpeg', 0.82);
+          imgElement.src = cleanBase64;
+          previewBox.classList.add('has-image');
+          callbackBase64(cleanBase64);
+        };
+        img.onerror = () => {
+          showToast('Não foi possível processar a imagem.');
+        };
+        img.src = rawBase64;
       };
       reader.readAsDataURL(file);
     }
@@ -1716,6 +1836,8 @@ function abrirModalDenuncia() {
           }
         });
       }
+
+      atualizarLocalizacaoOculta();
     },
     onDestroy: () => {
       modalDenunciaInstancia = null;
@@ -1774,7 +1896,7 @@ async function renderizarTrofeusNoMapa() {
         <span>${escapeHTML(String(t.tamanho || ''))} cm</span>
         ${imgTag}
         <div style="margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px; text-align: right;">
-          <button type="button" onclick="window.excluirTrofeuLocal('${escapeHTML(String(t.id))}')" style="background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
+          <button type="button" class="btn-excluir-trofeu" data-trofeu-id="${escapeHTML(String(t.id))}" style="background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">
             🗑️ Excluir
           </button>
         </div>
@@ -1786,6 +1908,17 @@ async function renderizarTrofeusNoMapa() {
      .addTo(trofeusLayerGroup);
   });
 }
+
+// Delegação de evento para exclusão de troféus sem inline handlers (CSP estrito)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-excluir-trofeu');
+  if (btn) {
+    const id = btn.getAttribute('data-trofeu-id');
+    if (id && typeof window.excluirTrofeuLocal === 'function') {
+      window.excluirTrofeuLocal(id);
+    }
+  }
+});
 
 // Carga inicial dos troféus locais
 setTimeout(renderizarTrofeusNoMapa, 1000);
@@ -1887,10 +2020,11 @@ function abrirModalParcerias(aba = 'pousadas') {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}${foneDestino}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
-          showToast('Proposta gerada! Compartilhe com o mantenedor Peterson Martins da Costa via WhatsApp.');
+          showToast('Proposta gerada! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
           destroy();
         });
       }
@@ -1925,10 +2059,11 @@ function abrirModalParcerias(aba = 'pousadas') {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}${foneDestino}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
-          showToast('Dados formatados! Encaminhe a mensagem ao mantenedor ou diretoria das Colônias Z-1, Z-7 ou Z-11.');
+          showToast('Dados formatados! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
           destroy();
         });
       }
@@ -1937,7 +2072,8 @@ function abrirModalParcerias(aba = 'pousadas') {
       if (btnCadastroAssistido) {
         btnCadastroAssistido.addEventListener('click', () => {
           const textoAssistido = `Olá Peterson! Sou piloteiro da Bacia do Miranda e gostaria de ajuda para cadastrar meu barco e contato no GeoFish MS.`;
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAssistido)}`;
+          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
+          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAssistido)}${foneDestino}`;
           window.open(urlWpp, '_blank');
           destroy();
         });
@@ -2081,6 +2217,15 @@ if (btnHeroParceiros) {
   btnHeroParceiros.addEventListener('click', () => {
     vibrar(35);
     abrirModalParcerias('pousadas');
+  });
+}
+
+// Botão Flutuante de GPS no Mapa ("Onde estou")
+const btnGpsMapa = document.getElementById('btn-gps');
+if (btnGpsMapa) {
+  btnGpsMapa.addEventListener('click', () => {
+    vibrar(30);
+    obterLocalizacao();
   });
 }
 
