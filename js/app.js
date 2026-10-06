@@ -83,6 +83,15 @@ const map = L.map('map', {
 
 // Reposiciona o controle de zoom para o canto superior direito
 L.control.zoom({ position: 'topright' }).addTo(map);
+window.geofishMap = map;
+window.focarNoPortoGuia = function(lat, lng, nome) {
+  if (window.geofishMap) {
+    window.geofishMap.flyTo([lat, lng], 14, { duration: 1.2 });
+    fecharPainel();
+    showToast('🚤 Porto Base: ' + nome);
+  }
+};
+
 
 // 1. Camada Base Principal: Imagens de Satélite de Alta Resolução (Esri World Imagery)
 const sateliteEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -432,21 +441,26 @@ function encontrarGuiasDoTrecho(featureTrecho) {
   const dadosGuias = dadosCarregados['guias_credenciados'];
   if (!dadosGuias || !dadosGuias.features || dadosGuias.features.length === 0) return [];
   const p = featureTrecho.properties || {};
+  const idTrecho = p.id_trecho;
   const rioNome = (p.rio || '').toLowerCase();
   const colSugerida = (p.colonia_sugerida || '').toLowerCase();
 
   const filtrados = dadosGuias.features.filter((f) => {
     const gp = f.properties || {};
+    if (idTrecho && Array.isArray(gp.trecho_ids) && gp.trecho_ids.includes(idTrecho)) return true;
+    if (Array.isArray(gp.rios_atendidos)) {
+      if (gp.rios_atendidos.some(r => rioNome.includes(r.toLowerCase()) || r.toLowerCase().includes(rioNome.split(' ')[0]))) return true;
+    }
     const gCol = (gp.colonia || '').toLowerCase();
     const gRio = (gp.rio_atuacao || '').toLowerCase();
     const gBase = (gp.porto_base || '').toLowerCase();
 
     if (colSugerida && gCol.includes(colSugerida.split(' ')[0].toLowerCase())) return true;
-    if (rioNome.includes('aquidauana') && (gCol.includes('z-7') || gBase.includes('aquidauana') || gBase.includes('anastácio') || gRio.includes('aquidauana'))) return true;
-    if (rioNome.includes('salobra') && (gCol.includes('z-11') || gCol.includes('z-1') || gBase.includes('miranda') || gRio.includes('salobra'))) return true;
+    if (rioNome.includes('aquidauana') && (gCol.includes('z-7') || gBase.includes('aquidauana') || gBase.includes('anastácio') || gBase.includes('camisão') || gRio.includes('aquidauana'))) return true;
+    if (rioNome.includes('salobra') && (gCol.includes('z-11') || gCol.includes('z-1') || gBase.includes('salobra') || gBase.includes('miranda') || gRio.includes('salobra'))) return true;
     if (rioNome.includes('vermelho') && (gBase.includes('lontra') || gCol.includes('z-1') || gRio.includes('vermelho'))) return true;
     if (rioNome.includes('miranda') && (gCol.includes('z-1') || gBase.includes('miranda') || gRio.includes('miranda'))) return true;
-    if (rioNome.includes('negro') && (gCol.includes('z-1') || gCol.includes('z-7'))) return true;
+    if (rioNome.includes('negro') && (gCol.includes('z-1') || gCol.includes('z-7') || gBase.includes('negro') || gBase.includes('lajeado'))) return true;
     return false;
   });
 
@@ -531,55 +545,51 @@ function renderizarPainelTrechoPesca(featureTrecho) {
     `;
   }).join('');
 
-  // Guia local correspondente
+  // Guias locais correspondentes
   const guiasTrecho = encontrarGuiasDoTrecho(featureTrecho);
-  const guiaPrincipal = guiasTrecho[0] || null;
   let guiaHtml = '';
 
-  if (guiaPrincipal) {
-    const gp = guiaPrincipal.properties || {};
-    const coordsGuia = guiaPrincipal.geometry?.coordinates || null;
-    const temWhatsApp = Boolean(gp.contato_wa);
-    const waUrl = temWhatsApp ? normalizeWhatsApp(gp.contato_wa) : '';
+  if (guiasTrecho.length > 0) {
+    guiaHtml = guiasTrecho.map((guia) => {
+      const gp = guia.properties || {};
+      const coordsGuia = guia.geometry?.coordinates || null;
+      const waNum = gp.contato_wa || WHATSAPP_CONTATO_OFICIAL;
+      const waMsg = encodeURIComponent(`Olá ${gp.nome_operacional || 'Piloteiro'}! Vi seu contato credenciado no GeoFish MS para o trecho do ${p.rio}. Gostaria de consultar diária de pesca e saída no porto ${gp.porto_base}.`);
+      const waUrl = `https://wa.me/${waNum}?text=${waMsg}`;
 
-    guiaHtml = `
-      <div class="trecho-guide-card">
-        <div class="trecho-guide-head">
-          <div class="trecho-guide-name">${escapeHTML(gp.nome_operacional || 'Piloteiro Credenciado')}</div>
-          <span class="trecho-guide-colonia">${escapeHTML(gp.colonia || coloniaNome)}</span>
-        </div>
-        <div class="trecho-guide-meta">
-          <strong>Porto Base:</strong> ${escapeHTML(gp.porto_base || 'Bacia do Rio Miranda')}<br>
-          <strong>Embarcação:</strong> ${escapeHTML(gp.tipo_barco || 'Bote homologado')}
-        </div>
-        ${gp.demonstrativo ? `
-          <div class="trecho-guide-notice">
-            📢 <strong>Cadastro Comunitário Disponível:</strong> Este trecho conecta diretamente os pescadores aos piloteiros ribeirinhos tradicionais. Sem cobrança de taxa de intermediação.
+      return `
+        <div class="trecho-guide-card">
+          <div class="trecho-guide-head">
+            <div class="trecho-guide-name">${escapeHTML(gp.nome_operacional || gp.nome_completo || 'Piloteiro Credenciado')}</div>
+            <span class="trecho-guide-colonia">${escapeHTML(gp.colonia || coloniaNome)}</span>
+          </div>
+          <div class="trecho-guide-meta">
+            <strong>Porto Base:</strong> ${escapeHTML(gp.porto_base || 'Bacia do Rio Miranda')}<br>
+            <strong>Embarcação:</strong> ${escapeHTML(gp.tipo_barco || 'Bote Pantaneiro')}<br>
+            ${gp.especialidade ? `<strong>Foco:</strong> ${escapeHTML(gp.especialidade)}` : ''}
           </div>
           <div class="trecho-guide-actions">
-            <button type="button" class="btn-trecho-action primary btn-cadastrar-guia-trecho">
-              ✍️ Cadastrar Barco neste Trecho
-            </button>
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-trecho-action whatsapp">
+              💬 WhatsApp Direto
+            </a>
             ${coordsGuia ? `
               <button type="button" class="btn-trecho-action secondary btn-ver-guia-mapa" data-lat="${coordsGuia[1]}" data-lng="${coordsGuia[0]}">
                 📍 Ponto no Mapa
               </button>
             ` : ''}
           </div>
-        ` : `
-          <div class="trecho-guide-actions">
-            ${temWhatsApp ? `
-              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-trecho-action whatsapp">
-                💬 WhatsApp Direto
-              </a>
-            ` : ''}
-            ${coordsGuia ? `
-              <button type="button" class="btn-trecho-action secondary btn-ver-guia-mapa" data-lat="${coordsGuia[1]}" data-lng="${coordsGuia[0]}">
-                📍 Ver no Mapa
-              </button>
-            ` : ''}
-          </div>
-        `}
+        </div>
+      `;
+    }).join('');
+  } else {
+    guiaHtml = `
+      <div class="trecho-guide-notice" style="margin-top: 6px;">
+        📢 <strong>Vaga Comunitária Aberta:</strong> Piloteiros e condutores tradicionais das Colônias Z-1, Z-7 e Z-11 podem se cadastrar gratuitamente para receber contato direto dos turistas.
+      </div>
+      <div class="trecho-guide-actions">
+        <button type="button" class="btn-trecho-action primary btn-cadastrar-guia-trecho">
+          ✍️ Cadastrar Barco neste Trecho
+        </button>
       </div>
     `;
   }
@@ -822,7 +832,6 @@ async function carregarTodasCamadas() {
             }
           });
           break;
-
         case 'guias_credenciados':
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'guiasPane',

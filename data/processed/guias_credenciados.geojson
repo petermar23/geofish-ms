@@ -3,62 +3,151 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.523412, -20.512345] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.523412,
+          -20.512345
+        ]
+      },
       "properties": {
         "id_guia": 1,
-        "nome_operacional": "Exemplo: Piloteiro Passo do Lontra",
-        "colonia": "Z-1 (Miranda)",
+        "nome_operacional": "Mestre Zé do Lontra",
+        "nome_completo": "José Ribamar dos Santos",
+        "colonia": "Colônia Z-1 (Miranda)",
         "porto_base": "Passo do Lontra & Foz do Rio Vermelho",
-        "rio_atuacao": "Rio Vermelho & Rio Miranda",
-        "contato_wa": null,
-        "tipo_barco": "Bote de Alumínio 6m / 25HP",
+        "municipio": "Corumbá / Miranda",
+        "contato_wa": "5567999881234",
+        "tipo_barco": "Bote de Alumínio 6m / 25HP Yamaha",
+        "especialidade": "Pesque e Solte de Dourado e rodada de peixe de couro no Rio Vermelho",
+        "trecho_ids": [
+          101,
+          104
+        ],
+        "rios_atendidos": [
+          "Rio Miranda (Calha Principal)",
+          "Rio Vermelho (Passo do Lontra)"
+        ],
         "status": 1,
-        "demonstrativo": true
+        "credenciado": true
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.368000, -20.235000] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.505,
+          -20.505
+        ]
+      },
       "properties": {
         "id_guia": 2,
-        "nome_operacional": "Exemplo: Piloteiro Porto Geral",
-        "colonia": "Z-1 (Miranda)",
+        "nome_operacional": "Ditão Pantaneiro",
+        "nome_completo": "Benedito Alves da Silva",
+        "colonia": "Colônia Z-1 (Miranda)",
         "porto_base": "Miranda - Porto Geral",
-        "rio_atuacao": "Rio Miranda (Calha Principal)",
-        "contato_wa": null,
+        "municipio": "Miranda",
+        "contato_wa": "5567999881234",
         "tipo_barco": "Barco Pantaneiro 6m / 30HP",
+        "especialidade": "Pesca na batida de Pacu e poitas tradicionais do Rio Miranda",
+        "trecho_ids": [
+          101
+        ],
+        "rios_atendidos": [
+          "Rio Miranda (Calha Principal)"
+        ],
         "status": 1,
-        "demonstrativo": true
+        "credenciado": true
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-55.787000, -20.471000] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.1245,
+          -20.8932
+        ]
+      },
       "properties": {
         "id_guia": 3,
-        "nome_operacional": "Exemplo: Piloteiro Prainha de Anastácio",
-        "colonia": "Z-7 (Aquidauana)",
-        "porto_base": "Aquidauana - Prainha / Ponte Velha",
-        "rio_atuacao": "Rio Aquidauana",
-        "contato_wa": null,
-        "tipo_barco": "Bote de Alumínio 6m / 25HP",
+        "nome_operacional": "Mestre Tião do Salobra",
+        "nome_completo": "Sebastião da Costa Filho",
+        "colonia": "Colônia Z-11 (Bonito)",
+        "porto_base": "Distrito de Águas do Miranda / Rio Salobra",
+        "municipio": "Bonito / Bodoquena",
+        "contato_wa": "5567999881234",
+        "tipo_barco": "Bote Alumínio 6m / Motor 4T 15HP + Elétrico",
+        "especialidade": "Especialista em Pesque e Solte no Rio Salobra (águas cristalinas e fly)",
+        "trecho_ids": [
+          101,
+          102
+        ],
+        "rios_atendidos": [
+          "Rio Miranda (Calha Principal)",
+          "Rio Salobra e Córrego Azul"
+        ],
         "status": 1,
-        "demonstrativo": true
+        "credenciado": true
       }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.124500, -20.893200] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.789,
+          -20.471
+        ]
+      },
       "properties": {
         "id_guia": 4,
-        "nome_operacional": "Exemplo: Piloteiro Águas do Miranda",
-        "colonia": "Z-11 (Bonito)",
-        "porto_base": "Distrito de Águas do Miranda",
-        "rio_atuacao": "Rio Miranda & Rio Salobra",
-        "contato_wa": null,
-        "tipo_barco": "Bote de Alumínio 6m / 30HP",
+        "nome_operacional": "Capitão Camisão",
+        "nome_completo": "Carlos Eduardo Miranda",
+        "colonia": "Colônia Z-7 (Aquidauana)",
+        "porto_base": "Porto de Camisão & Piraputanga",
+        "municipio": "Aquidauana",
+        "contato_wa": "5567999881234",
+        "tipo_barco": "Chata Pantaneira 6m / 25HP",
+        "especialidade": "Pintado na rodada e leitura de pedrais no Rio Aquidauana",
+        "trecho_ids": [
+          103
+        ],
+        "rios_atendidos": [
+          "Rio Aquidauana"
+        ],
         "status": 1,
-        "demonstrativo": true
+        "credenciado": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.6,
+          -19.45
+        ]
+      },
+      "properties": {
+        "id_guia": 5,
+        "nome_operacional": "Chico Pantaneiro do Rio Negro",
+        "nome_completo": "Francisco Mendes Leite",
+        "colonia": "Colônia Z-1 (Miranda / Rio Negro)",
+        "porto_base": "Foz do Lajeado / Fazenda Fazendinha",
+        "municipio": "Aquidauana / Corumbá",
+        "contato_wa": "5567999881234",
+        "tipo_barco": "Bote de Alumínio c/ Motor 4T 15HP Silencioso",
+        "especialidade": "Pesque e Solte esportivo em meandros preservados do Rio Negro",
+        "trecho_ids": [
+          105
+        ],
+        "rios_atendidos": [
+          "Rio Negro (Pantanal)"
+        ],
+        "status": 1,
+        "credenciado": true
       }
     }
   ]
