@@ -1924,27 +1924,24 @@ document.addEventListener('click', (e) => {
 setTimeout(renderizarTrofeusNoMapa, 1000);
 
 // ========================================================
-// 18. CONTROLES DO PORTAL COMUNITÁRIO, MODO BARCO E PARCERIAS
+// 18. CONTROLES DO PORTAL COMUNITÁRIO & NAVEGAÇÃO DA BACIA
 // ========================================================
 
-// Alternância do Modo Barco (Tela Cheia Náutica)
-const btnToggleFullscreen = document.getElementById('btn-toggle-fullscreen');
-if (btnToggleFullscreen) {
-  btnToggleFullscreen.addEventListener('click', () => {
-    vibrar(30);
-    const isFullscreen = document.body.classList.toggle('map-fullscreen');
-    btnToggleFullscreen.innerHTML = isFullscreen 
-      ? '✕ Sair do Modo Barco' 
-      : '⛶ Modo Barco (Tela Cheia)';
-    
-    // Invalida o tamanho do contêiner Leaflet para renderizar tiles sem falhas
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 180);
-
-    showToast(isFullscreen ? 'Modo Barco Ativado (Tela Cheia)' : 'Retornando ao Portal Hub');
+// Botão para Centralizar e Enquadrar a Bacia do Rio Miranda
+const btnCentralizarBacia = document.getElementById('btn-centralizar-bacia');
+if (btnCentralizarBacia) {
+  btnCentralizarBacia.addEventListener('click', () => {
+    vibrar(25);
+    if (map) {
+      // Enquadramento panorâmico de toda a Bacia Hidrográfica do Rio Miranda (MS)
+      map.flyTo([-20.35, -56.35], 9, { duration: 1.2 });
+      showToast('Visualização ajustada para a Bacia do Rio Miranda');
+    }
   });
 }
+
+// Remove qualquer classe residual de tela cheia para evitar aprisionamento de tela
+document.body.classList.remove('map-fullscreen');
 
 // Botão de Ver Regras na Faixa de Alerta
 const btnVerAlertaRegras = document.getElementById('btn-ver-alerta-regras');

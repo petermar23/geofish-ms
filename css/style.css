@@ -3337,17 +3337,6 @@ body.sheet-open .fab-container {
   letter-spacing: 0.3px;
 }
 
-body.map-fullscreen .webgis-window-frame {
-  border: none;
-  border-radius: 0;
-  margin: 0;
-  box-shadow: none;
-}
-
-body.map-fullscreen .webgis-frame-header {
-  display: none !important;
-}
-
 /* SEÇÃO 4: HISTÓRIAS DA BACIA */
 .historias-section {
   background-color: var(--bg-surface);
@@ -3511,7 +3500,7 @@ body.map-fullscreen .webgis-frame-header {
   pointer-events: auto;
 }
 
-.btn-map-fullscreen {
+.btn-map-action {
   background: #ffffff;
   border: 2px solid #0b4f6c;
   color: #0b4f6c;
@@ -3520,34 +3509,17 @@ body.map-fullscreen .webgis-frame-header {
   padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
   pointer-events: auto;
   transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.btn-map-fullscreen:hover {
+.btn-map-action:hover {
   background: #0b4f6c;
   color: #ffffff;
-}
-
-/* Modo Tela Cheia Náutica (Modo Barco) */
-body.map-fullscreen .gov-auth-bar,
-body.map-fullscreen .tpwd-alert-bar,
-body.map-fullscreen #header,
-body.map-fullscreen .hero-territorial,
-body.map-fullscreen .editorial-section,
-body.map-fullscreen .editorial-territorio-section,
-body.map-fullscreen .map-header-container,
-body.map-fullscreen .portal-section,
-body.map-fullscreen .tpwd-columns-section,
-body.map-fullscreen .ad-banner-horizontal,
-body.map-fullscreen #portal-footer {
-  display: none !important;
-}
-
-body.map-fullscreen #map {
-  height: 100dvh !important;
-  max-height: 100dvh !important;
 }
 
 /* Botão PIX no Topo */
@@ -3936,27 +3908,6 @@ body.map-fullscreen #map {
   max-height: 880px;
   background-color: #e2e8f0;
   border-bottom: 2px solid #cbd5e1;
-}
-
-body.map-fullscreen .portal-map-section {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  height: 100dvh !important;
-  z-index: 9999 !important;
-  max-height: none !important;
-  border-bottom: none !important;
-}
-
-body.map-fullscreen .portal-section,
-body.map-fullscreen .tpwd-columns-section,
-body.map-fullscreen .portal-footer,
-body.map-fullscreen .android-bottom-bar,
-body.map-fullscreen .quick-filters-bar,
-body.map-fullscreen .local-search-container {
-  display: none !important;
 }
 
 /* Ajuste nos botões de link do rodapé e bottom bar */
