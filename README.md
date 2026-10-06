@@ -111,7 +111,6 @@ geofish-ms/
 │   │   └── utils.js              # Funções de sanitização, formatação e vibração
 │   ├── app.js                    # Orquestrador principal do mapa Leaflet
 │   ├── db.js                     # Wrapper nativo de IndexedDB (GeoFishDB)
-│   ├── firebase-service.js       # Conexão transparente com Firestore
 │   └── geoFishImages.js          # Mapeamento de imagens e créditos fotográficos
 ├── lib/
 │   └── leaflet/                  # Biblioteca Leaflet vendorizada localmente
