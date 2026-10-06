@@ -397,11 +397,22 @@ export function verificarMedidaPescado(modalEl = null) {
   }
 }
 
-export function abrirModalEspecies() {
+export function abrirModalEspecies(idEspeciePreSelecionada = null) {
   modalEspeciesInstancia = abrirModalDeTemplate('template-modal-especies', {
     modalId: 'modal-especies',
     onMount: (modalEl) => {
-      preencherSelectEspecies(modalEl.querySelector('#checker-species'));
+      const selectEl = modalEl.querySelector('#checker-species');
+      preencherSelectEspecies(selectEl);
+      if (idEspeciePreSelecionada && selectEl) {
+        selectEl.value = idEspeciePreSelecionada;
+        const inputLen = modalEl.querySelector('#checker-length');
+        if (inputLen) {
+          setTimeout(() => inputLen.focus(), 150);
+        }
+        if (['dourado', 'piranha', 'tucunare', 'corvina'].includes(idEspeciePreSelecionada)) {
+          verificarMedidaPescado(modalEl);
+        }
+      }
       renderizarEspecies('', modalEl);
 
       const btnRunCheck = modalEl.querySelector('#btn-run-check') || modalEl.querySelector('#checker-btn');

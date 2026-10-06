@@ -427,6 +427,348 @@ async function carregarCamada(layerKey, url) {
   return dados;
 }
 
+// Helpers para Associação Territorial de Trechos Hidrográficos
+function encontrarGuiasDoTrecho(featureTrecho) {
+  const dadosGuias = dadosCarregados['guias_credenciados'];
+  if (!dadosGuias || !dadosGuias.features || dadosGuias.features.length === 0) return [];
+  const p = featureTrecho.properties || {};
+  const rioNome = (p.rio || '').toLowerCase();
+  const colSugerida = (p.colonia_sugerida || '').toLowerCase();
+
+  const filtrados = dadosGuias.features.filter((f) => {
+    const gp = f.properties || {};
+    const gCol = (gp.colonia || '').toLowerCase();
+    const gRio = (gp.rio_atuacao || '').toLowerCase();
+    const gBase = (gp.porto_base || '').toLowerCase();
+
+    if (colSugerida && gCol.includes(colSugerida.split(' ')[0].toLowerCase())) return true;
+    if (rioNome.includes('aquidauana') && (gCol.includes('z-7') || gBase.includes('aquidauana') || gBase.includes('anastácio') || gRio.includes('aquidauana'))) return true;
+    if (rioNome.includes('salobra') && (gCol.includes('z-11') || gCol.includes('z-1') || gBase.includes('miranda') || gRio.includes('salobra'))) return true;
+    if (rioNome.includes('vermelho') && (gBase.includes('lontra') || gCol.includes('z-1') || gRio.includes('vermelho'))) return true;
+    if (rioNome.includes('miranda') && (gCol.includes('z-1') || gBase.includes('miranda') || gRio.includes('miranda'))) return true;
+    if (rioNome.includes('negro') && (gCol.includes('z-1') || gCol.includes('z-7'))) return true;
+    return false;
+  });
+
+  return filtrados.length > 0 ? filtrados : dadosGuias.features;
+}
+
+function encontrarApoioProximoTrecho(featureTrecho) {
+  const dadosApoio = dadosCarregados['pontos_emergencia'];
+  if (!dadosApoio || !dadosApoio.features || !featureTrecho.geometry) return null;
+  const coordsTrecho = featureTrecho.geometry.coordinates;
+  if (!coordsTrecho || coordsTrecho.length < 2) return null;
+
+  let melhorPonto = null;
+  let menorDistancia = Infinity;
+
+  for (const feat of dadosApoio.features) {
+    if (!feat.geometry || !feat.geometry.coordinates) continue;
+    const ptLng = feat.geometry.coordinates[0];
+    const ptLat = feat.geometry.coordinates[1];
+
+    let menorDistPonto = Infinity;
+    for (let i = 0; i < coordsTrecho.length - 1; i++) {
+      const segA = coordsTrecho[i];
+      const segB = coordsTrecho[i + 1];
+      const d = distanciaPontoSegmentoKm(ptLat, ptLng, segA[1], segA[0], segB[1], segB[0]);
+      if (d < menorDistPonto) menorDistPonto = d;
+    }
+
+    const isRampa = Boolean(feat.properties?.possui_rampa === 1 || (feat.properties?.tipo && feat.properties.tipo.toLowerCase().includes('rampa')));
+    const pesoDist = isRampa ? menorDistPonto * 0.75 : menorDistPonto;
+
+    if (pesoDist < menorDistancia) {
+      menorDistancia = pesoDist;
+      melhorPonto = {
+        feature: feat,
+        distanciaKm: menorDistPonto,
+        isRampa
+      };
+    }
+  }
+
+  return melhorPonto;
+}
+
+function renderizarPainelTrechoPesca(featureTrecho) {
+  if (!featureTrecho) return;
+  const p = featureTrecho.properties || {};
+  const cor = obterCorPorRegra(p.regra);
+  const isPesqueSolte = Boolean(p.tipo_regra === 'pesque_solte' || (p.regra && p.regra.toLowerCase().includes('solte')));
+  const iconeRegra = isPesqueSolte ? '🌿' : '🎣';
+  const coloniaNome = p.colonia_sugerida || 'Colônia Tradicional Pantaneira';
+
+  // Espécies associadas ao trecho
+  const especies = Array.isArray(p.especies_principais) && p.especies_principais.length > 0
+    ? p.especies_principais
+    : [
+        { id: 'pintado', nome: 'Pintado / Surubim', faixa: '85 a 125 cm', tipo: 'faixa' },
+        { id: 'pacu', nome: 'Pacu', faixa: '45 a 65 cm', tipo: 'faixa' },
+        { id: 'cachara', nome: 'Cachara', faixa: '80 a 120 cm', tipo: 'faixa' },
+        { id: 'jau', nome: 'Jaú', faixa: '95 a 130 cm', tipo: 'faixa' },
+        { id: 'dourado', nome: 'Dourado', faixa: 'Pesque e Solte Obrigatório (Lei 5.321)', tipo: 'proibido' },
+        { id: 'piranha', nome: 'Piranha', faixa: 'Até 5 exemplares cumulativos', tipo: 'cota_extra' }
+      ];
+
+  const especiesHtml = especies.map((esp) => {
+    const isProibido = esp.tipo === 'proibido';
+    const isPs = esp.tipo === 'pesque_solte' || isPesqueSolte;
+    const classeItem = isProibido ? 'proibido' : (isPs ? 'pesque-solte' : '');
+    const textoBotao = isProibido ? '⚖️ Regra' : '📏 Medir';
+    const classeBotao = isProibido ? 'btn-trecho-medir btn-medir-proibido' : 'btn-trecho-medir';
+
+    return `
+      <div class="trecho-species-item ${classeItem}">
+        <div class="trecho-species-info">
+          <span class="trecho-species-name">🐟 ${escapeHTML(esp.nome)}</span>
+          <span class="trecho-species-badge">${escapeHTML(esp.faixa)}</span>
+        </div>
+        <button type="button" class="${classeBotao}" data-especie-id="${escapeHTML(esp.id)}" aria-label="Verificar medida de ${escapeHTML(esp.nome)}">
+          ${textoBotao}
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  // Guia local correspondente
+  const guiasTrecho = encontrarGuiasDoTrecho(featureTrecho);
+  const guiaPrincipal = guiasTrecho[0] || null;
+  let guiaHtml = '';
+
+  if (guiaPrincipal) {
+    const gp = guiaPrincipal.properties || {};
+    const coordsGuia = guiaPrincipal.geometry?.coordinates || null;
+    const temWhatsApp = Boolean(gp.contato_wa);
+    const waUrl = temWhatsApp ? normalizeWhatsApp(gp.contato_wa) : '';
+
+    guiaHtml = `
+      <div class="trecho-guide-card">
+        <div class="trecho-guide-head">
+          <div class="trecho-guide-name">${escapeHTML(gp.nome_operacional || 'Piloteiro Credenciado')}</div>
+          <span class="trecho-guide-colonia">${escapeHTML(gp.colonia || coloniaNome)}</span>
+        </div>
+        <div class="trecho-guide-meta">
+          <strong>Porto Base:</strong> ${escapeHTML(gp.porto_base || 'Bacia do Rio Miranda')}<br>
+          <strong>Embarcação:</strong> ${escapeHTML(gp.tipo_barco || 'Bote homologado')}
+        </div>
+        ${gp.demonstrativo ? `
+          <div class="trecho-guide-notice">
+            📢 <strong>Cadastro Comunitário Disponível:</strong> Este trecho conecta diretamente os pescadores aos piloteiros ribeirinhos tradicionais. Sem cobrança de taxa de intermediação.
+          </div>
+          <div class="trecho-guide-actions">
+            <button type="button" class="btn-trecho-action primary btn-cadastrar-guia-trecho">
+              ✍️ Cadastrar Barco neste Trecho
+            </button>
+            ${coordsGuia ? `
+              <button type="button" class="btn-trecho-action secondary btn-ver-guia-mapa" data-lat="${coordsGuia[1]}" data-lng="${coordsGuia[0]}">
+                📍 Ponto no Mapa
+              </button>
+            ` : ''}
+          </div>
+        ` : `
+          <div class="trecho-guide-actions">
+            ${temWhatsApp ? `
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-trecho-action whatsapp">
+                💬 WhatsApp Direto
+              </a>
+            ` : ''}
+            ${coordsGuia ? `
+              <button type="button" class="btn-trecho-action secondary btn-ver-guia-mapa" data-lat="${coordsGuia[1]}" data-lng="${coordsGuia[0]}">
+                📍 Ver no Mapa
+              </button>
+            ` : ''}
+          </div>
+        `}
+      </div>
+    `;
+  }
+
+  // Apoio náutico / Rampa mais próxima
+  const apoioMaisProximo = encontrarApoioProximoTrecho(featureTrecho);
+  let rampaHtml = '';
+  if (apoioMaisProximo && apoioMaisProximo.feature) {
+    const ap = apoioMaisProximo.feature.properties || {};
+    const apCoords = apoioMaisProximo.feature.geometry?.coordinates || null;
+    const distFormatada = apoioMaisProximo.distanciaKm < 1
+      ? `${Math.round(apoioMaisProximo.distanciaKm * 1000)} m`
+      : `${apoioMaisProximo.distanciaKm.toFixed(1)} km`;
+
+    rampaHtml = `
+      <div class="trecho-ramp-card">
+        <div class="trecho-ramp-info">
+          <div class="trecho-ramp-title">
+            ${apoioMaisProximo.isRampa ? '⚓ Rampa Pública de Embarque' : '🚨 Posto de Fiscalização e Apoio (PMA)'}
+          </div>
+          <div class="trecho-ramp-name">${escapeHTML(ap.nome)} &bull; a ~${distFormatada}</div>
+        </div>
+        ${apCoords ? `
+          <button type="button" class="btn-trecho-action secondary btn-ver-rampa-mapa" data-lat="${apCoords[1]}" data-lng="${apCoords[0]}" style="flex: 0 0 auto; min-width: auto; padding: 6px 10px;">
+            🎯 Ver Rampa
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  const html = `
+    <div class="trecho-governance-sheet">
+      <!-- 1. Segmento e Regra Territorial -->
+      <div class="trecho-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+          <span class="badge-tag" style="background-color: ${cor}; font-size: 0.78rem; font-weight: 800; padding: 4px 10px;">
+            ${iconeRegra} ${escapeHTML(p.regra)}
+          </span>
+          <span style="font-size: 0.72rem; color: #475569; font-weight: 700; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">
+            ${escapeHTML(coloniaNome)}
+          </span>
+        </div>
+        <h2 class="sheet-title" style="margin: 4px 0 6px 0; font-size: 1.3rem; color: #0b4f6c;">
+          ${escapeHTML(p.rio)}
+        </h2>
+      </div>
+
+      <!-- 2. Card de Cota e Regra do Trecho -->
+      <div class="trecho-rule-card ${isPesqueSolte ? 'pesque-solte' : 'cota-padrao'}">
+        <div class="trecho-rule-header">
+          <span class="trecho-rule-icon">${isPesqueSolte ? '🌿' : '⚖️'}</span>
+          <div>
+            <div class="trecho-rule-title">
+              ${isPesqueSolte ? 'Cota Zero / Preservação Total' : 'Cota de Transporte em MS'}
+            </div>
+            <div class="trecho-rule-text">${escapeHTML(p.cota)}</div>
+          </div>
+        </div>
+        ${p.petrechos ? `
+          <div class="trecho-rule-detail">
+            <strong>🎣 Petrechos Autorizados:</strong> ${escapeHTML(p.petrechos)}
+          </div>
+        ` : ''}
+        ${p.norma_ref ? `
+          <div class="trecho-rule-detail">
+            <strong>📜 Legislação:</strong> ${escapeHTML(p.norma_ref)}
+          </div>
+        ` : ''}
+        ${p.obs ? `
+          <div class="trecho-rule-detail">
+            <strong>ℹ️ Navegação:</strong> ${escapeHTML(p.obs)}
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- 3. Vitrine de Espécies & Régua de Limites Legais -->
+      <div class="trecho-section-box">
+        <div class="trecho-section-header">
+          <div>
+            <h3 class="trecho-section-title">🐟 Espécies & Limites Legais</h3>
+            <span class="trecho-section-sub">Decretos 15.166/19 e 15.375/20</span>
+          </div>
+          <button type="button" class="btn-trecho-medir btn-abrir-verificador-geral" style="padding: 6px 12px; font-size: 0.78rem;">
+            📏 Abrir Régua Completa
+          </button>
+        </div>
+
+        <div class="trecho-species-grid">
+          ${especiesHtml}
+        </div>
+
+        <div class="trecho-dourado-alert">
+          <strong>🚫 Dourado (Lei nº 6.190/24):</strong> Abate e transporte 100% PROIBIDOS em todo o MS até 2029. Devolução obrigatória e imediata à água.
+        </div>
+      </div>
+
+      <!-- 4. Card do Piloteiro Local (Inclusão Socioprodutiva) -->
+      <div class="trecho-section-box">
+        <div class="trecho-section-header">
+          <div>
+            <h3 class="trecho-section-title">🚤 Piloteiro / Condutor do Trecho</h3>
+            <span class="trecho-section-sub">${escapeHTML(coloniaNome)} &bull; Contato Direto</span>
+          </div>
+        </div>
+        ${guiaHtml}
+      </div>
+
+      <!-- 5. Apoio Náutico / Rampa Pública -->
+      ${rampaHtml ? `
+        <div>
+          ${rampaHtml}
+        </div>
+      ` : ''}
+
+      <!-- 6. Conformidade e Segurança -->
+      <div class="legal-note-box" style="margin-top: 4px;">
+        <strong>Conformidade Territorial:</strong> Dados do IMASUL e PMA integrados pelo GeoFish MS para garantir conformidade legal do pescador-turista e renda direta às comunidades tradicionais pantaneiras.
+      </div>
+    </div>
+  `;
+
+  abrirPainel(html);
+
+  // Vincula eventos dos botões interativos
+  const painelEl = document.getElementById('sheet-content');
+  if (painelEl) {
+    // Botões para medir espécie específica
+    painelEl.querySelectorAll('.btn-trecho-medir[data-especie-id]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idEsp = btn.getAttribute('data-especie-id');
+        fecharPainel();
+        if (typeof abrirModalEspecies === 'function') {
+          abrirModalEspecies(idEsp);
+        }
+      });
+    });
+
+    // Botão geral da régua
+    painelEl.querySelectorAll('.btn-abrir-verificador-geral').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fecharPainel();
+        if (typeof abrirModalEspecies === 'function') {
+          abrirModalEspecies();
+        }
+      });
+    });
+
+    // Botão cadastrar guia
+    painelEl.querySelectorAll('.btn-cadastrar-guia-trecho').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fecharPainel();
+        if (typeof window.abrirModalParceriasTab === 'function') {
+          window.abrirModalParceriasTab('piloteiros');
+        }
+      });
+    });
+
+    // Botão ver guia no mapa
+    painelEl.querySelectorAll('.btn-ver-guia-mapa').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lat = parseFloat(btn.getAttribute('data-lat'));
+        const lng = parseFloat(btn.getAttribute('data-lng'));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          fecharPainel();
+          map.flyTo([lat, lng], 14, { animate: true, duration: 1 });
+        }
+      });
+    });
+
+    // Botão ver rampa no mapa
+    painelEl.querySelectorAll('.btn-ver-rampa-mapa').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lat = parseFloat(btn.getAttribute('data-lat'));
+        const lng = parseFloat(btn.getAttribute('data-lng'));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          fecharPainel();
+          map.flyTo([lat, lng], 14, { animate: true, duration: 1 });
+        }
+      });
+    });
+  }
+}
+
 // 7. Inicialização de Todas as Camadas em Paralelo
 async function carregarTodasCamadas() {
   const loadingIndicator = document.getElementById('loading-indicator');
@@ -458,6 +800,7 @@ async function carregarTodasCamadas() {
         console.warn(`Camada [${def.nome}] indisponível no momento.`);
         return;
       }
+      dadosCarregados[def.key] = dados;
 
       let camadaLeaflet = null;
 
@@ -474,29 +817,7 @@ async function carregarTodasCamadas() {
             onEachFeature: (feature, layer) => {
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                const p = feature.properties;
-                const cor = obterCorPorRegra(p.regra);
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: ${cor};">Regra: ${escapeHTML(p.regra)}</span>
-                  <h2 class="sheet-title">${escapeHTML(p.rio)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Cota Permitida</div>
-                      <div class="data-value">${escapeHTML(p.cota)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Petrechos Autorizados</div>
-                      <div class="data-value">${escapeHTML(p.petrechos)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Norma de Referência</div>
-                      <div class="data-value">${escapeHTML(p.norma_ref)}</div>
-                    </div>
-                  </div>
-                  <div class="legal-note-box">
-                    <strong>Atenção:</strong> As regras apresentadas são orientativas e baseadas nas normativas do IMASUL/SEMADESC. Consulte sempre a legislação vigente antes da pescaria.
-                  </div>
-                `);
+                renderizarPainelTrechoPesca(feature);
               });
             }
           });
@@ -735,20 +1056,61 @@ async function carregarTodasCamadas() {
             onEachFeature: (feature, layer) => {
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                const r = feature.properties;
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: #0288d1;">Hidrografia Principal</span>
-                  <h2 class="sheet-title">${escapeHTML(r.rio)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Extensão Mapeada</div>
-                      <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Não informado'}</div>
+                const r = feature.properties || {};
+                const dadosTrechos = dadosCarregados['trechos_pesca'];
+                let trechoMatch = null;
+                if (dadosTrechos && dadosTrechos.features) {
+                  const nomeRio = (r.rio || '').toLowerCase();
+                  trechoMatch = dadosTrechos.features.find((t) => {
+                    const tNome = (t.properties?.rio || '').toLowerCase();
+                    return tNome.includes(nomeRio) || nomeRio.includes(tNome.split(' ')[0]);
+                  });
+                }
+
+                if (trechoMatch) {
+                  renderizarPainelTrechoPesca(trechoMatch);
+                } else {
+                  abrirPainel(`
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span class="badge-tag" style="background-color: #0288d1; margin: 0;">Hidrografia da Bacia do Miranda</span>
+                      <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Calha Fluvial</span>
                     </div>
-                  </div>
-                  <div class="legal-note-box">
-                    Toque nos trechos destacados com cores vivas para visualizar as regras específicas de pesca (Cota Zero, Pesque e Solte, Defeso).
-                  </div>
-                `);
+                    <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(r.rio || 'Rio da Bacia')}</h2>
+                    <div class="data-group">
+                      <div class="data-item">
+                        <div class="data-label">Extensão Mapeada</div>
+                        <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Trecho mapeado pelo IMASUL'}</div>
+                      </div>
+                      <div class="data-item">
+                        <div class="data-label">Regra Geral de Pesca (MS)</div>
+                        <div class="data-value">Cota de 1 nativo na medida regulamentar + 5 piranhas (Dourado Proibido - Pesque e Solte)</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                      <button type="button" class="btn-cta btn-abrir-especies-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                        📏 Consultar Medidas Legais
+                      </button>
+                      <button type="button" class="btn-cta btn-abrir-guias-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0b4f6c; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                        🚤 Piloteiros da Bacia
+                      </button>
+                    </div>
+                  `);
+
+                  const btnEsp = document.querySelector('.btn-abrir-especies-rio');
+                  if (btnEsp) {
+                    btnEsp.addEventListener('click', () => {
+                      fecharPainel();
+                      if (typeof abrirModalEspecies === 'function') abrirModalEspecies();
+                    });
+                  }
+                  const btnGui = document.querySelector('.btn-abrir-guias-rio');
+                  if (btnGui) {
+                    btnGui.addEventListener('click', () => {
+                      fecharPainel();
+                      if (typeof window.abrirModalParceriasTab === 'function') window.abrirModalParceriasTab('piloteiros');
+                    });
+                  }
+                }
               });
             }
           });

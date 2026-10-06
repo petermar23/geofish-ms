@@ -9,6 +9,7 @@
         "nome_operacional": "Exemplo: Piloteiro Passo do Lontra",
         "colonia": "Z-1 (Miranda)",
         "porto_base": "Passo do Lontra & Foz do Rio Vermelho",
+        "rio_atuacao": "Rio Vermelho & Rio Miranda",
         "contato_wa": null,
         "tipo_barco": "Bote de Alumínio 6m / 25HP",
         "status": 1,
@@ -17,12 +18,13 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.505000, -20.505000] },
+      "geometry": { "type": "Point", "coordinates": [-56.368000, -20.235000] },
       "properties": {
         "id_guia": 2,
         "nome_operacional": "Exemplo: Piloteiro Porto Geral",
         "colonia": "Z-1 (Miranda)",
         "porto_base": "Miranda - Porto Geral",
+        "rio_atuacao": "Rio Miranda (Calha Principal)",
         "contato_wa": null,
         "tipo_barco": "Barco Pantaneiro 6m / 30HP",
         "status": 1,
@@ -31,12 +33,28 @@
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-56.124500, -20.893200] },
+      "geometry": { "type": "Point", "coordinates": [-55.787000, -20.471000] },
       "properties": {
         "id_guia": 3,
+        "nome_operacional": "Exemplo: Piloteiro Prainha de Anastácio",
+        "colonia": "Z-7 (Aquidauana)",
+        "porto_base": "Aquidauana - Prainha / Ponte Velha",
+        "rio_atuacao": "Rio Aquidauana",
+        "contato_wa": null,
+        "tipo_barco": "Bote de Alumínio 6m / 25HP",
+        "status": 1,
+        "demonstrativo": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-56.124500, -20.893200] },
+      "properties": {
+        "id_guia": 4,
         "nome_operacional": "Exemplo: Piloteiro Águas do Miranda",
         "colonia": "Z-11 (Bonito)",
         "porto_base": "Distrito de Águas do Miranda",
+        "rio_atuacao": "Rio Miranda & Rio Salobra",
         "contato_wa": null,
         "tipo_barco": "Bote de Alumínio 6m / 30HP",
         "status": 1,
