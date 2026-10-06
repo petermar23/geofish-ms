@@ -244,10 +244,125 @@ export function preencherSelectEspecies(selectEl) {
   }).join('');
 }
 
+export function gerarReguaVisualCard(esp) {
+  if (esp.status === 'proibido') {
+    return `
+      <div class="species-ruler-wrap">
+        <div class="species-ruler-bar">
+          <div class="ruler-seg-forbidden" style="width: 100%;">🚫 Soltura Obrigatória (Pesque e Solte 100%)</div>
+        </div>
+      </div>
+    `;
+  }
+  if (esp.status === 'exotica') {
+    return `
+      <div class="species-ruler-wrap">
+        <div class="species-ruler-bar">
+          <div class="ruler-seg-allowed" style="width: 100%;">🟢 Cota e Medida Livre (Alóctone/Exótica)</div>
+        </div>
+      </div>
+    `;
+  }
+  if (esp.id === 'piranha') {
+    return `
+      <div class="species-ruler-wrap">
+        <div class="species-ruler-bar">
+          <div class="ruler-seg-allowed" style="width: 100%;">🟢 Cota: Até 5 exemplares (sem tamanho mínimo)</div>
+        </div>
+      </div>
+    `;
+  }
+  if (esp.min && esp.max) {
+    const escalaMax = Math.round(esp.max * 1.25);
+    const p1 = Math.round((esp.min / escalaMax) * 100);
+    const p2 = Math.round(((esp.max - esp.min) / escalaMax) * 100);
+    const p3 = 100 - p1 - p2;
+    return `
+      <div class="species-ruler-wrap">
+        <div class="species-ruler-bar">
+          <div class="ruler-seg-forbidden" style="width: ${p1}%;">Proibido &lt;${esp.min}cm</div>
+          <div class="ruler-seg-allowed" style="width: ${p2}%;">✅ Permitido: ${esp.min} a ${esp.max} cm</div>
+          <div class="ruler-seg-matrix" style="width: ${p3}%;">Matriz &gt;${esp.max}cm</div>
+        </div>
+        <div class="species-ruler-labels">
+          <span>0 cm</span>
+          <span>${esp.min} cm (Mín)</span>
+          <span>${esp.max} cm (Máx)</span>
+          <span>${escalaMax} cm</span>
+        </div>
+      </div>
+    `;
+  }
+  if (esp.min) {
+    const escalaMax = Math.round(esp.min * 1.8);
+    const p1 = Math.round((esp.min / escalaMax) * 100);
+    const p2 = 100 - p1;
+    return `
+      <div class="species-ruler-wrap">
+        <div class="species-ruler-bar">
+          <div class="ruler-seg-forbidden" style="width: ${p1}%;">Proibido &lt;${esp.min}cm</div>
+          <div class="ruler-seg-allowed" style="width: ${p2}%;">✅ Permitido (&ge;${esp.min} cm)</div>
+        </div>
+        <div class="species-ruler-labels">
+          <span>0 cm</span>
+          <span>${esp.min} cm (Mínimo)</span>
+          <span>${escalaMax} cm+</span>
+        </div>
+      </div>
+    `;
+  }
+  return '';
+}
+
+export function gerarReguaInterativa(esp, valor) {
+  if (esp.status === 'proibido' || esp.status === 'exotica' || esp.id === 'piranha') {
+    return '';
+  }
+  let escalaMax = 100;
+  if (esp.max) escalaMax = Math.max(Math.round(esp.max * 1.25), Math.round(valor * 1.15));
+  else if (esp.min) escalaMax = Math.max(Math.round(esp.min * 1.8), Math.round(valor * 1.15));
+
+  const clampedVal = Math.min(Math.max(valor, 0), escalaMax);
+  const pinPct = Math.round((clampedVal / escalaMax) * 100);
+
+  let p1 = 0, p2 = 0, p3 = 0;
+  if (esp.min && esp.max) {
+    p1 = Math.round((esp.min / escalaMax) * 100);
+    p2 = Math.round(((esp.max - esp.min) / escalaMax) * 100);
+    p3 = 100 - p1 - p2;
+  } else if (esp.min) {
+    p1 = Math.round((esp.min / escalaMax) * 100);
+    p2 = 100 - p1;
+  }
+
+  return `
+    <div class="species-ruler-wrap" style="margin-top: 26px; margin-bottom: 8px;">
+      <div class="species-ruler-bar" style="height: 24px;">
+        ${esp.max ? `
+          <div class="ruler-seg-forbidden" style="width: ${p1}%;">Proibido &lt;${esp.min}cm</div>
+          <div class="ruler-seg-allowed" style="width: ${p2}%;">Permitido (${esp.min} - ${esp.max}cm)</div>
+          <div class="ruler-seg-matrix" style="width: ${p3}%;">Matriz &gt;${esp.max}cm</div>
+        ` : `
+          <div class="ruler-seg-forbidden" style="width: ${p1}%;">Proibido &lt;${esp.min}cm</div>
+          <div class="ruler-seg-allowed" style="width: ${p2}%;">Permitido (&ge;${esp.min}cm)</div>
+        `}
+        <div class="ruler-interactive-pin" style="left: ${pinPct}%;"></div>
+        <div class="ruler-interactive-tag" style="left: ${pinPct}%;">📍 ${valor} cm</div>
+      </div>
+      <div class="species-ruler-labels">
+        <span>0 cm</span>
+        <span>${esp.min} cm</span>
+        ${esp.max ? `<span>${esp.max} cm</span>` : ''}
+        <span>${escalaMax} cm</span>
+      </div>
+    </div>
+  `;
+}
+
 export function renderizarEspecies(termoBusca = '', containerEl = null) {
   const container = containerEl 
-    ? (containerEl.querySelector('#species-grid') || containerEl.querySelector('#species-cards-container'))
-    : (document.getElementById('species-grid') || document.getElementById('species-cards-container'));
+    ? (containerEl.querySelector('#species-grid') || containerEl.querySelector('#grid-especies-cards') || containerEl.querySelector('#species-cards-container'))
+    : (document.getElementById('species-grid') || document.getElementById('grid-especies-cards') || document.getElementById('species-cards-container'));
 
   if (!container) return;
 
@@ -271,18 +386,20 @@ export function renderizarEspecies(termoBusca = '', containerEl = null) {
     else if (esp.status === 'exotica') badgeClass = 'badge-exotica';
     else if (esp.status === 'cota-especial') badgeClass = 'badge-especial';
 
-    let medidasTexto = '';
-    if (esp.min && esp.max) {
-      medidasTexto = `<span>Mín: <strong>${esp.min} cm</strong></span> <span>Máx: <strong>${esp.max} cm</strong></span>`;
+    let vereditoDireto = '';
+    if (esp.status === 'proibido') {
+      vereditoDireto = `<div style="font-size: 0.8rem; font-weight: 800; color: #b91c1c; margin-bottom: 2px;">🔴 Soltura Obrigatória (Pesque e Solte)</div>`;
+    } else if (esp.status === 'exotica') {
+      vereditoDireto = `<div style="font-size: 0.8rem; font-weight: 800; color: #15803d; margin-bottom: 2px;">🟢 Pode Reter (Cota Livre)</div>`;
+    } else if (esp.min && esp.max) {
+      vereditoDireto = `<div style="font-size: 0.8rem; font-weight: 800; color: #15803d; margin-bottom: 2px;">🟢 Pode Reter: entre ${esp.min} cm e ${esp.max} cm (1 Nativo)</div>`;
     } else if (esp.min) {
-      medidasTexto = `<span>Mínimo: <strong>${esp.min} cm</strong></span> <span>Sem limite máx.</span>`;
-    } else if (esp.status === 'proibido') {
-      medidasTexto = `<span style="color: #b91c1c; font-weight: 700;">Moratória: Captura 0 cm</span>`;
+      vereditoDireto = `<div style="font-size: 0.8rem; font-weight: 800; color: #15803d; margin-bottom: 2px;">🟢 Pode Reter: a partir de ${esp.min} cm (1 Nativo)</div>`;
     } else if (esp.id === 'piranha') {
-      medidasTexto = `<span style="color: #92400e; font-weight: 700;">Até 5 exemplares (sem tamanho)</span>`;
-    } else {
-      medidasTexto = `<span style="color: #15803d; font-weight: 700;">Cota Livre (Espécie Exótica)</span>`;
+      vereditoDireto = `<div style="font-size: 0.8rem; font-weight: 800; color: #15803d; margin-bottom: 2px;">🟢 Pode Reter: até 5 exemplares cumulativos</div>`;
     }
+
+    const reguaVisualHtml = gerarReguaVisualCard(esp);
 
     return `
       <div class="species-card ${esp.status === 'proibido' ? 'species-card-proibido' : ''}">
@@ -293,10 +410,9 @@ export function renderizarEspecies(termoBusca = '', containerEl = null) {
           </div>
           <span class="species-badge ${badgeClass}">${escapeHTML(esp.statusTexto)}</span>
         </div>
-        <div class="species-measures">
-          ${medidasTexto}
-        </div>
-        <div class="species-desc">${escapeHTML(esp.regra)}</div>
+        ${vereditoDireto}
+        ${reguaVisualHtml}
+        <div class="species-desc" style="margin-top: 6px;">${escapeHTML(esp.regra)}</div>
       </div>
     `;
   }).join('');
@@ -315,32 +431,45 @@ export function verificarMedidaPescado(modalEl = null) {
   if (!esp) return;
 
   vibrar(20);
+  measureResult.style.display = 'block';
 
   // 1. Verificação de Período de Defeso (Piracema)
   if (estaEmDefeso() && esp.status !== 'exotica') {
     measureResult.className = 'measure-result-box forbidden';
-    measureResult.innerHTML = `🚫 <strong>Período de Defeso da Piracema em Vigor (05/Nov a 28/Fev*)!</strong><br>A captura, transporte e estocagem de espécies nativas (como o <strong>${escapeHTML(esp.nome)}</strong>) estão <strong>suspensos por normas estaduais (SEMADESC/IMASUL)</strong> em toda a Bacia do Rio Miranda. O abate durante a reprodução natural constitui infração e crime ambiental (Lei Federal nº 9.605/1998 e Decreto nº 6.514/2008). <strong>Solte o exemplar vivo imediatamente no rio!</strong>`;
+    measureResult.innerHTML = `
+      <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: SOLTURA OBRIGATÓRIA</div>
+      <div>🚫 <strong>Período de Defeso da Piracema em Vigor (05/Nov a 28/Fev*)!</strong><br>A captura, transporte e estocagem de espécies nativas (como o <strong>${escapeHTML(esp.nome)}</strong>) estão <strong>suspensos por normas estaduais (SEMADESC/IMASUL)</strong> em toda a Bacia do Rio Miranda. O abate durante a reprodução natural constitui crime ambiental (Lei Federal nº 9.605/1998). <strong>Solte o exemplar vivo imediatamente!</strong></div>
+    `;
     return;
   }
 
   // 2. Dourado: Moratória e Proibição Total de Abate
   if (esp.status === 'proibido') {
     measureResult.className = 'measure-result-box forbidden';
-    measureResult.innerHTML = `🚫 <strong>Dourado Proibido (Lei nº 5.321/19 prorrogada até 2029)!</strong><br>Em Mato Grosso do Sul, a captura e o abate do Dourado são proibidos por moratória legal em todas as bacias. <strong>Permitido exclusivamente Pesque e Solte esportivo. Solte vivo imediatamente!</strong>`;
+    measureResult.innerHTML = `
+      <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: SOLTURA OBRIGATÓRIA</div>
+      <div>🚫 <strong>Dourado Protegido por Lei (Lei nº 6.190/24 até 2029)!</strong><br>Em Mato Grosso do Sul, o abate e transporte de Dourado são estritamente proibidos por moratória legal em todas as bacias. <strong>Permitida exclusivamente a modalidade Pesque e Solte esportivo. Devolva vivo imediatamente à água!</strong></div>
+    `;
     return;
   }
 
   // 3. Piranha: Até 5 exemplares cumulativos, sem medição de tamanho
   if (esp.id === 'piranha') {
     measureResult.className = 'measure-result-box allowed';
-    measureResult.innerHTML = `✅ <strong>Piranha (Até 5 Exemplares Cumulativos):</strong><br>Não há medida mínima nem máxima fixada em MS para piranhas. O pescador licenciado no IMASUL pode capturar e transportar até <strong>5 (cinco) exemplares</strong> cumulativamente com o exemplar nativo (Art. 4º, II do Decreto nº 15.166/19).`;
+    measureResult.innerHTML = `
+      <div style="font-size: 0.95rem; font-weight: 800; color: #15803d; margin-bottom: 4px;">🟢 PODE RETER (Até 5 exemplares)</div>
+      <div>✅ <strong>Piranha:</strong> Não há medida mínima ou máxima fixada em MS para piranhas. O pescador licenciado no IMASUL pode capturar e transportar até <strong>5 (cinco) exemplares</strong> cumulativamente com o exemplar nativo (Art. 4º, II do Decreto nº 15.166/19).</div>
+    `;
     return;
   }
 
   // 4. Espécies Exóticas / Alóctones: Captura e Cota Livre
   if (esp.status === 'exotica') {
     measureResult.className = 'measure-result-box allowed';
-    measureResult.innerHTML = `✅ <strong>Espécie Exótica / Alóctone!</strong><br>Captura e transporte <strong>totalmente livres de limite de tamanho e cota</strong> (Decreto Estadual nº 15.166/19, Art. 7º). O controle e pesca dessas espécies são incentivados para preservação da ictiofauna nativa pantaneira!`;
+    measureResult.innerHTML = `
+      <div style="font-size: 0.95rem; font-weight: 800; color: #15803d; margin-bottom: 4px;">🟢 PODE RETER (Cota e Medida Livre)</div>
+      <div>✅ <strong>Espécie Exótica / Alóctone!</strong> Captura e transporte <strong>totalmente livres de limite de tamanho e cota</strong> (Decreto Estadual nº 15.166/19, Art. 7º). A pesca dessa espécie é incentivada para conservação da ictiofauna nativa.</div>
+    `;
     return;
   }
 
@@ -348,24 +477,32 @@ export function verificarMedidaPescado(modalEl = null) {
   const valor = parseFloat(inputSize?.value);
   if (isNaN(valor) || valor <= 0) {
     measureResult.className = 'measure-result-box forbidden';
-    measureResult.textContent = 'Por favor, informe o comprimento do peixe em centímetros (ex: 88).';
+    measureResult.innerHTML = `⚠️ Por favor, informe o comprimento do peixe medido da ponta do focinho à extremidade da cauda em centímetros (ex: 88).`;
     return;
   }
 
   const avisoTrechoPesqueSolte = `
-    <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #86efac; font-size: 0.78rem; color: #166534; line-height: 1.4;">
-      ⚠️ <strong>Atenção Territorial aos Trechos de Pesca:</strong> Se capturado em trechos declarados de <strong>Pesque e Solte</strong> (como o <strong>Rio Salobra e afluentes</strong>, ou trechos protegidos da calha do Rio Miranda/Aquidauana — consulte a camada no mapa), o abate e transporte são <strong>PROIBIDOS</strong> para qualquer espécie nativa! Devolva vivo imediatamente à água.
+    <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #86efac; font-size: 0.76rem; color: #166534; line-height: 1.4;">
+      ⚠️ <strong>Atenção Territorial:</strong> Em trechos declarados exclusivamente de <strong>Pesque e Solte</strong> (como o <strong>Rio Salobra</strong> e afluentes), o abate é <strong>PROIBIDO</strong> mesmo para peixes na medida! Devolva sempre vivo.
     </div>
   `;
 
-  // 5. Piraputanga: Medida geral 30cm + Alerta rigoroso do Rio Salobra
+  const reguaInterativaHtml = gerarReguaInterativa(esp, valor);
+
+  // 5. Piraputanga: Medida geral 30cm
   if (esp.id === 'piraputanga') {
     if (valor >= 30) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo Geral!</strong> (${valor} cm &ge; 30 cm). Permitido para captura e transporte (1 exemplar nativo) na calha comum da bacia.${avisoTrechoPesqueSolte}`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #15803d; margin-bottom: 4px;">🟢 PODE RETER (${valor} cm &ge; 30 cm)</div>
+        <div>✅ <strong>Acima do Tamanho Mínimo!</strong> Permitido para captura e transporte (dentro da cota de 1 exemplar nativo por pescador com licença IMASUL).${reguaInterativaHtml}${avisoTrechoPesqueSolte}</div>
+      `;
     } else {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; 30 cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: SOLTURA OBRIGATÓRIA</div>
+        <div>❌ <strong>Abaixo do Mínimo Legal (${valor} cm &lt; 30 cm)!</strong> Infração ambiental grave. <strong>Solte o peixe na água com cuidado e vivo (Art. 9º, § 3º)!</strong>${reguaInterativaHtml}</div>
+      `;
     }
     return;
   }
@@ -374,22 +511,37 @@ export function verificarMedidaPescado(modalEl = null) {
   if (esp.min && esp.max) {
     if (valor >= esp.min && valor <= esp.max) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador com carteirinha do IMASUL). O peixe transportado deve estar <strong>inteiro no gelo com cabeça e cauda</strong>, lacrado pela PMA com a GCP!${avisoTrechoPesqueSolte}`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #15803d; margin-bottom: 4px;">🟢 PODE RETER: DENTRO DA FAIXA LEGAL</div>
+        <div>✅ <strong>Dentro da Faixa Permitida!</strong> (${esp.min} a ${esp.max} cm). O peixe mede <strong>${valor} cm</strong>. Permitido para transporte (cota de 1 exemplar nativo por pescador licenciado). Deve ser mantido inteiro no gelo com cabeça e vísceras para vistoria e lacre no posto da PMA antes da rodovia.${reguaInterativaHtml}${avisoTrechoPesqueSolte}</div>
+      `;
     } else if (valor < esp.min) {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem ${valor} cm e o mínimo legal é <strong>${esp.min} cm</strong>. Infração ambiental grave sujeita a apreensão do barco e multa. <strong>Solte imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: SOLTURA OBRIGATÓRIA</div>
+        <div>❌ <strong>Abaixo da Medida Mínima!</strong> O peixe tem <strong>${valor} cm</strong> e o mínimo legal é <strong>${esp.min} cm</strong>. Reter exemplar juvenil sujeita a apreensão e multa. <strong>Solte vivo imediatamente na água!</strong>${reguaInterativaHtml}</div>
+      `;
     } else {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Acima da Medida Máxima!</strong> O exemplar tem ${valor} cm e o teto máximo de proteção de matrizes reprodutoras é <strong>${esp.max} cm</strong>. <strong>Solte vivo imediatamente no local de captura (Art. 9º, § 3º)!</strong>`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: MATRIZ REPRODUTORA PROTEGIDA</div>
+        <div>❌ <strong>Acima da Medida Máxima!</strong> O peixe mede <strong>${valor} cm</strong> e o limite máximo de proteção de matrizes é <strong>${esp.max} cm</strong>. Exemplares gigantes são vitais para a reprodução do rio. <strong>Solte vivo imediatamente (Art. 9º, § 3º)!</strong>${reguaInterativaHtml}</div>
+      `;
     }
   } else if (esp.min) {
     // 7. Espécies com tamanho mínimo apenas
     if (valor >= esp.min) {
       measureResult.className = 'measure-result-box allowed';
-      measureResult.innerHTML = `✅ <strong>Acima do Tamanho Mínimo!</strong> (${valor} cm &ge; ${esp.min} cm). Permitido para captura e transporte (integrante da cota de 1 exemplar nativo por pescador licenciado).${avisoTrechoPesqueSolte}`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #15803d; margin-bottom: 4px;">🟢 PODE RETER (${valor} cm &ge; ${esp.min} cm)</div>
+        <div>✅ <strong>Acima do Tamanho Mínimo!</strong> Permitido para retenção e transporte (integrante da cota de 1 exemplar nativo). Lembre-se de passar no posto da PMA para lacre e emissão da Guia GCP.${reguaInterativaHtml}${avisoTrechoPesqueSolte}</div>
+      `;
     } else {
       measureResult.className = 'measure-result-box forbidden';
-      measureResult.innerHTML = `❌ <strong>Abaixo do Mínimo Legal!</strong> (${valor} cm &lt; ${esp.min} cm). Proibido o abate ou transporte. <strong>Solte o peixe na água com cuidado (Art. 9º, § 3º)!</strong>`;
+      measureResult.innerHTML = `
+        <div style="font-size: 0.95rem; font-weight: 800; color: #b91c1c; margin-bottom: 4px;">🔴 NÃO PODE ABATER: SOLTURA OBRIGATÓRIA</div>
+        <div>❌ <strong>Abaixo do Mínimo Legal (${valor} cm &lt; ${esp.min} cm)!</strong> Proibido o abate. <strong>Devolva vivo imediatamente ao rio (Art. 9º, § 3º)!</strong>${reguaInterativaHtml}</div>
+      `;
     }
   } else {
     measureResult.className = 'measure-result-box allowed';
@@ -401,11 +553,11 @@ export function abrirModalEspecies(idEspeciePreSelecionada = null) {
   modalEspeciesInstancia = abrirModalDeTemplate('template-modal-especies', {
     modalId: 'modal-especies',
     onMount: (modalEl) => {
-      const selectEl = modalEl.querySelector('#checker-species');
+      const selectEl = modalEl.querySelector('#checker-species') || modalEl.querySelector('#select-especie');
       preencherSelectEspecies(selectEl);
       if (idEspeciePreSelecionada && selectEl) {
         selectEl.value = idEspeciePreSelecionada;
-        const inputLen = modalEl.querySelector('#checker-length');
+        const inputLen = modalEl.querySelector('#checker-length') || modalEl.querySelector('#checker-size');
         if (inputLen) {
           setTimeout(() => inputLen.focus(), 150);
         }
@@ -420,7 +572,16 @@ export function abrirModalEspecies(idEspeciePreSelecionada = null) {
         btnRunCheck.addEventListener('click', () => verificarMedidaPescado(modalEl));
       }
 
-      const speciesSearchInput = modalEl.querySelector('#species-search-input');
+      if (selectEl) {
+        selectEl.addEventListener('change', () => {
+          const inputLen = modalEl.querySelector('#checker-length') || modalEl.querySelector('#checker-size');
+          if (inputLen && inputLen.value) {
+            verificarMedidaPescado(modalEl);
+          }
+        });
+      }
+
+      const speciesSearchInput = modalEl.querySelector('#species-search-input') || modalEl.querySelector('#input-busca-especie');
       if (speciesSearchInput) {
         speciesSearchInput.addEventListener('input', (e) => {
           renderizarEspecies(e.target.value, modalEl);

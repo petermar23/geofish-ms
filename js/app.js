@@ -21,9 +21,8 @@ import {
 
 import GeoFishDB from './db.js';
 
-// Telefone oficial para recebimento das solicitações de parcerias e cadastros comunitários
-// Canal de homologação oficial GeoFish MS (+55 16 99266-7526)
-export const WHATSAPP_CONTATO_OFICIAL = '5516992667526';
+// Canal oficial a ser configurado mediante homologação formal do projeto
+export const WHATSAPP_CONTATO_OFICIAL = null;
 
 import {
   abrirModalCartilha,
@@ -1574,7 +1573,8 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
     const coords = feat.geometry ? feat.geometry.coordinates : null;
     const lat = coords ? coords[1] : null;
     const lng = coords ? coords[0] : null;
-    const waUrl = normalizeWhatsApp(p.contato_wa);
+    const isConfirmado = Boolean(p.credenciado && p.contato_wa);
+    const waUrl = isConfirmado ? normalizeWhatsApp(p.contato_wa) : '';
 
     return `
       <article class="sidebar-guia-card">
@@ -1588,14 +1588,20 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
               ⛵ <strong>Embarcação:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
             </div>
           </div>
-          <span class="badge-tag" style="background: #0b4f6c; font-size: 0.68rem; margin: 0; white-space: nowrap;">Homologado</span>
+          <span class="badge-tag" style="background: ${isConfirmado ? '#15803d' : '#f1f5f9'}; color: ${isConfirmado ? '#ffffff' : '#475569'}; border: ${isConfirmado ? 'none' : '1px solid #cbd5e1'}; font-size: 0.68rem; margin: 0; white-space: nowrap;">
+            ${isConfirmado ? '✓ Confirmado' : 'Demonstrativo'}
+          </span>
         </div>
         <div class="sidebar-guia-card-actions">
           ${waUrl ? `
             <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" title="Conversar no WhatsApp">
               <span>💬 WhatsApp</span>
             </a>
-          ` : ''}
+          ` : `
+            <span style="font-size: 0.72rem; color: #64748b; font-style: italic; align-self: center;">
+              Homologação em andamento
+            </span>
+          `}
           ${(lat && lng) ? `
             <button type="button" class="btn-guia-focar" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome_operacional || '')}" title="Ver no Mapa">
               <span>🗺️ Ver no Mapa</span>
@@ -1639,12 +1645,13 @@ function renderizarSidebarPousadas() {
     return t.includes('rampa') || t.includes('porto') || t.includes('apoio') || t.includes('marina') || t.includes('pousada');
   });
 
-  container.innerHTML = rampas.map(feat => {
+  const htmlRampas = rampas.map(feat => {
     const p = feat.properties || {};
     const coords = feat.geometry ? feat.geometry.coordinates : null;
     const lat = coords ? coords[1] : null;
     const lng = coords ? coords[0] : null;
-    const tel = p.telefone_emergencia ? sanitizeTel(p.telefone_emergencia) : '';
+    const temTelefoneValido = p.telefone_emergencia && !p.telefone_emergencia.includes('190') && p.contato_status !== 'sem_telefone';
+    const tel = temTelefoneValido ? sanitizeTel(p.telefone_emergencia) : '';
 
     return `
       <article class="sidebar-guia-card">
@@ -1657,6 +1664,11 @@ function renderizarSidebarPousadas() {
             ${p.endereco ? `
               <div class="sidebar-guia-card-meta" style="color: #64748b;">
                 📍 ${escapeHTML(p.endereco)}
+              </div>
+            ` : ''}
+            ${!temTelefoneValido ? `
+              <div class="sidebar-guia-card-meta" style="color: #64748b; font-style: italic;">
+                📞 Sem telefone cadastrado (Acesso público local)
               </div>
             ` : ''}
           </div>
@@ -1676,6 +1688,31 @@ function renderizarSidebarPousadas() {
       </article>
     `;
   }).join('');
+
+  const htmlModeloPousada = `
+    <div style="margin-top: 14px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">🏨 Estrutura de Pousadas &amp; Ranchos</span>
+        <span class="badge-tag" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.65rem; margin: 0;">Ficha Modelo</span>
+      </div>
+      <article class="sidebar-guia-card" style="border: 1px dashed #94a3b8; background: #f8fafc;">
+        <div class="sidebar-guia-card-header">
+          <div>
+            <div class="sidebar-guia-card-title">Rancho Pantaneiro (Modelo de Ficha)</div>
+            <div class="sidebar-guia-card-meta">📍 <strong>Região:</strong> Bacia do Rio Miranda</div>
+            <div class="sidebar-guia-card-meta">⚓ <strong>Atracadouro:</strong> Rampa de concreto e trapiche flutuante</div>
+            <div class="sidebar-guia-card-meta">🛎️ <strong>Comodidades:</strong> Barcos com motor, gelo, piloteiros e iscas</div>
+            <div class="sidebar-guia-card-meta" style="color: #64748b; font-style: italic;">📞 Aguardando homologação do proprietário</div>
+          </div>
+        </div>
+        <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; padding: 6px 8px; background: #ffffff; border-radius: 4px; border: 1px solid #e2e8f0;">
+          ℹ️ <strong>Proprietário:</strong> Anuncie sua pousada ou rancho gratuitamente para aparecer com status Verificado e receber turistas direto no seu contato.
+        </div>
+      </article>
+    </div>
+  `;
+
+  container.innerHTML = htmlRampas + htmlModeloPousada;
 
   container.querySelectorAll('.btn-guia-focar').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1732,6 +1769,11 @@ function inicializarSidebarDataGeo() {
   if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', fecharSidebar);
   if (btnOpenSidebarFloat) btnOpenSidebarFloat.addEventListener('click', abrirSidebar);
   if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', fecharSidebar);
+
+  // No mobile (<= 768px), inicia com a sidebar recolhida para o mapa respirar
+  if (window.innerWidth <= 768 && sidebar) {
+    sidebar.classList.add('collapsed');
+  }
 
   // Alternância de Abas da Sidebar
   document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
@@ -2764,10 +2806,14 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
-          window.open(urlWpp, '_blank');
+          if (WHATSAPP_CONTATO_OFICIAL) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
+            window.open(urlWpp, '_blank');
+            showToast('Proposta gerada! Encaminhando diretamente à coordenação.');
+          } else {
+            showToast('Dados copiados para a área de transferência para validação cadastral!');
+          }
           vibrar(30);
-          showToast('Proposta gerada! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
           destroy();
         });
       }
@@ -2785,10 +2831,14 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
             try { await navigator.clipboard.writeText(textoMensagem); } catch (_) {}
           }
 
-          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(textoMensagem)}`;
-          window.open(urlWpp, '_blank');
+          if (WHATSAPP_CONTATO_OFICIAL) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(textoMensagem)}`;
+            window.open(urlWpp, '_blank');
+            showToast('Abrindo WhatsApp oficial! Grave seu áudio ou envie seus dados.');
+          } else {
+            showToast('Texto de apresentação copiado para a área de transferência!');
+          }
           vibrar(30);
-          showToast('Abrindo WhatsApp oficial! Grave seu áudio ou envie seus dados.');
           destroy();
         });
       }
@@ -2812,16 +2862,20 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
             `📍 *Porto de Saída:* ${porto || 'A combinar'}\n` +
             `⛵ *Embarcação / Motor:* ${barco || 'Barco homologado'}\n` +
             `💬 *WhatsApp Turistas:* ${wpp || 'Mesmo número deste WhatsApp'}\n\n` +
-            `Olá Peterson! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
+            `Olá! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
 
           if (navigator.clipboard && navigator.clipboard.writeText) {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
-          window.open(urlWpp, '_blank');
+          if (WHATSAPP_CONTATO_OFICIAL) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
+            window.open(urlWpp, '_blank');
+            showToast('Dados formatados! Encaminhando diretamente à coordenação.');
+          } else {
+            showToast('Dados do piloteiro copiados para a área de transferência!');
+          }
           vibrar(30);
-          showToast('Dados formatados! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
           destroy();
         });
       }
@@ -2983,6 +3037,31 @@ document.addEventListener('click', (e) => {
 
   const action = actionEl.getAttribute('data-action');
   switch (action) {
+    case 'tarefa-explorar-mapa':
+      e.preventDefault();
+      vibrar(20);
+      map.fitBounds(BOUNDS_BACIA, { padding: [20, 20] });
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('geofish-sidebar');
+        if (sidebar) sidebar.classList.add('collapsed');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (backdrop) backdrop.classList.remove('active');
+        map.invalidateSize();
+      } else {
+        showToast('Mapa focado na Bacia do Rio Miranda');
+      }
+      break;
+    case 'tarefa-consultar-regras':
+      e.preventDefault();
+      vibrar(20);
+      abrirModalEspecies();
+      break;
+    case 'tarefa-encontrar-servicos':
+      e.preventDefault();
+      vibrar(20);
+      const tabGuias = document.getElementById('tab-guias');
+      if (tabGuias) tabGuias.click();
+      break;
     case 'abrir-cartilha':
       e.preventDefault();
       vibrar(25);
