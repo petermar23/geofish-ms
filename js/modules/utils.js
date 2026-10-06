@@ -52,16 +52,21 @@ export function formatPossuiRampa(val) {
 }
 
 export function obterCorPorRegra(regra) {
-  switch (regra) {
-    case 'Pesque e Solte':
-      return '#2e7d32'; // Verde
-    case 'Cota Zero':
-      return '#f57c00'; // Laranja
-    case 'Defeso':
-      return '#d32f2f'; // Vermelho
-    default:
-      return '#0288d1'; // Azul padrão
+  if (!regra) return '#0ea5e9';
+  const r = String(regra).toLowerCase();
+  if (r.includes('cota 1') || r.includes('permitid') || r.includes('aberta') || r.includes('faixa')) {
+    return '#10b981'; // Verde Esmeralda d'água
   }
+  if (r.includes('solte') || r.includes('pesque')) {
+    return '#0284c7'; // Azul Oceano profundo
+  }
+  if (r.includes('cota zero')) {
+    return '#f59e0b'; // Âmbar Pantaneiro
+  }
+  if (r.includes('defeso') || r.includes('proibid') || r.includes('restrit')) {
+    return '#ef4444'; // Coral de alerta
+  }
+  return '#0ea5e9'; // Ciano hidrográfico padrão
 }
 
 /**

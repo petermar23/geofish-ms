@@ -855,14 +855,38 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'riosPane',
             style: (feature) => ({
-              color: obterCorPorRegra(feature.properties.regra),
-              weight: 8,
-              opacity: 0.95
+              color: obterCorPorRegra(feature.properties?.regra),
+              weight: 5.5,
+              opacity: 0.92,
+              lineCap: 'round',
+              lineJoin: 'round'
             }),
             onEachFeature: (feature, layer) => {
-              layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                renderizarPainelTrechoPesca(feature);
+              const p = feature.properties || {};
+              const nomeRio = p.rio || 'Trecho de Pesca';
+              const regra = p.regra || 'Regulamentado';
+              layer.bindTooltip(`<strong>${escapeHTML(nomeRio)}</strong> &bull; ${escapeHTML(regra)}`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -6],
+                sticky: true
+              });
+
+              layer.on({
+                mouseover: (e) => {
+                  const l = e.target;
+                  l.setStyle({ weight: 8.5, opacity: 1 });
+                  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    l.bringToFront();
+                  }
+                },
+                mouseout: (e) => {
+                  camadaLeaflet.resetStyle(e.target);
+                },
+                click: (e) => {
+                  L.DomEvent.stopPropagation(e);
+                  renderizarPainelTrechoPesca(feature);
+                }
               });
             }
           });
@@ -875,7 +899,7 @@ async function carregarTodasCamadas() {
                 className: 'custom-guia-marker',
                 html: `
                   <div style="
-                    background: #0284c7;
+                    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
                     color: #ffffff;
                     width: 32px;
                     height: 32px;
@@ -883,10 +907,11 @@ async function carregarTodasCamadas() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 16px;
-                    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-                    border: 2px solid #ffffff;
+                    font-size: 15px;
+                    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+                    border: 2.5px solid #ffffff;
                     cursor: pointer;
+                    transition: transform 0.2s ease;
                   ">🚤</div>
                 `,
                 iconSize: [32, 32],
@@ -895,6 +920,13 @@ async function carregarTodasCamadas() {
               return L.marker(latlng, { icon: iconeGuia, pane: 'guiasPane' });
             },
             onEachFeature: (feature, layer) => {
+              const gNome = feature.properties?.nome_operacional || 'Guia de Pesca';
+              layer.bindTooltip(escapeHTML(gNome), {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -16]
+              });
+
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 const g = feature.properties;
@@ -991,26 +1023,34 @@ async function carregarTodasCamadas() {
                 className: isRampa ? 'custom-rampa-marker' : 'custom-sos-marker',
                 html: `
                   <div style="
-                    background: ${isRampa ? '#0d9488' : '#dc2626'};
+                    background: ${isRampa ? 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'};
                     color: #ffffff;
-                    width: 28px;
-                    height: 28px;
+                    width: 30px;
+                    height: 30px;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 14px;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                    border: 2px solid #ffffff;
+                    box-shadow: 0 4px 12px ${isRampa ? 'rgba(13, 148, 136, 0.35)' : 'rgba(239, 68, 68, 0.35)'};
+                    border: 2.5px solid #ffffff;
                     cursor: pointer;
+                    transition: transform 0.2s ease;
                   ">${isRampa ? '⚓' : '🚨'}</div>
                 `,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
               });
               return L.marker(latlng, { icon: iconePonto, pane: 'apoioPane' });
             },
             onEachFeature: (feature, layer) => {
+              const aNome = feature.properties?.nome || 'Ponto de Apoio';
+              layer.bindTooltip(escapeHTML(aNome), {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -15]
+              });
+
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 const a = feature.properties;
@@ -1056,13 +1096,23 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'restritasPane',
             style: {
-              color: '#f57c00',
-              fillColor: '#f57c00',
+              color: '#f59e0b',
+              fillColor: '#f59e0b',
               weight: 2,
-              fillOpacity: 0.25,
-              dashArray: '5, 5'
+              fillOpacity: 0.2,
+              dashArray: '5, 5',
+              lineCap: 'round',
+              lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
+              const uNome = feature.properties?.nome || 'Unidade de Conservação';
+              layer.bindTooltip(escapeHTML(uNome), {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -8],
+                sticky: true
+              });
+
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 const u = feature.properties;
@@ -1092,67 +1142,84 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'hidrografiaBasePane',
             style: {
-              color: '#0288d1',
-              weight: 5,
-              opacity: 0.6,
-              dashArray: '3, 6'
+              color: '#0ea5e9',
+              weight: 4,
+              opacity: 0.72,
+              lineCap: 'round',
+              lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
-              layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const r = feature.properties || {};
-                const dadosTrechos = dadosCarregados['trechos_pesca'];
-                let trechoMatch = null;
-                if (dadosTrechos && dadosTrechos.features) {
-                  const nomeRio = (r.rio || '').toLowerCase();
-                  trechoMatch = dadosTrechos.features.find((t) => {
-                    const tNome = (t.properties?.rio || '').toLowerCase();
-                    return tNome.includes(nomeRio) || nomeRio.includes(tNome.split(' ')[0]);
-                  });
-                }
+              const r = feature.properties || {};
+              const nomeRio = r.rio || 'Rio da Bacia';
+              layer.bindTooltip(`<strong>${escapeHTML(nomeRio)}</strong> &bull; Hidrografia`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -4],
+                sticky: true
+              });
 
-                if (trechoMatch) {
-                  renderizarPainelTrechoPesca(trechoMatch);
-                } else {
-                  abrirPainel(`
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                      <span class="badge-tag" style="background-color: #0288d1; margin: 0;">Hidrografia da Bacia do Miranda</span>
-                      <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Calha Fluvial</span>
-                    </div>
-                    <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(r.rio || 'Rio da Bacia')}</h2>
-                    <div class="data-group">
-                      <div class="data-item">
-                        <div class="data-label">Extensão Mapeada</div>
-                        <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Trecho mapeado pelo IMASUL'}</div>
-                      </div>
-                      <div class="data-item">
-                        <div class="data-label">Regra Geral de Pesca (MS)</div>
-                        <div class="data-value">Cota de 1 nativo na medida regulamentar + 5 piranhas (Dourado Proibido - Pesque e Solte)</div>
-                      </div>
-                    </div>
-                    <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                      <button type="button" class="btn-cta btn-abrir-especies-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
-                        📏 Consultar Medidas Legais
-                      </button>
-                      <button type="button" class="btn-cta btn-abrir-guias-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0b4f6c; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
-                        🚤 Piloteiros da Bacia
-                      </button>
-                    </div>
-                  `);
-
-                  const btnEsp = document.querySelector('.btn-abrir-especies-rio');
-                  if (btnEsp) {
-                    btnEsp.addEventListener('click', () => {
-                      fecharPainel();
-                      if (typeof abrirModalEspecies === 'function') abrirModalEspecies();
+              layer.on({
+                mouseover: (e) => {
+                  e.target.setStyle({ weight: 6.5, opacity: 0.95 });
+                },
+                mouseout: (e) => {
+                  camadaLeaflet.resetStyle(e.target);
+                },
+                click: (e) => {
+                  L.DomEvent.stopPropagation(e);
+                  const dadosTrechos = dadosCarregados['trechos_pesca'];
+                  let trechoMatch = null;
+                  if (dadosTrechos && dadosTrechos.features) {
+                    const nomeRioLower = (r.rio || '').toLowerCase();
+                    trechoMatch = dadosTrechos.features.find((t) => {
+                      const tNome = (t.properties?.rio || '').toLowerCase();
+                      return tNome.includes(nomeRioLower) || nomeRioLower.includes(tNome.split(' ')[0]);
                     });
                   }
-                  const btnGui = document.querySelector('.btn-abrir-guias-rio');
-                  if (btnGui) {
-                    btnGui.addEventListener('click', () => {
-                      fecharPainel();
-                      if (typeof window.abrirModalParceriasTab === 'function') window.abrirModalParceriasTab('piloteiros');
-                    });
+
+                  if (trechoMatch) {
+                    renderizarPainelTrechoPesca(trechoMatch);
+                  } else {
+                    abrirPainel(`
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span class="badge-tag" style="background-color: #0288d1; margin: 0;">Hidrografia da Bacia do Miranda</span>
+                        <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Calha Fluvial</span>
+                      </div>
+                      <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(r.rio || 'Rio da Bacia')}</h2>
+                      <div class="data-group">
+                        <div class="data-item">
+                          <div class="data-label">Extensão Mapeada</div>
+                          <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Trecho mapeado pelo IMASUL'}</div>
+                        </div>
+                        <div class="data-item">
+                          <div class="data-label">Regra Geral de Pesca (MS)</div>
+                          <div class="data-value">Cota de 1 nativo na medida regulamentar + 5 piranhas (Dourado Proibido - Pesque e Solte)</div>
+                        </div>
+                      </div>
+                      <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                        <button type="button" class="btn-cta btn-abrir-especies-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                          📏 Consultar Medidas Legais
+                        </button>
+                        <button type="button" class="btn-cta btn-abrir-guias-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0b4f6c; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+                          🚤 Piloteiros da Bacia
+                        </button>
+                      </div>
+                    `);
+
+                    const btnEsp = document.querySelector('.btn-abrir-especies-rio');
+                    if (btnEsp) {
+                      btnEsp.addEventListener('click', () => {
+                        fecharPainel();
+                        if (typeof abrirModalEspecies === 'function') abrirModalEspecies();
+                      });
+                    }
+                    const btnGui = document.querySelector('.btn-abrir-guias-rio');
+                    if (btnGui) {
+                      btnGui.addEventListener('click', () => {
+                        fecharPainel();
+                        if (typeof window.abrirModalParceriasTab === 'function') window.abrirModalParceriasTab('piloteiros');
+                      });
+                    }
                   }
                 }
               });
@@ -1164,13 +1231,22 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'baciasPane',
             style: {
-              color: '#1976d2',
-              fillColor: '#90caf9',
+              color: '#0284c7',
+              fillColor: '#38bdf8',
               weight: 1.5,
-              fillOpacity: 0.15,
-              dashArray: '4, 4'
+              fillOpacity: 0.12,
+              dashArray: '4, 4',
+              lineCap: 'round',
+              lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
+              const bNome = feature.properties?.nome_bacia || 'Bacia Hidrográfica';
+              layer.bindTooltip(escapeHTML(bNome), {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -6],
+                sticky: true
+              });
               layer.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
                 const b = feature.properties;
@@ -1727,6 +1803,7 @@ function inicializarSidebarDataGeo() {
   function abrirSidebar() {
     if (sidebar) {
       sidebar.classList.remove('collapsed');
+      document.body.classList.add('sidebar-open');
       if (sidebarBackdrop && window.innerWidth <= 768) sidebarBackdrop.classList.add('active');
       setTimeout(() => map.invalidateSize(), 300);
     }
@@ -1735,6 +1812,7 @@ function inicializarSidebarDataGeo() {
   function fecharSidebar() {
     if (sidebar) {
       sidebar.classList.add('collapsed');
+      document.body.classList.remove('sidebar-open');
       if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
       setTimeout(() => map.invalidateSize(), 300);
     }
@@ -1755,9 +1833,14 @@ function inicializarSidebarDataGeo() {
   if (btnOpenSidebarFloat) btnOpenSidebarFloat.addEventListener('click', abrirSidebar);
   if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', fecharSidebar);
 
-  // No mobile (<= 768px), inicia com a sidebar recolhida para o mapa respirar
-  if (window.innerWidth <= 768 && sidebar) {
-    sidebar.classList.add('collapsed');
+  // Inicialização de estado conforme viewport
+  if (sidebar) {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.add('collapsed');
+      document.body.classList.remove('sidebar-open');
+    } else {
+      document.body.classList.add('sidebar-open');
+    }
   }
 
   // Alternância de Abas da Sidebar
