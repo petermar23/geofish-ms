@@ -113,11 +113,12 @@
     </div>
   </aside>
 
-  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Quando Ativo) -->
-  <div id="banner-defeso" class="banner-defeso hidden" role="alert" aria-live="assertive">
+  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Dinâmico) -->
+  <div id="banner-defeso" class="banner-defeso" role="region" aria-label="Status da Temporada de Pesca e Defeso">
     <div class="banner-defeso-content">
-      <svg class="icon-svg" viewBox="0 0 24 24" style="color: #ffffff; width: 18px; height: 18px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span id="banner-defeso-text">Período de Defeso da Piracema vigente em toda a Bacia. Pesca amadora e profissional suspensa por lei estadual.</span>
+      <span id="banner-defeso-icon" class="banner-defeso-icon" aria-hidden="true">🎣</span>
+      <span id="banner-defeso-text">Carregando status da temporada de pesca no Pantanal...</span>
+      <button type="button" id="btn-fechar-banner-defeso" class="btn-fechar-banner-defeso" aria-label="Recolher aviso da temporada">&times;</button>
     </div>
   </div>
 
@@ -1372,82 +1373,87 @@
 
         <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1, Z-7 E Z-11) -->
         <div id="tab-pane-piloteiros" class="tab-pane hidden">
-          <div class="parceria-callout-box parceria-callout-social">
-            <strong>🚤 Compromisso Social com os Pescadores do Rio:</strong> Piloteiros e guias das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> têm cadastro <strong>100% GRATUITO</strong>. Não cobramos mensalidade, taxa de inscrição nem comissão sobre passeios.
+          <div class="parceria-callout-box parceria-callout-social" style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px; border-radius: 6px; margin-bottom: 14px;">
+            <strong style="color: #14532d; font-size: 0.95rem; display: block; margin-bottom: 4px;">🚤 Compromisso Social com os Pescadores do Pantanal:</strong>
+            <p style="color: #166534; font-size: 0.83rem; margin: 0; line-height: 1.45;">
+              Piloteiros e pescadores tradicionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> têm cadastro <strong>100% GRATUITO</strong>. Não cobramos mensalidade, taxa de inscrição nem comissão sobre passeios.
+            </p>
           </div>
 
-          <form id="form-parceria-guia">
-            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 10px;">
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome Completo:</label>
-                <input type="text" id="guia-nome" class="checker-input" placeholder="Ex: Sebastião da Silva" required style="margin-bottom: 0;">
-              </div>
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Apelido de Rio:</label>
-                <input type="text" id="guia-apelido" class="checker-input" placeholder="Ex: Mestre Tião" style="margin-bottom: 0;">
-              </div>
+          <!-- CARD PRINCIPAL: WHATSAPP-FIRST POR ÁUDIO OU MENSAGEM -->
+          <div style="background: #ffffff; border: 2px solid #22c55e; border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15); text-align: center;">
+            <div style="font-size: 2.2rem; margin-bottom: 4px;">🎙️💬</div>
+            <h3 style="font-size: 1.15rem; color: #0f172a; margin: 0 0 6px 0; font-weight: 800;">
+              Cadastro Fácil por Áudio no WhatsApp
+            </h3>
+            <p style="font-size: 0.85rem; color: #475569; margin: 0 0 14px 0; line-height: 1.45;">
+              Sem formulários complicados. Basta clicar no botão abaixo para abrir o WhatsApp oficial da Coordenação e <strong>gravar um áudio simples</strong> ou mandar mensagem com seus dados:
+            </p>
+
+            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; text-align: left; font-size: 0.8rem; color: #334155; line-height: 1.45;">
+              <strong>💡 O que falar no áudio (Exemplo simples):</strong><br>
+              <em>"Olá! Sou o [Seu Nome], piloteiro da Colônia [Z-1/Z-7/Z-11], atendo no porto [Passo do Lontra / Porto Geral / Anastácio], meu barco é [modelo/motor] e atendo no trecho do rio..."</em>
             </div>
 
-            <div style="margin-bottom: 10px;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
-              <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
-                <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
-                <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
-                <option value="Colônia Z-11 (Bonito / Águas do Miranda)">Colônia Z-11 (Bonito / Águas do Miranda)</option>
-                <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
-              </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Porto de Saída Habitual:</label>
-                <input type="text" id="guia-porto" class="checker-input" placeholder="Ex: Porto Geral de Miranda" required style="margin-bottom: 0;">
-              </div>
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Contato de Turistas:</label>
-                <input type="tel" id="guia-wpp" class="checker-input" placeholder="(67) 99999-9999" required style="margin-bottom: 0;">
-              </div>
-            </div>
-
-            <div style="margin-bottom: 10px;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Embarcação e Motor:</label>
-              <input type="text" id="guia-barco" class="checker-input" placeholder="Ex: Bote de alumínio 6m com motor 25HP" style="margin-bottom: 0;">
-            </div>
-
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Diferenciais Náuticos e Atendimento:</label>
-            <div class="amenities-checkbox-grid">
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="guia-diferencial" value="Coletes Homologados Marinha"> 🦺 Coletes Homologados
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="guia-diferencial" value="Barco e Motor Próprio"> 🚤 Barco Próprio Revisado
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="guia-diferencial" value="Especialista em Pesque e Solte"> 🐟 Pesque &amp; Solte Esportivo
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="guia-diferencial" value="Conhecimento de Rebojos e Ceveiros"> 🎯 Conhecimento do Rio
-              </label>
-            </div>
-
-            <div style="margin: 12px 0 10px 0; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.78rem; color: #475569; line-height: 1.4;">
-              <div style="font-weight: 700; color: #1e293b; margin-bottom: 3px;">📋 Como funciona a publicação:</div>
-              • <strong>Sem classificação paga:</strong> A ordem dos profissionais no mapa é puramente geográfica. Não vendemos posições de destaque.<br>
-              • <strong>Revisão comunitária:</strong> Novos contatos são validados antes da inserção no mapa para evitar números incorretos.<br>
-              • <strong>Atualização ou remoção a qualquer momento:</strong> Caso queira alterar seu telefone, porto ou remover seu perfil, basta solicitar pelo canal oficial.
-            </div>
-
-            <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="background: #2563eb; font-size: 0.9rem; padding: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <span>🚤</span>
-              <span>Solicitar Inclusão no WebGIS (Via WhatsApp)</span>
+            <button type="button" id="btn-cadastro-piloteiro-whatsapp" class="btn-cta" style="background: #16a34a; color: #ffffff; font-size: 1rem; font-weight: 800; padding: 14px 18px; border-radius: 8px; width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
+              <span>📲</span>
+              <span>Enviar Áudio / Mensagem no WhatsApp</span>
             </button>
-
-            <div style="text-align: center; margin-top: 10px;">
-              <button type="button" id="btn-cadastro-assistido" style="background: none; border: none; color: #0284c7; font-size: 0.8rem; text-decoration: underline; cursor: pointer; padding: 4px;">
-                💬 Dificuldade para preencher? Fazer cadastro assistido por áudio no WhatsApp
-              </button>
+            <div style="font-size: 0.76rem; color: #64748b; margin-top: 8px;">
+              Canal Oficial de Credenciamento: <strong>+55 (16) 99266-7526</strong>
             </div>
-          </form>
+          </div>
+
+          <!-- OPÇÃO SANFONA: FORMULÁRIO ESCRITO (PARA QUEM PREFERIR DIGITAR) -->
+          <details style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; color: #475569;">
+            <summary style="font-weight: 700; color: #0b4f6c; cursor: pointer; padding: 4px 0;">
+              ✍️ Prefere preencher os campos por escrito? Clique aqui
+            </summary>
+
+            <form id="form-parceria-guia" style="margin-top: 12px;">
+              <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome Completo:</label>
+                  <input type="text" id="guia-nome" class="checker-input" placeholder="Ex: Sebastião da Silva" style="margin-bottom: 0;">
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Apelido de Rio:</label>
+                  <input type="text" id="guia-apelido" class="checker-input" placeholder="Ex: Mestre Tião" style="margin-bottom: 0;">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
+                <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
+                  <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
+                  <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
+                  <option value="Colônia Z-11 (Bonito / Águas do Miranda)">Colônia Z-11 (Bonito / Águas do Miranda)</option>
+                  <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                <div>
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Porto de Saída Habitual:</label>
+                  <input type="text" id="guia-porto" class="checker-input" placeholder="Ex: Porto Geral de Miranda" style="margin-bottom: 0;">
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Contato de Turistas:</label>
+                  <input type="tel" id="guia-wpp" class="checker-input" placeholder="(67) 99999-9999" style="margin-bottom: 0;">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Embarcação e Motor:</label>
+                <input type="text" id="guia-barco" class="checker-input" placeholder="Ex: Bote de alumínio 6m com motor 25HP" style="margin-bottom: 0;">
+              </div>
+
+              <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="background: #2563eb; font-size: 0.9rem; padding: 12px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>🚤</span>
+                <span>Enviar Formulário via WhatsApp</span>
+              </button>
+            </form>
+          </details>
         </div>
       </div>
     </div>
@@ -1773,6 +1779,50 @@
        ======================================================== -->
 
   <section class="tourist-section" aria-label="Guia do Turista Pescador">
+
+    <!-- CARD: JORNADA COMPLETA DO TURISTA: ANTES, DURANTE E DEPOIS -->
+    <article id="secao-jornada-turista" class="tourist-card" style="border-left: 6px solid #0284c7;">
+      <div class="tourist-card-header">
+        <span class="tourist-card-icon">
+          <svg class="icon-svg" style="stroke: #0284c7; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        <div>
+          <span class="editorial-section-kicker" style="color: #0284c7; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px;">GOVERNANÇA &amp; EXPERIÊNCIA DO VISITANTE</span>
+          <h2 class="tourist-card-title" style="font-family: var(--font-editorial); font-size: 1.6rem; font-weight: 900; color: var(--color-leaf);">A Jornada Completa do Turista: Antes, Durante e Depois</h2>
+          <span class="tourist-card-sub">Como o GeoFish MS integra cidadania ribeirinha, navegação offline e legalidade ambiental</span>
+        </div>
+      </div>
+      
+      <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
+        Uma experiência de pescaria esportiva sustentável e sem imprevistos no Pantanal se divide em 3 momentos estratégicos:
+      </p>
+
+      <div class="steps-grid">
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #0284c7;">1</span>
+          <h3 class="step-title">1. Antes da Viagem (Planejamento Conectado)</h3>
+          <p class="step-desc">
+            Ainda em seu estado de origem (SP, PR, MG, etc.), o turista explora os trechos navegáveis no WebGIS, emite a <strong>Licença Digital no IMASUL</strong> e escolhe seu piloteiro homologado pelas <strong>Colônias Z-1, Z-7 ou Z-11</strong>, combinando a diária diretamente pelo WhatsApp sem taxas de agenciamento.
+          </p>
+        </div>
+
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #0d9488;">2</span>
+          <h3 class="step-title">2. Durante a Pescaria (No Barco 100% Offline)</h3>
+          <p class="step-desc">
+            Sem sinal de 4G no rio, o pescador abre o GeoFish MS em cache (PWA), monitora sua posição náutica em tempo real, consulta as regras de zonas restritas (como o <strong>Rio Salobra — Decreto nº 15.166/19</strong>) e afere espécies nativas na régua digital de tamanhos permitidos.
+          </p>
+        </div>
+
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #16a34a;">3</span>
+          <h3 class="step-title">3. No Retorno à Rodovia (Posto PMA &amp; Lacre GCP)</h3>
+          <p class="step-desc">
+            Ao sair da calha fluvial para as rodovias (BR-262, MS-184 ou MS-345), o aplicativo localiza o <strong>Pelotão da Polícia Militar Ambiental (PMA)</strong> mais próximo. O turista apresenta o exemplar inteiro no gelo para conferência, lacre oficial gratuito e emissão da <strong>GCP (Guia de Controle de Pescado)</strong>.
+          </p>
+        </div>
+      </div>
+    </article>
 
     <!-- CARD 1: VOU LEVAR PEIXE PARA CASA: PASSO A PASSO OFICIAL -->
     <article id="secao-transporte-passo-a-passo" class="tourist-card" style="border-left: 6px solid #16a34a;">

@@ -20,8 +20,21 @@
         "id_trecho": 101,
         "rio": "Rio Miranda (Calha Principal)",
         "regra": "Cota Permitida (1 nativo + 5 piranhas)",
-        "cota": "1 exemplar nativo na medida + 5 piranhas. Peixe inteiro no gelo. Dourado proibido (Pesque e Solte). Licença IMASUL obrigatória.",
-        "obs": "Navegação livre para motores homologados pela Capitania. Proibido uso de redes, espinhéis e cevadores fixos."
+        "tipo_regra": "cota_padrao",
+        "cota": "1 exemplar nativo na medida regulamentar + até 5 piranhas. Peixe inteiro no gelo com GCP emitida na PMA. Dourado proibido (Pesque e Solte). Licença IMASUL obrigatória.",
+        "petrechos": "Linha de mão, vara com carretilha ou molinete, iscas naturais/artificiais com anzóis simples/garateias. Proibido rede, tarrafa, espinhel e cevador fixo.",
+        "norma_ref": "Decretos Estaduais nº 15.166/19 e 15.375/20 & Lei nº 5.321/19",
+        "obs": "Navegação livre para motores homologados pela Capitania. Vistoria e lacre obrigatórios em qualquer posto PMA antes de transitar em rodovias.",
+        "colonia_sugerida": "Z-1 (Miranda)",
+        "especies_principais": [
+          { "id": "pintado", "nome": "Pintado / Surubim", "faixa": "85 a 125 cm", "tipo": "faixa" },
+          { "id": "pacu", "nome": "Pacu", "faixa": "45 a 65 cm", "tipo": "faixa" },
+          { "id": "cachara", "nome": "Cachara", "faixa": "80 a 120 cm", "tipo": "faixa" },
+          { "id": "jau", "nome": "Jaú", "faixa": "95 a 130 cm", "tipo": "faixa" },
+          { "id": "dourado", "nome": "Dourado", "faixa": "Pesque e Solte Obrigatório (Lei 5.321)", "tipo": "proibido" },
+          { "id": "piranha", "nome": "Piranha", "faixa": "Até 5 exemplares cumulativos", "tipo": "cota_extra" }
+        ],
+        "rampa_apoio": "Porto Geral de Miranda & Rampa de Passo do Lontra"
       }
     },
     {
@@ -40,8 +53,19 @@
         "id_trecho": 102,
         "rio": "Rio Salobra e Córrego Azul",
         "regra": "Pesque e Solte",
-        "cota": "PESQUE E SOLTE EXCLUSIVO. Proibido abater qualquer espécie de peixe. Motor 4 tempos até 15HP ou elétrico (Decreto 15.166/19).",
-        "obs": "Área de preservação cênica e berçário biológico. Abate é crime ambiental inafiançável com perda da embarcação."
+        "tipo_regra": "pesque_solte",
+        "cota": "PESQUE E SOLTE EXCLUSIVO (Cota Zero). Proibido abater ou transportar qualquer peixe, inclusive iscas nativas. Devolução imediata e viva à água.",
+        "petrechos": "Anzol sem farpa (ou com farpa amassada). Apenas motores 4 tempos até 15 HP ou motores elétricos (Decreto 15.166/19, Art. 10º). Iscas artificiais ou naturais com anzol simples sem farpa.",
+        "norma_ref": "Decreto Estadual nº 15.166/19 (Art. 10º) & Portarias Conjuntas IMASUL",
+        "obs": "Santuário ecológico de águas cristalinas e berçário biológico da bacia. Abate constitui crime ambiental inafiançável com perda imediata de barcos e equipamentos.",
+        "colonia_sugerida": "Z-1 (Miranda) e Z-11 (Bonito)",
+        "especies_principais": [
+          { "id": "piraputanga", "nome": "Piraputanga", "faixa": "100% Pesque e Solte neste rio", "tipo": "pesque_solte" },
+          { "id": "dourado", "nome": "Dourado", "faixa": "100% Pesque e Solte", "tipo": "pesque_solte" },
+          { "id": "pacu", "nome": "Pacu", "faixa": "100% Pesque e Solte", "tipo": "pesque_solte" },
+          { "id": "pintado", "nome": "Pintado", "faixa": "100% Pesque e Solte", "tipo": "pesque_solte" }
+        ],
+        "rampa_apoio": "Base Turística Salobra / Porto Geral de Miranda"
       }
     },
     {
@@ -61,8 +85,20 @@
         "id_trecho": 103,
         "rio": "Rio Aquidauana",
         "regra": "Cota Permitida (1 nativo + 5 piranhas)",
-        "cota": "1 exemplar nativo na medida + 5 piranhas. Dourado proibido (Pesque e Solte). Licença IMASUL obrigatória.",
-        "obs": "Atenção com pedrais e corredeiras rasas na estiagem. Proibida a pesca 200m acima da Ponte Velha."
+        "tipo_regra": "cota_padrao",
+        "cota": "1 exemplar nativo na medida regulamentar + até 5 piranhas. Dourado proibido (Pesque e Solte até 2029). Licença IMASUL ativa.",
+        "petrechos": "Vara com carretilha ou molinete, linha de mão. Proibida qualquer pesca a menos de 200m a montante e a jusante de barragens, cachoeiras e corredeiras (Art. 13º).",
+        "norma_ref": "Decretos Estaduais nº 15.166/19 e 15.375/20 & Lei nº 5.321/19",
+        "obs": "Atenção com pedrais e corredeiras rasas na estiagem (Piraputanga e Anastácio). Área monitorada pelo Pelotão PMA Aquidauana.",
+        "colonia_sugerida": "Z-7 (Aquidauana)",
+        "especies_principais": [
+          { "id": "pintado", "nome": "Pintado / Surubim", "faixa": "85 a 125 cm", "tipo": "faixa" },
+          { "id": "pacu", "nome": "Pacu", "faixa": "45 a 65 cm", "tipo": "faixa" },
+          { "id": "curimbata", "nome": "Curimbatá", "faixa": "Mínimo 38 cm", "tipo": "faixa" },
+          { "id": "piavucu", "nome": "Piavuçu", "faixa": "Mínimo 38 cm", "tipo": "faixa" },
+          { "id": "dourado", "nome": "Dourado", "faixa": "Pesque e Solte Obrigatório (Lei 5.321)", "tipo": "proibido" }
+        ],
+        "rampa_apoio": "Prainha de Anastácio & Pelotão PMA Aquidauana"
       }
     },
     {
@@ -80,8 +116,20 @@
         "id_trecho": 104,
         "rio": "Rio Vermelho (Passo do Lontra)",
         "regra": "Cota Permitida (1 nativo + 5 piranhas)",
-        "cota": "1 exemplar nativo na medida + 5 piranhas. Dourado proibido. Licença IMASUL obrigatória.",
-        "obs": "Confluência pantaneira com o Rio Miranda na Estrada Parque MS-184. Ótimo trecho para peixes de couro."
+        "tipo_regra": "cota_padrao",
+        "cota": "1 exemplar nativo na medida legal + até 5 piranhas. Dourado 100% protegido. Licença IMASUL obrigatória.",
+        "petrechos": "Linha de mão, vara comum, carretilha ou molinete com iscas regulamentadas. Proibido rede, tarrafa e espinhel.",
+        "norma_ref": "Decretos Estaduais nº 15.166/19 e 15.375/20 & Lei nº 5.321/19",
+        "obs": "Confluência pantaneira com o Rio Miranda na Estrada Parque MS-184. Trecho tradicional de peixes de couro e condutores ribeirinhos da Colônia Z-1.",
+        "colonia_sugerida": "Z-1 (Miranda)",
+        "especies_principais": [
+          { "id": "pintado", "nome": "Pintado / Surubim", "faixa": "85 a 125 cm", "tipo": "faixa" },
+          { "id": "cachara", "nome": "Cachara", "faixa": "80 a 120 cm", "tipo": "faixa" },
+          { "id": "jau", "nome": "Jaú", "faixa": "95 a 130 cm", "tipo": "faixa" },
+          { "id": "pacu", "nome": "Pacu", "faixa": "45 a 65 cm", "tipo": "faixa" },
+          { "id": "dourado", "nome": "Dourado", "faixa": "Pesque e Solte Obrigatório (Lei 5.321)", "tipo": "proibido" }
+        ],
+        "rampa_apoio": "Rampa Pública Passo do Lontra & Posto PMA Passo do Lontra"
       }
     },
     {
@@ -99,8 +147,19 @@
         "id_trecho": 105,
         "rio": "Rio Negro (Pantanal)",
         "regra": "Pesque e Solte",
-        "cota": "PESQUE E SOLTE OBRIGATÓRIO no trecho regulamentado (Resolução SEMADESC / IMASUL). Proibido abate.",
-        "obs": "Trecho da confluência com Córrego Lajeado até Fazenda Fazendinha."
+        "tipo_regra": "pesque_solte",
+        "cota": "PESQUE E SOLTE OBRIGATÓRIO no trecho regulamentado (Resoluções Conjuntas SEMADESC / IMASUL). Proibido abate de pescado.",
+        "petrechos": "Anzol sem farpa (ou amassado), iscas artificiais ou naturais com anzol simples. Prática esportiva conservacionista com soltura imediata.",
+        "norma_ref": "Resolução Conjunta SEMADESC/IMASUL & Lei Estadual nº 5.321/19",
+        "obs": "Trecho da confluência com Córrego Lajeado até Fazenda Fazendinha. Berçário de meandros e lagoas marginais pantaneiras.",
+        "colonia_sugerida": "Z-1 (Miranda) e Z-7 (Aquidauana)",
+        "especies_principais": [
+          { "id": "pintado", "nome": "Pintado", "faixa": "Pesque e Solte no trecho", "tipo": "pesque_solte" },
+          { "id": "dourado", "nome": "Dourado", "faixa": "Pesque e Solte Obrigatório", "tipo": "pesque_solte" },
+          { "id": "jau", "nome": "Jaú", "faixa": "Pesque e Solte no trecho", "tipo": "pesque_solte" },
+          { "id": "pacu", "nome": "Pacu", "faixa": "Pesque e Solte no trecho", "tipo": "pesque_solte" }
+        ],
+        "rampa_apoio": "Posto PMA Buraco das Piranhas / Postos Pantaneiros"
       }
     }
   ]

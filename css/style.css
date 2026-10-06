@@ -197,7 +197,6 @@ body {
 
 /* Alerta Oficial do Período de Defeso / Piracema */
 .banner-defeso {
-  background: linear-gradient(90deg, #b71c1c, #d32f2f);
   color: #ffffff;
   padding: 8px 16px;
   font-size: 0.82rem;
@@ -207,6 +206,17 @@ body {
   justify-content: center;
   z-index: 1001;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.25s ease, max-height 0.25s ease;
+}
+
+.banner-defeso.defeso-ativo {
+  background: linear-gradient(90deg, #991b1b, #dc2626);
+  border-bottom: 2px solid #f87171;
+}
+
+.banner-defeso.temporada-aberta {
+  background: linear-gradient(90deg, #065f46, #0b4f6c);
+  border-bottom: 2px solid #34d399;
 }
 
 .banner-defeso.hidden {
@@ -216,13 +226,36 @@ body {
 .banner-defeso-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  max-width: 1200px;
+  justify-content: center;
+  gap: 10px;
+  max-width: 1240px;
+  width: 100%;
   text-align: center;
 }
 
 .banner-defeso-icon {
   font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.btn-fechar-banner-defeso {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 2px 8px;
+  cursor: pointer;
+  opacity: 0.8;
+  border-radius: 4px;
+  margin-left: auto;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.btn-fechar-banner-defeso:hover,
+.btn-fechar-banner-defeso:focus {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .btn-install:hover {
@@ -744,8 +777,334 @@ body.sheet-open .btn-gps {
   min-height: 40px;
 }
 
-.btn-copy:hover {
-  background-color: #cbd5e1;
+/* Painel Integrado de Governança Territorial de Trecho Hidrográfico */
+.trecho-governance-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.trecho-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.trecho-rule-card {
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border-left: 4px solid #0284c7;
+  background: #f0f9ff;
+}
+
+.trecho-rule-card.pesque-solte {
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.trecho-rule-card.cota-padrao {
+  border-left-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.trecho-rule-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.trecho-rule-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.trecho-rule-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #0b4f6c;
+}
+
+.trecho-rule-card.pesque-solte .trecho-rule-title {
+  color: #14532d;
+}
+
+.trecho-rule-text {
+  font-size: 0.88rem;
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+.trecho-rule-detail {
+  font-size: 0.78rem;
+  color: #334155;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+  line-height: 1.35;
+}
+
+.trecho-section-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.trecho-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trecho-section-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trecho-section-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 600;
+  display: block;
+  margin-top: 2px;
+}
+
+.trecho-species-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.trecho-species-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  gap: 8px;
+}
+
+.trecho-species-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.trecho-species-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trecho-species-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.trecho-species-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #0284c7;
+}
+
+.trecho-species-item.proibido .trecho-species-badge {
+  color: #dc2626;
+}
+
+.trecho-species-item.pesque-solte .trecho-species-badge {
+  color: #16a34a;
+}
+
+.btn-trecho-medir {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-trecho-medir:hover {
+  background: #0369a1;
+}
+
+.btn-trecho-medir:active {
+  transform: scale(0.96);
+}
+
+.btn-trecho-medir.btn-medir-proibido {
+  background: #dc2626;
+}
+
+.btn-trecho-medir.btn-medir-proibido:hover {
+  background: #b91c1c;
+}
+
+.trecho-dourado-alert {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #fef2f2;
+  border-left: 3px solid #dc2626;
+  border-radius: 4px;
+  font-size: 0.76rem;
+  color: #991b1b;
+  line-height: 1.35;
+}
+
+.trecho-guide-card {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+
+.trecho-guide-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 6px;
+}
+
+.trecho-guide-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.trecho-guide-colonia {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.trecho-guide-meta {
+  font-size: 0.78rem;
+  color: #475569;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.trecho-guide-notice {
+  font-size: 0.76rem;
+  color: #92400e;
+  background: #fffbeb;
+  border-left: 3px solid #d97706;
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.trecho-guide-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-trecho-action {
+  flex: 1;
+  min-width: 130px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.btn-trecho-action:active {
+  transform: scale(0.97);
+}
+
+.btn-trecho-action.primary {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.btn-trecho-action.primary:hover {
+  background: #0369a1;
+}
+
+.btn-trecho-action.whatsapp {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-trecho-action.whatsapp:hover {
+  background: #15803d;
+}
+
+.btn-trecho-action.secondary {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.btn-trecho-action.secondary:hover {
+  background: #cbd5e1;
+}
+
+.trecho-ramp-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.trecho-ramp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trecho-ramp-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #14532d;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trecho-ramp-name {
+  font-size: 0.78rem;
+  color: #166534;
+  font-weight: 600;
 }
 
 /* Modal "Sobre os Dados" */
