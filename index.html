@@ -6,14 +6,14 @@
   <meta name="color-scheme" content="light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
 
-  <title>GeoFish MS - Bacia do Rio Miranda</title>
-  <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Otimizado para celulares Android.">
+  <title>GeoFish MS - Bacia do Rio Miranda (WebGIS & Governança Territorial)</title>
+  <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Inspirado nos portais PIN-MS e DataGEO.">
   
   <meta property="og:title" content="GeoFish MS - Bacia do Rio Miranda">
   <meta property="og:description" content="Navegação náutica e governança da pesca esportiva na Bacia do Rio Miranda (Mato Grosso do Sul).">
   <meta property="og:type" content="website">
 
-  <!-- PWA & Android / Samsung One UI / Motorola Meta Tags -->
+  <!-- PWA & Android / iOS Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b4f6c">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,750 +22,441 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GeoFish MS">
 
-  <!-- Ícones PWA e Favicons Oficiais -->
+  <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
-  <!-- Folhas de Estilo (Leaflet Local e Estilo do GeoFish) -->
+  <!-- Folhas de Estilo -->
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- Preload da Fotografia Principal do Hero para Performance Visual Imediata -->
-  <link rel="preload" as="image" href="images/hero/rio_miranda_panorama.jpg">
 </head>
-<body>
+<body class="geofish-geoportal-app">
 
-  <!-- 1. Barra de Identificação Territorial e Iniciativa Cidadã -->
-  <div class="gov-auth-bar" role="region" aria-label="Iniciativa Cidadã Independente">
-    <div class="tpwd-container gov-auth-inner">
-      <div class="gov-auth-flag">
-        <span class="flag-ms" aria-hidden="true">🟩⬜🟦</span>
-        <span>Iniciativa Cidadã por <strong>Peterson Martins da Costa</strong> &bull; Em prol do Bem Comum e da Bacia do Rio Miranda / MS</span>
-      </div>
-      <div class="gov-auth-badge">
-        <span aria-hidden="true">🌿</span> Guia Cívico Independente &bull; Sem apoio institucional nem financiamento público
+  <!-- ========================================================
+       1. HEADER SUPERIOR INSTITUCIONAL (PADRÃO PIN-MS / ARCGIS)
+       ======================================================== -->
+  <header class="geofish-top-bar" role="banner">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="btn-toggle-sidebar" class="btn-top-action" aria-label="Alternar painel lateral de ferramentas e serviços" title="Abrir/Fechar Painel">
+        <span aria-hidden="true">☰</span>
+        <span style="font-weight: 700;">Painel</span>
+      </button>
+
+      <a href="#" class="top-bar-brand" aria-label="GeoFish MS - Página Principal">
+        <div class="top-bar-logo" aria-hidden="true">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/></svg>
+        </div>
+        <div class="top-bar-titles">
+          <span class="top-bar-title">GeoFish <strong>MS</strong></span>
+          <span class="top-bar-sub">Bacia do Rio Miranda &bull; Pantanal MS</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Status Dinâmico da Temporada / Defeso da Piracema -->
+    <div class="top-bar-center">
+      <div id="badge-defeso-top" class="badge-defeso-top temporada-aberta" role="status" title="Clique para ver regras da temporada">
+        <span id="badge-defeso-icon">🎣</span>
+        <span id="badge-defeso-text">Temporada de Pesca Aberta (Cota 1+5)</span>
       </div>
     </div>
-  </div>
 
-  <!-- 2. Header Principal Editorial (Identidade & Navegação do Território) -->
-  <header id="header" class="tpwd-header" role="banner">
-    <div class="tpwd-container tpwd-header-inner">
-      <div class="tpwd-brand">
-        <a href="#hero-territorio" class="brand-link" aria-label="Página Inicial do GeoFish MS">
-          <div class="brand-logo-symbol" aria-hidden="true">
-            <svg class="icon-svg" viewBox="0 0 24 24" style="width: 24px; height: 24px; color: #4ade80;"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 3.5 0 5 .85 1.28 1.27 2.22 1.27 3.5 0 1.28-.42 2.22-1.27 3.5-1 1.5-1 3.5 0 5 2.85-.47 4.27-2.5 4.27-5.17"/></svg>
-          </div>
-          <div class="brand-text">
-            <span class="brand-title">GeoFish <strong>MS</strong></span>
-            <span class="brand-sub">Bacia do Rio Miranda &bull; Pantanal</span>
-          </div>
-        </a>
-      </div>
-
-      <!-- Navegação Desktop Editorial -->
-      <nav class="tpwd-nav" aria-label="Navegação Principal">
-        <ul class="tpwd-menu">
-          <li><a href="#hero-territorio" class="tpwd-menu-link active">Início</a></li>
-          <li><a href="#secao-parceiros-turismo" class="tpwd-menu-link">Hospedagem &amp; Turismo</a></li>
-          <li><a href="#secao-explore-bacia" class="tpwd-menu-link">Explore a Bacia</a></li>
-          <li><a href="#secao-territorio" class="tpwd-menu-link">O Território</a></li>
-          <li><a href="#secao-mapa" class="tpwd-menu-link">Mapa WebGIS</a></li>
-          <li><a href="#secao-transporte-passo-a-passo" class="tpwd-menu-link">Regras &amp; Guia</a></li>
-          <li><a href="#secao-cartilha" class="tpwd-menu-link">Cartilha PMA</a></li>
-        </ul>
-      </nav>
-
-      <!-- Ações do Header -->
-      <div class="header-actions">
-        <span id="status-rede"><span class="status-dot"></span> Online</span>
-        <a href="#secao-mapa" class="btn-header-webgis">
-          <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-          <span>Explorar WebGIS</span>
-        </a>
-        <button id="btn-sobre" type="button" class="btn-header" title="Informações sobre o projeto comunitário">
-          Sobre
-        </button>
-      </div>
+    <!-- Ações Rápidas no Topo -->
+    <div class="top-bar-actions">
+      <button id="btn-sos-top" class="btn-top-action btn-sos-top" title="Acionar socorro imediato e coordenadas náuticas">
+        <span aria-hidden="true">🚨</span>
+        <span>SOS Fluvial</span>
+      </button>
+      <button id="btn-satelite-top" class="btn-top-action" title="Alternar entre imagem de satélite de alta resolução e mapa topográfico">
+        <span aria-hidden="true">🛰️</span>
+        <span class="btn-label-desktop">Satélite</span>
+      </button>
+      <button id="btn-gps-top" class="btn-top-action" title="Localizar meu barco no rio em tempo real">
+        <span aria-hidden="true">📍</span>
+        <span class="btn-label-desktop">Meu GPS</span>
+      </button>
+      <button id="btn-offline-top" class="btn-top-action" title="Salvar mapa e camadas no celular para navegar sem 4G">
+        <span aria-hidden="true">💾</span>
+        <span class="btn-label-desktop">Salvar Offline</span>
+      </button>
+      <button id="btn-sobre-top" class="btn-top-action" title="Conhecer a iniciativa cidadã e dados">
+        <span aria-hidden="true">ℹ️</span>
+        <span class="btn-label-desktop">Sobre</span>
+      </button>
     </div>
   </header>
 
-  <!-- 3. Ticker Fluvial & Alerta ao Pescador (Estilo Globo.com Indicadores) -->
-  <aside class="tpwd-alert-bar" role="region" aria-label="Aviso Legal e Normativo">
-    <div class="tpwd-container tpwd-alert-inner">
-      <div class="tpwd-alert-content">
-        <span class="status-indicator-chip chip-open">
-          <span class="pulse-dot-green" aria-hidden="true"></span>
-          <span>Temporada 2026: Aberta</span>
-        </span>
-        <span class="status-indicator-chip chip-gold">
-          <span class="pulse-dot" aria-hidden="true"></span>
-          <span>Cota Zero Dourado</span>
-        </span>
-        <div class="alert-text">
-          Transporte autorizado <strong>exclusivamente dentro do MS</strong>: 1 exemplar nativo na medida + 5 piranhas (inteiro, lacrado com GCP pela PMA).
-        </div>
-      </div>
-      <div class="tpwd-alert-actions">
-        <span class="pma-contact-tag">📞 PMA Miranda: (67) 3242-4344 &bull; Plantão MS: (67) 3357-1500 / 190</span>
-        <a href="#secao-transporte-passo-a-passo" id="btn-ver-alerta-regras" class="tpwd-alert-link">Passo a Passo Sem Multa &rarr;</a>
-      </div>
-    </div>
-  </aside>
+  <!-- ========================================================
+       2. ÁREA DE TRABALHO (SIDEBAR DATAGEO + MAPA TELA CHEIA)
+       ======================================================== -->
+  <div class="geofish-workspace">
 
-  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Dinâmico) -->
-  <div id="banner-defeso" class="banner-defeso" role="region" aria-label="Status da Temporada de Pesca e Defeso">
-    <div class="banner-defeso-content">
-      <span id="banner-defeso-icon" class="banner-defeso-icon" aria-hidden="true">🎣</span>
-      <span id="banner-defeso-text">Carregando status da temporada de pesca no Pantanal...</span>
-      <button type="button" id="btn-fechar-banner-defeso" class="btn-fechar-banner-defeso" aria-label="Recolher aviso da temporada">&times;</button>
-    </div>
+    <!-- PAINEL LATERAL ESQUERDO (PADRÃO DATAGEO / PIN-MS) -->
+    <aside id="geofish-sidebar" class="geofish-sidebar" role="region" aria-label="Painel de Ferramentas e Serviços">
+      
+      <!-- Cabeçalho do Painel -->
+      <div class="sidebar-header">
+        <div class="sidebar-header-title">
+          <span aria-hidden="true">🧭</span>
+          <span>Governança &amp; Serviços</span>
+        </div>
+        <button id="btn-close-sidebar" class="btn-close-sidebar" aria-label="Recolher painel lateral">
+          <span aria-hidden="true">◀</span>
+          <span>Recolher</span>
+        </button>
+      </div>
+
+      <!-- Abas Principais da Barra Lateral -->
+      <nav class="sidebar-tabs" role="tablist" aria-label="Seções do Painel">
+        <button class="sidebar-tab-btn active" data-tab="guias" role="tab" aria-selected="true" aria-controls="pane-guias" id="tab-guias">
+          <span class="tab-icon" aria-hidden="true">🚤</span>
+          <span>Piloteiros</span>
+        </button>
+        <button class="sidebar-tab-btn" data-tab="pousadas" role="tab" aria-selected="false" aria-controls="pane-pousadas" id="tab-pousadas">
+          <span class="tab-icon" aria-hidden="true">🏨</span>
+          <span>Pousadas</span>
+        </button>
+        <button class="sidebar-tab-btn" data-tab="regras" role="tab" aria-selected="false" aria-controls="pane-regras" id="tab-regras">
+          <span class="tab-icon" aria-hidden="true">⚖️</span>
+          <span>Regras PMA</span>
+        </button>
+        <button class="sidebar-tab-btn" data-tab="camadas" role="tab" aria-selected="false" aria-controls="pane-camadas" id="tab-camadas">
+          <span class="tab-icon" aria-hidden="true">🗺️</span>
+          <span>Camadas</span>
+        </button>
+        <button class="sidebar-tab-btn" data-tab="sobre" role="tab" aria-selected="false" aria-controls="pane-sobre" id="tab-sobre">
+          <span class="tab-icon" aria-hidden="true">📖</span>
+          <span>Sobre</span>
+        </button>
+      </nav>
+
+      <!-- Área de Conteúdo com Rolagem Independente -->
+      <div class="sidebar-content-area">
+
+        <!-- ABA 1: PILOTEIROS & GUIAS NATIVOS -->
+        <section id="pane-guias" class="sidebar-pane active" role="tabpanel" aria-labelledby="tab-guias">
+          <h2 class="sidebar-section-title">
+            <span>🚤</span> <span>Piloteiros &amp; Guias Nativos</span>
+          </h2>
+          <p class="sidebar-section-desc">
+            Condutores ribeirinhos homologados pelas <strong>Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito)</strong>. Negociação direta por WhatsApp, sem intermediários.
+          </p>
+
+          <!-- Filtros Rápidos de Região (Ergonomia ao Toque 44px+) -->
+          <div class="sidebar-region-filters" role="toolbar" aria-label="Filtrar por Colônia e Município">
+            <button type="button" class="sidebar-region-btn active" data-regiao="todas" aria-pressed="true">
+              <span>🗺️ Todas as Regiões</span>
+            </button>
+            <button type="button" class="sidebar-region-btn" data-regiao="z1" aria-pressed="false">
+              <span>📍 Miranda &bull; Z-1</span>
+            </button>
+            <button type="button" class="sidebar-region-btn" data-regiao="z7" aria-pressed="false">
+              <span>📍 Aquidauana &bull; Z-7</span>
+            </button>
+            <button type="button" class="sidebar-region-btn" data-regiao="z11" aria-pressed="false">
+              <span>📍 Bonito &bull; Z-11</span>
+            </button>
+          </div>
+
+          <!-- Lista Dinâmica de Profissionais -->
+          <div id="sidebar-guias-list" class="sidebar-cards-container" aria-live="polite">
+            <div style="padding: 16px; text-align: center; color: #64748b;">
+              <span class="spinner" style="display: inline-block; margin-bottom: 6px;"></span>
+              <div>Carregando piloteiros homologados...</div>
+            </div>
+          </div>
+
+          <!-- Card de Chamada para Cadastro Oficial via WhatsApp -->
+          <div style="margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 0.82rem; font-weight: 800; color: #166534;">
+              📢 É Piloteiro ou Guia Tradicional?
+            </div>
+            <div style="font-size: 0.76rem; color: #15803d; line-height: 1.4;">
+              O cadastro é 100% gratuito. Envie uma mensagem ou áudio no WhatsApp oficial para homologação com sua Colônia:
+            </div>
+            <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Sou%20piloteiro/pescador%20artesanal%20e%20gostaria%20de%20cadastrar%20minha%20embarca%C3%A7%C3%A3o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="margin-top: 4px;">
+              <span>📲 Enviar Áudio no WhatsApp da Colônia</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- ABA 2: POUSADAS & ESTRUTURA NÁUTICA -->
+        <section id="pane-pousadas" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-pousadas">
+          <h2 class="sidebar-section-title">
+            <span>🏨</span> <span>Pousadas, Ranchos &amp; Apoio</span>
+          </h2>
+          <p class="sidebar-section-desc">
+            Atracadouros, descidas de barco com rampa de concreto, marinas e pousadas ribeirinhas na Bacia do Rio Miranda.
+          </p>
+
+          <div id="sidebar-pousadas-list" class="sidebar-cards-container" aria-live="polite">
+            <!-- Preenchido dinamicamente via JS com pontos de emergência e apoio -->
+          </div>
+
+          <div style="margin-top: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px;">
+            <div style="font-size: 0.82rem; font-weight: 800; color: #0369a1; margin-bottom: 4px;">
+              ⭐ Divulgue sua Pousada ou Marina
+            </div>
+            <p style="font-size: 0.76rem; color: #0284c7; line-height: 1.4; margin-bottom: 8px;">
+              Conecte sua estrutura diretamente aos milhares de pescadores esportivos que planejam a expedição no WebGIS.
+            </p>
+            <button type="button" class="btn-guia-wa" style="background: #0284c7;" data-action="abrir-parcerias-pousadas">
+              <span>💬 Anunciar Pousada ou Rancho</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ABA 3: REGRAS OFICIAIS & PMA (CONFORMIDADE) -->
+        <section id="pane-regras" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-regras">
+          <h2 class="sidebar-section-title">
+            <span>⚖️</span> <span>Regras de Pesca &amp; Postos PMA</span>
+          </h2>
+          <p class="sidebar-section-desc">
+            Normas vigentes em Mato Grosso do Sul (Decretos nº 15.166/19 e 15.375/20) para você pescar com total segurança jurídica.
+          </p>
+
+          <!-- Dourado Pesque e Solte -->
+          <div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #92400e; font-size: 0.88rem; margin-bottom: 4px;">
+              🚫 Cota Zero do Dourado (Lei nº 6.190/24)
+            </div>
+            <p style="font-size: 0.78rem; color: #78350f; line-height: 1.45; margin: 0;">
+              O abate e transporte de <strong>Dourado (Salminus brasiliensis)</strong> é expressamente proibido em todos os rios de MS até 2029. Modalidade 100% Pesque e Solte.
+            </p>
+          </div>
+
+          <!-- Verificador Interativo de Espécies -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem; margin-bottom: 4px;">
+              📏 Régua Oficial &amp; Medidas de Abate
+            </div>
+            <p style="font-size: 0.76rem; color: #64748b; line-height: 1.4; margin-bottom: 8px;">
+              Consulte medidas mínimas e máximas de Pintado, Pacu, Cachara, Jaú e outras espécies nativas.
+            </p>
+            <button type="button" class="btn-top-action" style="width: 100%; background: #0b4f6c; color: #ffffff; justify-content: center;" data-action="abrir-especies">
+              <span>🔍 Abrir Verificador de Espécies</span>
+            </button>
+          </div>
+
+          <!-- Passo a Passo do Transporte sem Multa -->
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #166534; font-size: 0.88rem; margin-bottom: 6px;">
+              🐟 Transporte no Veículo: 4 Passos
+            </div>
+            <ol style="font-size: 0.78rem; color: #334155; line-height: 1.5; padding-left: 18px; margin: 0;">
+              <li><strong>Cota:</strong> 1 exemplar nativo na medida + 5 piranhas (dentro do MS).</li>
+              <li><strong>Peixe Inteiro:</strong> Proibido filés na estrada; manter cabeça, rabo e vísceras no gelo.</li>
+              <li><strong>Licença:</strong> Portar Autorização Ambiental de Pesca Amadora do IMASUL.</li>
+              <li><strong>Lacre e GCP:</strong> Passar no posto da PMA antes da rodovia para medição, lacre e Guia de Controle gratuita.</li>
+            </ol>
+          </div>
+
+          <!-- A Jornada do Turista em 3 Momentos -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #15803d; font-size: 0.85rem; margin-bottom: 4px;">
+              🧭 A Jornada do Turista Pescador
+            </div>
+            <ul style="font-size: 0.76rem; color: #166534; line-height: 1.45; padding-left: 16px; margin: 0;">
+              <li><strong>Antes (em casa):</strong> WebGIS, licença IMASUL e contato direto com o guia via WhatsApp.</li>
+              <li><strong>Durante (no barco offline):</strong> GPS náutico, zonas restritas (ex: Salobra Dec. 15.166) e régua de espécies.</li>
+              <li><strong>Depois (na rodovia):</strong> Posto PMA da BR-262/MS-184 para lacre e Guia GCP.</li>
+            </ul>
+          </div>
+
+          <!-- Postos da Polícia Militar Ambiental -->
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #991b1b; font-size: 0.85rem; margin-bottom: 4px;">
+              🚨 Postos de Atendimento da PMA
+            </div>
+            <div style="font-size: 0.76rem; color: #b91c1c; line-height: 1.4;">
+              &bull; <strong>Pelotão Miranda:</strong> BR-262, km 565 &bull; Tel: (67) 3242-4344<br>
+              &bull; <strong>Pelotão Aquidauana:</strong> Tel: (67) 3241-1188<br>
+              &bull; <strong>Plantão Estadual PMA-MS:</strong> (67) 3357-1500 / 190
+            </div>
+          </div>
+
+          <button type="button" class="btn-top-action" style="width: 100%; background: #15803d; color: #ffffff; justify-content: center;" data-action="abrir-cartilha">
+            <span>📖 Consultar Cartilha Oficial PMA-MS</span>
+          </button>
+        </section>
+
+        <!-- ABA 4: CAMADAS CARTOGRÁFICAS (PADRÃO DATAGEO) -->
+        <section id="pane-camadas" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-camadas">
+          <h2 class="sidebar-section-title">
+            <span>🗺️</span> <span>Camadas do WebGIS (PIN-MS)</span>
+          </h2>
+          <p class="sidebar-section-desc">
+            Bases espaciais oficiais em SIRGAS 2000 / UTM 21S provenientes do IMASUL e SEMADESC.
+          </p>
+
+          <div class="layer-checkbox-group" role="group" aria-label="Controle de visibilidade das camadas">
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🎣</span>
+                <span>Trechos de Pesca com Cotas</span>
+              </div>
+              <input type="checkbox" id="layer-chk-trechos" checked data-camada-key="trechos_pesca" aria-label="Ativar camada Trechos de Pesca">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🚤</span>
+                <span>Piloteiros &amp; Guias Homologados</span>
+              </div>
+              <input type="checkbox" id="layer-chk-guias" checked data-camada-key="guias_credenciados" aria-label="Ativar camada Guias Credenciados">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">⚓</span>
+                <span>Rampas Náuticas &amp; Atracadouros</span>
+              </div>
+              <input type="checkbox" id="layer-chk-apoio" checked data-camada-key="pontos_emergencia" aria-label="Ativar camada Apoio Náutico e Rampas">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🌊</span>
+                <span>Rios Principais do Estado</span>
+              </div>
+              <input type="checkbox" id="layer-chk-rios" checked data-camada-key="rios_principais" aria-label="Ativar camada Rios Principais">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">⚠️</span>
+                <span>Áreas Restritas (Unidades Conservação)</span>
+              </div>
+              <input type="checkbox" id="layer-chk-restritas" checked data-camada-key="areas_restritas" aria-label="Ativar camada Áreas Restritas">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🗺️</span>
+                <span>Bacias Hidrográficas (UEPGRH)</span>
+              </div>
+              <input type="checkbox" id="layer-chk-uepgrh" data-camada-key="bacias_uepgrh" aria-label="Ativar camada Bacias UEPGRH">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🛡️</span>
+                <span>Bacias Especiais de Manejo</span>
+              </div>
+              <input type="checkbox" id="layer-chk-especiais" data-camada-key="bacias_especiais" aria-label="Ativar camada Bacias Especiais">
+            </label>
+          </div>
+
+          <div style="margin-top: 16px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.74rem; color: #64748b;">
+            💡 <strong>Dica de Desempenho:</strong> No celular com sinal fraco no rio, mantenha ativas apenas as camadas essenciais para navegação rápida.
+          </div>
+        </section>
+
+        <!-- ABA 5: SOBRE O PROJETO & TERRITÓRIO -->
+        <section id="pane-sobre" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-sobre">
+          <h2 class="sidebar-section-title">
+            <span>📖</span> <span>Sobre o GeoFish MS</span>
+          </h2>
+          <p class="sidebar-section-desc">
+            Iniciativa Cidadã voluntária desenvolvida por <strong>Peterson Martins da Costa</strong> para governança territorial da Bacia do Rio Miranda.
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 0.78rem; color: #334155; line-height: 1.5;">
+            <strong>A Bacia do Rio Miranda:</strong> Com 44.740 km² de drenagem, abrange municípios estratégicos como Miranda, Aquidauana, Anastácio, Bonito (Águas do Miranda), Corumbá (Passo do Lontra), Bodoquena e Jardim.
+          </div>
+
+          <!-- Protocolo Institucional -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #166534; font-size: 0.82rem; margin-bottom: 4px;">
+              🤝 Protocolo com as Colônias de Pescadores
+            </div>
+            <p style="font-size: 0.76rem; color: #15803d; line-height: 1.45; margin: 0;">
+              O cadastro é homologado junto às <strong>Colônias Z-1, Z-7 e Z-11</strong>, que auditam o RGP do condutor tradicional. Isso combate clandestinos e intermediários predatórios.
+            </p>
+          </div>
+
+          <!-- Indicadores do Prêmio -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #0b4f6c; font-size: 0.82rem; margin-bottom: 4px;">
+              📊 Indicadores de Impacto (XXI Prêmio Inovação)
+            </div>
+            <ul style="font-size: 0.76rem; color: #475569; line-height: 1.45; padding-left: 16px; margin: 0;">
+              <li><strong>Renda Local Direta:</strong> 100% da diária paga diretamente à família do piloteiro.</li>
+              <li><strong>Conformidade Preventiva:</strong> Consultas cidadãs que evitam autuações da PMA.</li>
+              <li><strong>Custo para o Estado:</strong> R$ 0,00 (100% software livre e GitHub Pages).</li>
+            </ul>
+          </div>
+
+          <!-- Transparência Offline -->
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+            <div style="font-weight: 800; color: #1e40af; font-size: 0.82rem; margin-bottom: 4px;">
+              📶 Transparência do Modo Offline
+            </div>
+            <p style="font-size: 0.76rem; color: #1d4ed8; line-height: 1.45; margin: 0;">
+              Todas as 8 camadas de rios, regras e piloteiros estão 100% salvas no seu aparelho via IndexedDB. As fotos de satélite são cacheadas conforme você navega (até 1.500 quadrículas). Navegue pelo seu trecho no hotel antes de ir para o rio!
+            </p>
+          </div>
+
+          <div style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 10px;">
+            Versão 2026 &bull; Licença MIT &bull; Feito por quem ama o Pantanal
+          </div>
+        </section>
+
+      </div>
+    </aside>
+
+    <!-- MAPA LEAFLET EM TELA CHEIA (PALCO PRINCIPAL) -->
+    <main id="map-container" class="geofish-map-viewport" role="main" aria-label="Mapa Náutico Interativo">
+      
+      <!-- Botão Flutuante para Reabrir a Sidebar quando Recolhida -->
+      <button id="btn-open-sidebar-float" class="btn-open-sidebar-float" aria-label="Abrir Painel de Ferramentas e Camadas">
+        <span aria-hidden="true">☰</span>
+        <span>Menu / Camadas</span>
+      </button>
+
+      <!-- Busca Flutuante Instantânea no Mapa -->
+      <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca no Mapa">
+        <div class="local-search-input-wrapper">
+          <span class="local-search-icon" aria-hidden="true">🔍</span>
+          <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar rio, piloteiro, porto ou rampa..." autocomplete="off" spellcheck="false" aria-label="Buscar feições locais no mapa">
+          <button type="button" id="btn-clear-local-search" class="local-clear-btn" style="display: none;" aria-label="Limpar busca">&times;</button>
+        </div>
+        <div id="local-search-results" class="local-search-results hidden" role="listbox" aria-label="Resultados da busca"></div>
+      </div>
+
+      <!-- Indicador Flutuante de Carregamento -->
+      <div id="loading-indicator" aria-live="polite">
+        <span class="spinner"></span>
+        <span id="loading-text">Carregando camadas…</span>
+      </div>
+
+      <!-- O Mapa Leaflet em Si -->
+      <div id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></div>
+
+      <!-- Botão Flutuante de GPS Náutico -->
+      <button type="button" id="btn-gps" class="btn-gps" aria-label="Localizar minha posição no rio (GPS)" title="Onde estou no rio">
+        <span aria-hidden="true">📍</span>
+        <span>Onde estou</span>
+      </button>
+
+      <!-- Legenda Compacta do WebGIS -->
+      <div class="webgis-legend-strip" role="region" aria-label="Legenda do Mapa">
+        <div class="legend-item"><span class="legend-marker marker-guia">🚤</span> <span>Piloteiro (Z-1, Z-7, Z-11)</span></div>
+        <div class="legend-item"><span class="legend-marker marker-rampa">⚓</span> <span>Rampa Náutica</span></div>
+        <div class="legend-item"><span class="legend-marker marker-pma">🚨</span> <span>Posto PMA</span></div>
+        <div class="legend-item"><span class="legend-line line-cota"></span> <span>Cota Permitida</span></div>
+        <div class="legend-item"><span class="legend-line line-pesque-solte"></span> <span>Pesque e Solte</span></div>
+        <div class="legend-item"><span class="legend-box box-restrita"></span> <span>Área Restrita</span></div>
+      </div>
+    </main>
+
+    <!-- Overlay para Fechar a Sidebar no Celular ao Tocar Fora -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
   </div>
 
   <!-- ========================================================
-       HERO PRINCIPAL FOCADO: BUSCA DE GUIAS E MAPA NÁUTICO
+       3. PAINEL INFERIOR RETRÁTIL DE DETALHES (BOTTOM SHEET)
        ======================================================== -->
-  <section id="hero-territorio" class="hero-territorial" aria-label="Encontre um Guia ou Piloteiro Local na Bacia do Rio Miranda">
-    <div class="hero-photo-layer" style="background-image: url('images/hero/rio_miranda_panorama.jpg');" title="Rio Miranda &bull; Foto: Katita Alves (CC BY-SA 4.0 / Wikimedia Commons)"></div>
-    <span class="hero-photo-credit" aria-hidden="true">Foto: Katita Alves (CC BY-SA 4.0)</span>
-    <div class="hero-overlay-gradient"></div>
-    
-    <div class="tpwd-container hero-content-inner">
-      <div class="hero-editorial-grid">
-        <!-- COLUNA PRINCIPAL: MISSÃO CLARA & ENTRADA DIRETA -->
-        <div class="hero-poetic-block">
-          <div class="hero-kicker-badge">
-            <span class="kicker-dot"></span>
-            <span>BACIA DO RIO MIRANDA &bull; PANTANAL SUL-MATO-GROSSENSE</span>
-          </div>
-          <h1 class="hero-poetic-headline" style="font-size: clamp(1.8rem, 3.8vw, 2.6rem); line-height: 1.15; margin-bottom: 12px;">
-            Encontre um piloteiro ou guia local no Rio Miranda
-          </h1>
-          <p class="hero-poetic-subheadline" style="font-size: 1.05rem; line-height: 1.5; margin-bottom: 20px;">
-            Conecte-se diretamente com pescadores e piloteiros nativos das <strong>Colônias Z-1, Z-7 e Z-11</strong> pelo WhatsApp. O turista encontra no mapa; você combina tudo direto com o profissional, sem taxas nem intermediação.
-          </p>
-
-          <!-- AÇÕES DIRETAS DE ENTRADA -->
-          <div class="hero-cta-group" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
-            <a href="#secao-mapa" id="btn-hero-ver-guias" class="btn-hero-primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-              <span>Ver Guias no Mapa</span>
-            </a>
-            <button type="button" data-action="abrir-sos" class="btn-hero-sos" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(185, 28, 28, 0.85); color: #ffffff; border: 1px solid #f87171; border-radius: 8px; padding: 12px 18px; font-weight: 700; font-size: 0.95rem; cursor: pointer; backdrop-filter: blur(4px);">
-              <span aria-hidden="true">🚨</span>
-              <span>SOS Fluvial (PMA &amp; Resgate)</span>
-            </button>
-          </div>
-
-          <!-- FILTROS RÁPIDOS POR REGIÃO / COLÔNIA (SEM EXIGIR CADASTRO) -->
-          <div class="hero-quick-filters" style="margin-top: 8px;" aria-label="Filtros rápidos por região">
-            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.85); font-weight: 700; display: block; margin-bottom: 8px;">
-              Filtrar profissionais por região:
-            </span>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <button type="button" class="btn-filter-chip active" data-regiao="todas" style="background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4); color: #ffffff; border-radius: 20px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-weight: 600;">
-                📍 Todas as Regiões
-              </button>
-              <button type="button" class="btn-filter-chip" data-regiao="z1" style="background: rgba(15,23,42,0.45); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; border-radius: 20px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-weight: 500;">
-                🚤 Miranda &amp; Passo do Lontra (Z-1)
-              </button>
-              <button type="button" class="btn-filter-chip" data-regiao="z7" style="background: rgba(15,23,42,0.45); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; border-radius: 20px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-weight: 500;">
-                🚤 Aquidauana &amp; Anastácio (Z-7)
-              </button>
-              <button type="button" class="btn-filter-chip" data-regiao="z11" style="background: rgba(15,23,42,0.45); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; border-radius: 20px; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; font-weight: 500;">
-                🚤 Bonito &amp; Águas do Miranda (Z-11)
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- COLUNA LATERAL DE CONSULTA & SEGURANÇA (SOB DEMANDA) -->
-        <aside class="hero-quick-tools-panel" aria-label="Painel de Consulta Rápida">
-          <div class="panel-header">
-            <span class="panel-kicker">CONSULTA SOB DEMANDA</span>
-            <h2 class="panel-title" style="font-size: 1.15rem;">Regras &amp; Medidas Oficiais</h2>
-          </div>
-
-          <!-- Régua de Espécies -->
-          <div class="quick-tool-card tool-species">
-            <div class="quick-tool-icon">
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/></svg>
-            </div>
-            <div class="quick-tool-content">
-              <div class="quick-tool-head">
-                <span class="tool-tag tag-species">MEDIDAS PMA</span>
-                <span class="tool-status">Cota Zero Dourado</span>
-              </div>
-              <p class="tool-desc">
-                Pintado (85–125 cm), Pacu (45–65 cm), Cachara (80–120 cm).
-              </p>
-              <button type="button" id="btn-hero-species" class="btn-panel-action">
-                <span>Abrir Régua de Espécies &rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Cota & Transporte GCP -->
-          <div class="quick-tool-card tool-transport">
-            <div class="quick-tool-icon">
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="quick-tool-content">
-              <div class="quick-tool-head">
-                <span class="tool-tag tag-pma">LEGISLAÇÃO MS</span>
-                <span class="tool-status">Dentro de MS</span>
-              </div>
-              <p class="tool-desc">
-                1 exemplar nativo + 5 piranhas (lacrado com GCP pela PMA).
-              </p>
-              <button type="button" data-action="abrir-cartilha" class="btn-panel-link" style="background: none; border: none; text-align: left; padding: 0; cursor: pointer;">
-                <span>Consultar Cartilha PMA &rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Ações Oficiais: Licença IMASUL & Cartilha -->
-          <div class="panel-dual-actions">
-            <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="panel-dual-btn btn-licenca" title="Emissão da Licença Digital de Pesca no IMASUL">
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span>Licença IMASUL</span>
-            </a>
-            <button type="button" data-action="abrir-cartilha" class="panel-dual-btn btn-cartilha-panel" title="Consultar a Cartilha Oficial do Pescador PMA">
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              <span>Cartilha PMA</span>
-            </button>
-          </div>
-        </aside>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       NOVO BLOCO: VITRINE DE TURISMO, POUSADAS & PARCEIROS (INFORME PUBLICITÁRIO)
-       ======================================================== -->
-  <section id="secao-parceiros-turismo" class="editorial-partners-strip" aria-label="Parceiros do Turismo e Hospedagem Pantaneira">
-    <div class="editorial-container">
-      <div class="partners-strip-header">
-        <div class="partners-badge-group">
-          <span class="partners-kicker">INFORME PUBLICITÁRIO &bull; TURISMO &amp; SERVIÇOS</span>
-          <span class="partners-pill-badge">Bacia do Rio Miranda</span>
-        </div>
-        <div class="partners-header-row">
-          <h2 class="partners-title">Onde Ficar &amp; Serviços Náuticos no Pantanal</h2>
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partners-anuncie" style="border: none; cursor: pointer;">
-            <span>Anuncie sua Empresa Aqui &rarr;</span>
-          </button>
-        </div>
-        <p class="partners-desc">
-          Conecte-se com pousadas pesqueiras, barcos-hotéis e comércios náuticos credenciados ao longo do Rio Miranda, Passo do Lontra e Aquidauana.
-        </p>
-      </div>
-
-      <div class="partners-grid-cards">
-        <!-- CARD 1: POUSADAS & HOTÉIS PESQUEIROS -->
-        <article class="partner-card">
-          <div class="partner-card-media">
-            <img src="images/comunidade/rio_miranda_floresta.jpg" alt="Pousada e beira de rio no Pantanal de Miranda" class="partner-card-img" loading="lazy">
-            <span class="partner-card-tag">HOSPEDAGEM &amp; LAZER</span>
-            <span class="photo-credit-badge">Foto: Geoff Gallice (CC BY 2.0)</span>
-          </div>
-          <div class="partner-card-content">
-            <h3 class="partner-card-title">Pousadas &amp; Hotéis de Pesca no Rio Miranda</h3>
-            <p class="partner-card-text">
-              Estrutura com pensão completa, apartamentos climatizados, barcos com motor 4 tempos e piloteiros nativos conhecedores dos melhores poços.
-            </p>
-            <div class="partner-card-footer">
-              <span class="partner-loc">📍 Miranda &bull; Passo do Lontra</span>
-              <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partner-wpp" style="border: none; cursor: pointer;">
-                <span>💬 Informações &amp; Parcerias</span>
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <!-- CARD 2: BARCOS-HOTÉIS & EXPEDIÇÕES -->
-        <article class="partner-card">
-          <div class="partner-card-media">
-            <img src="images/navegacao/passo_lontra_foz.jpg" alt="Expedição de barco pelo Rio Miranda e Vermelho" class="partner-card-img" loading="lazy">
-            <span class="partner-card-tag" style="background: #0284c7;">EXPEDIÇÕES FLUVIAIS</span>
-            <span class="photo-credit-badge">Foto: Luiz Bernhard (CC BY-SA 4.0)</span>
-          </div>
-          <div class="partner-card-content">
-            <h3 class="partner-card-title">Barcos-Hotéis &amp; Expedições Fluviais</h3>
-            <p class="partner-card-text">
-              Viva o Pantanal profundo a bordo de chalanas e barcos-hotéis confortáveis com navegação contínua, safári fotográfico e pacotes all-inclusive.
-            </p>
-            <div class="partner-card-footer">
-              <span class="partner-loc">📍 Rio Miranda &bull; Rio Paraguai</span>
-              <button type="button" data-action="abrir-parcerias-pousadas" class="btn-partner-wpp" style="border: none; cursor: pointer;">
-                <span>💬 Consultar Parcerias</span>
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <!-- CARD 3: ISCAS, GASOLINA NÁUTICA & PILOTEIROS -->
-        <article class="partner-card">
-          <div class="partner-card-media">
-            <img src="images/rio/estrada_parque_miranda.jpg" alt="Apoio náutico e pontes pantaneiras" class="partner-card-img" loading="lazy">
-            <span class="partner-card-tag" style="background: #d97706;">APOIO NÁUTICO</span>
-            <span class="photo-credit-badge">Foto: Kaliewhite (CC BY-SA 4.0)</span>
-          </div>
-          <div class="partner-card-content">
-            <h3 class="partner-card-title">Comércio Náutico, Iscas &amp; Guias Nativos</h3>
-            <p class="partner-card-text">
-              Tuviras selecionadas, caranguejos, tralhas de pesca, combustível náutico e contratação de guias credenciados pelas Colônias Z-1, Z-7 e Z-11.
-            </p>
-            <div class="partner-card-footer">
-              <span class="partner-loc">📍 Estrada Parque &bull; Postos Náuticos</span>
-              <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-partner-wpp" style="border: none; cursor: pointer;">
-                <span>💬 Piloteiros &amp; Apoio</span>
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       SEÇÃO 1: EXPLORE A BACIA DO RIO MIRANDA (MOSAICO EDITORIAL)
-       ======================================================== -->
-  <section id="secao-explore-bacia" class="editorial-section" aria-label="Explore a Bacia do Rio Miranda">
-    <div class="editorial-container">
-      <div class="editorial-section-header">
-        <span class="editorial-section-kicker">GUIA PRÁTICO DO TERRITÓRIO</span>
-        <h2 class="editorial-section-title">Explore a Bacia do Rio Miranda</h2>
-        <p class="editorial-section-desc">
-          Tudo o que você precisa para planejar sua pescaria, navegar com segurança e vivenciar o Pantanal com responsabilidade ambiental.
-        </p>
-      </div>
-
-      <div class="explore-mosaic-grid">
-        <!-- BLOCO 1 (GRANDE COM FOTO): ONDE PESCAR -->
-        <article class="mosaic-card card-onde-pescar">
-          <div class="mosaic-card-image-wrap">
-            <img src="images/pesca/barco_rio_miranda.jpg" alt="Pescadores navegando no Rio Miranda" class="mosaic-card-img" loading="lazy">
-            <span class="mosaic-card-tag">PESCA ESPORTIVA</span>
-            <span class="photo-credit-badge">Foto: Rezendevaleria (CC BY-SA 4.0)</span>
-          </div>
-          <div class="mosaic-card-body">
-            <h3 class="mosaic-card-title">Onde Pescar: Trechos &amp; Regimes Normativos</h3>
-            <p class="mosaic-card-text">
-              Descubra os pontos de rodada de pintado no canal principal, batida de pacu nas margens e trechos exclusivos de Pesque e Solte no Rio Miranda e Rio Aquidauana.
-            </p>
-            <a href="#secao-mapa" class="mosaic-card-action">
-              <span>Localizar Trechos no Mapa</span>
-              <span aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
-        </article>
-
-        <!-- BLOCO 2 (MÉDIO / COTAS): MEDIDAS DOS PEIXES -->
-        <article class="mosaic-card card-medidas">
-          <div class="mosaic-card-body">
-            <span class="mosaic-card-tag tag-amber">COTAS &amp; MEDIDAS OFICIAIS</span>
-            <h3 class="mosaic-card-title">Medidas dos Peixes do Pantanal</h3>
-            <p class="mosaic-card-text">
-              Consulte a faixa permitida de cada espécie para evitar autuação da PMA: Pintado (85 a 125 cm), Pacu (45 a 65 cm), Jaú (95 a 130 cm). Dourado é 100% Pesque e Solte!
-            </p>
-            <div class="card-species-preview">
-              <span class="species-chip">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/></svg>
-                Pintado: 85–125 cm
-              </span>
-              <span class="species-chip">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/></svg>
-                Pacu: 45–65 cm
-              </span>
-              <span class="species-chip" style="color: var(--color-gold); font-weight: 800;">
-                <svg class="icon-svg" viewBox="0 0 24 24" style="color: var(--color-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Dourado: Soltura Obrigatória
-              </span>
-            </div>
-            <button type="button" data-action="abrir-especies" class="mosaic-btn-action">
-              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
-              <span>Consultar Régua Digital de Espécies</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- BLOCO 3 (MÉDIO COM FOTO): NÁUTICA & RAMPAS -->
-        <article class="mosaic-card card-nautica">
-          <div class="mosaic-card-image-wrap">
-            <img src="images/navegacao/passo_lontra_foz.jpg" alt="Passo do Lontra e foz do Rio Vermelho" class="mosaic-card-img" loading="lazy">
-            <span class="mosaic-card-tag tag-cyan">NÁUTICA &amp; RAMPAS</span>
-            <span class="photo-credit-badge">Foto: Luiz Bernhard (CC BY-SA 4.0)</span>
-          </div>
-          <div class="mosaic-card-body">
-            <h3 class="mosaic-card-title">Rampas de Barco &amp; Apoio Náutico</h3>
-            <p class="mosaic-card-text">
-              Descidas de concreto homologadas, postos com gasolina náutica e atracadouros estratégicos em Miranda, Passo do Lontra e Anastácio.
-            </p>
-            <a href="#secao-mapa" class="mosaic-card-action">
-              <span>Ver Rampas no WebGIS</span>
-              <span aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
-        </article>
-
-        <!-- BLOCO 4 (GRANDE COM FOTO): REGRAS DE PESCA & SANTUÁRIO DO SALOBRA -->
-        <article class="mosaic-card card-regras-salobra">
-          <div class="mosaic-card-image-wrap">
-            <img src="images/natureza/rio_salobra_cristalino.jpg" alt="Águas cristalinas do Rio Salobra na Bodoquena" class="mosaic-card-img" loading="lazy">
-            <span class="mosaic-card-tag tag-emerald">SANTUÁRIO ECOLÓGICO</span>
-            <span class="photo-credit-badge">Foto: Wilmar Carrilho (CC BY-SA 4.0)</span>
-          </div>
-          <div class="mosaic-card-body">
-            <h3 class="mosaic-card-title">Regras de Pesca &amp; Santuário do Rio Salobra</h3>
-            <p class="mosaic-card-text">
-              Águas transparentes de calcário protegidas por lei estadual. Na calha do Salobra, a pesca é estritamente Pesque e Solte, proibido abate ou transporte, com autorização apenas para motores 4 tempos até 15 HP.
-            </p>
-            <div class="mosaic-card-footer-btns">
-              <button type="button" data-action="abrir-cartilha" class="mosaic-btn-sub">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                <span>Ler Cartilha Oficial PMA</span>
-              </button>
-              <a href="#secao-transporte-passo-a-passo" class="mosaic-card-action">
-                <span>Passo a Passo Sem Multa &rarr;</span>
-              </a>
-            </div>
-          </div>
-        </article>
-
-        <!-- BLOCO 5 (MÉDIO COM FOTO): CONTATOS DE EMERGÊNCIA & APOIO FLUVIAL -->
-        <article class="mosaic-card card-sos">
-          <div class="mosaic-card-image-wrap">
-            <img src="images/rio/estrada_parque_miranda.jpg" alt="Estrada Parque e ponte sobre o Rio Miranda" class="mosaic-card-img" loading="lazy">
-            <span class="mosaic-card-tag tag-red">EMERGÊNCIA FLUVIAL</span>
-            <span class="photo-credit-badge">Foto: Kaliewhite (CC BY-SA 4.0)</span>
-          </div>
-          <div class="mosaic-card-body">
-            <h3 class="mosaic-card-title">Contatos de Emergência &amp; Apoio no Rio</h3>
-            <p class="mosaic-card-text">
-              Acesso rápido aos telefones de socorro: Marinha do Brasil (185), Polícia Militar Ambiental (190), Bombeiros (193) e pronto atendimento de Miranda.
-            </p>
-            <button type="button" data-action="abrir-sos" class="mosaic-btn-action btn-danger">
-              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
-              <span>Ver Telefones de Emergência</span>
-            </button>
-          </div>
-        </article>
-
-        <!-- BLOCO 6 (CHAMADA NOBRE PARA O MAPA): WEBGIS COMPLETO -->
-        <article class="mosaic-card card-webgis-highlight">
-          <div class="mosaic-card-body">
-            <span class="mosaic-card-tag tag-gold">CARTOGRAFIA DIGITAL</span>
-            <h3 class="mosaic-card-title">WebGIS Interativo da Bacia</h3>
-            <p class="mosaic-card-text">
-              Visualize todas as camadas geográficas integradas: limites municipais, reservas ecológicas, piloteiros credenciados e áreas de restrição na palma da sua mão.
-            </p>
-            <div class="webgis-features-inline">
-              <span>🛰️ Satélite Esri</span>
-              <span>⚡ Offline-First</span>
-              <span>📍 Sem sinal de celular</span>
-            </div>
-            <a href="#secao-mapa" class="mosaic-btn-action btn-webgis-lead">
-              <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-              <span>Explorar Mapa Interativo &rarr;</span>
-            </a>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       SEÇÃO 2: CONHEÇA A BACIA DO RIO MIRANDA (O TERRITÓRIO)
-       ======================================================== -->
-  <section id="secao-territorio" class="editorial-territorio-section" aria-label="Conheça a Bacia do Rio Miranda">
-    <div class="editorial-container">
-      <div class="territorio-layout-grid">
-        
-        <!-- Coluna Visual: Mosaico Fotográfico Regional -->
-        <div class="territorio-media-col">
-          <figure class="territorio-figure-main">
-            <img src="images/pantanal/tuiuiu_pantanal.jpg" alt="Tuiuiú em área alagada da Bacia do Rio Miranda" class="territorio-photo-main" loading="lazy">
-            <figcaption class="territorio-photo-caption">
-              Tuiuiú (<em>Jabiru mycteria</em>), ave-símbolo do Pantanal sul-mato-grossense &bull; Foto: Chuheng Xi (CC BY-SA 4.0)
-            </figcaption>
-          </figure>
-          <div class="territorio-figure-secondary-wrap">
-            <figure class="territorio-figure-secondary">
-              <img src="images/natureza/arara_azul_miranda.jpg" alt="Arara-azul nas matas ciliares do Rio Miranda" class="territorio-photo-sub" loading="lazy">
-              <figcaption class="territorio-photo-caption">
-                Arara-azul nas matas ciliares do Rio Miranda &bull; Foto: Alessandra Thompson (CC BY-SA 4.0)
-              </figcaption>
-            </figure>
-            <figure class="territorio-figure-secondary">
-              <img src="images/pantanal/pantanal_crepusculo.jpg" alt="Crepúsculo espelhado sobre o Pantanal" class="territorio-photo-sub" loading="lazy">
-              <figcaption class="territorio-photo-caption">
-                Crepúsculo nas planícies pantaneiras &bull; Foto: Alice Pache (CC BY-SA 4.0)
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-
-        <!-- Coluna Textual: Narrativa do Território -->
-        <div class="territorio-content-col">
-          <span class="editorial-section-kicker">O TERRITÓRIO &amp; NATUREZA</span>
-          <h2 class="territorio-title">Conheça a Bacia do Rio Miranda</h2>
-          
-          <div class="territorio-prose">
-            <p>
-              A <strong>Bacia Hidrográfica do Rio Miranda</strong> abrange <strong>44.740 km²</strong> de área de drenagem (cerca de 12% de todo o território sul-mato-grossense) e integra <strong>23 municípios</strong> onde vive mais de 54% da população do estado. Suas nascentes brotam nos planaltos da Serra de Maracaju e nas escarpas da Serra da Bodoquena, percorrendo <strong>490 km de curso principal</strong> até desaguar na margem esquerda do Rio Paraguai, no Pantanal de Corumbá.
-            </p>
-            <p>
-              Ao longo do seu percurso, o Miranda recebe tributários fundamentais como o <strong>Rio Aquidauana</strong>, o límpido <strong>Rio Salobra</strong> e o <strong>Rio Vermelho</strong>. Essa dinâmica fluvial sustenta um dos ecossistemas de peixes migradores mais produtivos do planeta — como o Pintado, o Pacu, o Jaú, a Cachara e o emblemático Dourado — sob forte regramento ambiental de preservação.
-            </p>
-            <p>
-              Mais do que uma bacia hidrográfica, este território é o lar de comunidades ribeirinhas históricas. Os piloteiros e pescadores nativos das <strong>Colônias Z-1 (Miranda e Corumbá)</strong>, <strong>Z-7 (Aquidauana e Anastácio)</strong> e <strong>Z-11 (Bonito e Águas do Miranda)</strong> detêm o conhecimento tradicional da navegação, conduzindo com segurança os visitantes por canais, baías e restingas pantaneiras.
-            </p>
-          </div>
-
-          <div class="territorio-facts-grid">
-            <div class="territorio-fact-card">
-              <span class="fact-num">44.740 km²</span>
-              <span class="fact-label">Área total oficial da bacia (12% do MS)</span>
-            </div>
-            <div class="territorio-fact-card">
-              <span class="fact-num">490 km</span>
-              <span class="fact-label">Calha principal da nascente à foz no Rio Paraguai</span>
-            </div>
-            <div class="territorio-fact-card">
-              <span class="fact-num">23 Cidades</span>
-              <span class="fact-label">Municípios abrangendo 54% da população do MS</span>
-            </div>
-            <div class="territorio-fact-card">
-              <span class="fact-num">3 Colônias</span>
-              <span class="fact-label">Colônias Z-1, Z-7 e Z-11 de Piloteiros Nativos</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       SEÇÃO 3: EXPLORE NO MAPA (WEBGIS INTERATIVO)
-       ======================================================== -->
-  <section id="secao-mapa" class="portal-map-section-wrapper" aria-label="WebGIS Interativo da Bacia do Rio Miranda">
-    <div class="editorial-container map-header-container">
-      <div class="map-intro-row">
-        <div>
-          <span class="editorial-section-kicker">CARTOGRAFIA EM AÇÃO &bull; SIRGAS 2000</span>
-          <h2 class="editorial-section-title">Explore o Território no WebGIS</h2>
-          <p class="editorial-section-desc">
-            Consulte camadas oficiais em SIRGAS 2000: limites municipais, traçado detalhado da hidrografia, postos de fiscalização da PMA e atracadouros georreferenciados.
-          </p>
-        </div>
-        <div class="map-intro-actions">
-          <button id="btn-centralizar-bacia" class="btn-map-action" title="Ajustar visualização para enquadrar toda a Bacia do Rio Miranda">
-            <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
-            <span>Centralizar Bacia</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Indicador Flutuante de Carga de Camadas -->
-    <div id="loading-indicator" aria-live="polite">
-      <span class="spinner"></span>
-      <span id="loading-text">Carregando camadas…</span>
-    </div>
-
-    <!-- Moldura Técnica do WebGIS (Janela Territorial) -->
-    <div class="editorial-container">
-      <div class="webgis-window-frame">
-        <div class="webgis-frame-header">
-          <div class="webgis-frame-meta">
-            <span class="webgis-chip-layer">
-              <span class="chip-dot"></span>
-              Camada Ativa: Hidrografia &amp; Bacia do Miranda
-            </span>
-            <span class="webgis-chip-layer">
-              <span class="chip-dot"></span>
-              Trechos PMA &amp; Rampas
-            </span>
-          </div>
-          <div class="webgis-frame-crs">
-            Projeção: <strong>SIRGAS 2000 / UTM 21S</strong>
-          </div>
-        </div>
-
-        <!-- Barra de Controle Rápido de Camadas & Modo Lista (Fase 2) -->
-        <div class="quick-filters-bar" role="toolbar" aria-label="Filtro rápido de camadas no mapa">
-          <button type="button" class="filter-chip active" data-camada-filtro="guias" aria-pressed="true">
-            <span>🚤</span> <span>Piloteiros &amp; Guias</span>
-          </button>
-          <button type="button" class="filter-chip" data-camada-filtro="apoio" aria-pressed="false">
-            <span>⚓</span> <span>Rampas &amp; Apoio</span>
-          </button>
-          <button type="button" class="filter-chip" data-camada-filtro="regras" aria-pressed="false">
-            <span>🎣</span> <span>Trechos &amp; Cotas</span>
-          </button>
-          <button type="button" class="filter-chip" data-camada-filtro="restritas" aria-pressed="false">
-            <span>⚠️</span> <span>Áreas Restritas</span>
-          </button>
-          <button type="button" class="filter-chip" data-camada-filtro="all" aria-pressed="false">
-            <span>🗺️</span> <span>Todas as Camadas</span>
-          </button>
-          <button type="button" id="btn-abrir-lista-guias" class="filter-chip" style="margin-left: auto; background: #0284c7; color: #ffffff; border-color: #0284c7;" aria-label="Abrir lista de profissionais">
-            <span>📋</span> <span>Ver em Lista</span>
-          </button>
-        </div>
-
-        <div class="portal-map-section">
-          <!-- Busca Flutuante Instantânea de Feições, Profissionais e Rios -->
-          <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca no Mapa">
-            <div class="local-search-input-wrapper">
-              <span class="local-search-icon" aria-hidden="true">🔍</span>
-              <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar piloteiro, rancho, rio ou rampa..." autocomplete="off" spellcheck="false" aria-label="Buscar feições locais no mapa">
-              <button type="button" id="btn-clear-local-search" class="local-clear-btn" style="display: none;" aria-label="Limpar busca">&times;</button>
-            </div>
-            <div id="local-search-results" class="local-search-results hidden" role="listbox" aria-label="Resultados da busca"></div>
-          </div>
-
-          <main id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></main>
-          <!-- Botão Flutuante de GPS & Localização Náutica ("Onde estou no rio") -->
-          <button type="button" id="btn-gps" class="btn-gps" aria-label="Localizar minha posição no rio (GPS)" title="Onde estou no rio">
-            <span aria-hidden="true">📍</span>
-            <span>Onde estou</span>
-          </button>
-        </div>
-
-        <!-- Legenda Simples e Acessível do WebGIS (Fase 2) -->
-        <div class="webgis-legend-strip" role="region" aria-label="Legenda do Mapa">
-          <div class="legend-item"><span class="legend-marker marker-guia">🚤</span> <span>Piloteiro Local (Colônias Z-1, Z-7, Z-11)</span></div>
-          <div class="legend-item"><span class="legend-marker marker-rampa">⚓</span> <span>Rampa Náutica de Apoio</span></div>
-          <div class="legend-item"><span class="legend-marker marker-pma">🚨</span> <span>Posto PMA / Fiscalização</span></div>
-          <div class="legend-item"><span class="legend-line line-cota"></span> <span>Trecho c/ Cota Permitida</span></div>
-          <div class="legend-item"><span class="legend-line line-pesque-solte"></span> <span>Pesque e Solte Exclusivo</span></div>
-          <div class="legend-item"><span class="legend-box box-restrita"></span> <span>Área Restrita / Parque</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================
-       SEÇÃO 4: HISTÓRIAS DA BACIA (EDITORIAL)
-       ======================================================== -->
-  <section id="secao-historias" class="editorial-section historias-section" aria-label="Histórias da Bacia do Rio Miranda">
-    <div class="editorial-container">
-      <div class="editorial-section-header">
-        <span class="editorial-section-kicker">MEMÓRIA, NATUREZA &amp; GENTE</span>
-        <h2 class="editorial-section-title">Histórias da Bacia</h2>
-        <p class="editorial-section-desc">
-          Artigos, relatos de campo e conhecimento prático sobre os rios, a fauna e a vida pantaneira.
-        </p>
-      </div>
-
-      <div class="historias-cards-grid">
-        <!-- Card 1: Navegabilidade e Calha Fluvial -->
-        <article class="historia-card">
-          <div class="historia-img-wrap">
-            <img src="images/comunidade/rio_miranda_floresta.jpg" alt="Matas ciliares e curso do Rio Miranda" class="historia-img" loading="lazy">
-            <span class="historia-tag">EXPEDIÇÃO &amp; NAVEGABILIDADE</span>
-          </div>
-          <div class="historia-body">
-            <h3 class="historia-title">Do Alto Curso ao Passo do Lontra: A Dinâmica da Calha</h3>
-            <p class="historia-desc">
-              Expedições técnicas (Brasil das Águas e WWF) revelam o relevo da bacia: pedrais e restingas no alto curso (Jardim, Bonito e Aquidauana) exigem embarcações leves com calado raso. De Miranda até a foz no Rio Paraguai, a calha se alarga permitindo voadeiras e chalanas.
-            </p>
-            <a href="#secao-mapa" class="historia-link">Consultar no WebGIS &rarr;</a>
-          </div>
-        </article>
-
-        <!-- Card 2: Bonito e Distrito Águas do Miranda -->
-        <article class="historia-card">
-          <div class="historia-img-wrap">
-            <img src="images/natureza/rio_salobra_cristalino.jpg" alt="Águas do Miranda e Rio Salobra" class="historia-img" loading="lazy">
-            <span class="historia-tag">POLO DE PESCA EM BONITO</span>
-          </div>
-          <div class="historia-body">
-            <h3 class="historia-title">Bonito &amp; Águas do Miranda: Polo Oficial de Pesca</h3>
-            <p class="historia-desc">
-              Em Bonito, rios cristalinos de flutuação (Formoso, Sucuri, Prata) têm pesca 100% proibida por lei. O <strong>Distrito Águas do Miranda</strong> é o único polo oficial do município para a pesca esportiva, operando com pousadas e pesque-e-solte na calha do Miranda.
-            </p>
-            <a href="#secao-transporte-passo-a-passo" class="historia-link">Conhecer o polo &rarr;</a>
-          </div>
-        </article>
-
-        <!-- Card 3: Comunidades e Piloteiros Nativos -->
-        <article class="historia-card">
-          <div class="historia-img-wrap">
-            <img src="images/pesca/barco_rio_miranda.jpg" alt="Piloteiro nativo conduzindo barco no rio" class="historia-img" loading="lazy">
-            <span class="historia-tag">COMUNIDADES &amp; TRADIÇÃO</span>
-          </div>
-          <div class="historia-body">
-            <h3 class="historia-title">Piloteiros Nativos: Guardiões das Colônias Z-1, Z-7 e Z-11</h3>
-            <p class="historia-desc">
-              O saber secular dos pescadores profissionais de Miranda (Colônia Z-1), Aquidauana (Colônia Z-7) e Bonito (Colônia Z-11) na leitura dos balseiros, corixos e poços profundos onde habitam as grandes matrizes de pintado, pacu e jaú no Pantanal.
-            </p>
-            <a href="#" data-action="abrir-parcerias-piloteiros" class="historia-link">Contatar piloteiros &rarr;</a>
-          </div>
-        </article>
-
-        <!-- Card 4: Pesca Sustentável e FUNDTUR -->
-        <article class="historia-card">
-          <div class="historia-img-wrap">
-            <img src="images/pantanal/pantanal_crepusculo.jpg" alt="Pôr do sol espelhado no Pantanal" class="historia-img" loading="lazy">
-            <span class="historia-tag">SUSTENTABILIDADE &amp; TURISMO</span>
-          </div>
-          <div class="historia-body">
-            <h3 class="historia-title">Pesque &amp; Solte: MS como Líder Nacional na Pesca Esportiva</h3>
-            <p class="historia-desc">
-              Reconhecido no cenário nacional (Pesca Trade Show / FUNDTUR-MS), Mato Grosso do Sul lidera a pesca responsável no Brasil. A proteção permanente do Dourado e o estímulo ao Pesque e Solte asseguram fauna farta e economia sustentável.
-            </p>
-            <a href="#secao-calendario-pesca" class="historia-link">Ver calendário e regras &rarr;</a>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- Barra Inferior de Polegar (Android Bottom Navigation Bar) -->
-  <nav id="android-bottom-bar" class="android-bottom-bar" aria-label="Navegação rápida inferior">
-    <button id="nav-btn-guias" class="bottom-nav-item" data-action="abrir-parcerias-piloteiros" aria-label="Piloteiros e Guias das Colônias Z-1, Z-7 e Z-11">
-      <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
-      <span class="bottom-nav-label">Piloteiros</span>
-    </button>
-    <button id="nav-btn-especies" class="bottom-nav-item" aria-label="Medidas de Peixes IMASUL">
-      <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 3.5 0 5 .85 1.28 1.27 2.22 1.27 3.5 0 1.28-.42 2.22-1.27 3.5-1 1.5-1 3.5 0 5 2.85-.47 4.27-2.5 4.27-5.17"/></svg></span>
-      <span class="bottom-nav-label">Peixes MS</span>
-    </button>
-    <button id="nav-btn-rampas" class="bottom-nav-item" aria-label="Rampas e Portos">
-      <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
-      <span class="bottom-nav-label">Rampas</span>
-    </button>
-    <button id="nav-btn-pousadas" class="bottom-nav-item" data-action="abrir-parcerias-pousadas" aria-label="Pousadas e Ranchos">
-      <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-      <span class="bottom-nav-label">Pousadas</span>
-    </button>
-    <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="bottom-nav-item" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;" aria-label="Emitir Licença Ambiental">
-      <span class="bottom-nav-icon"><svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
-      <span class="bottom-nav-label">Licença</span>
-    </a>
-  </nav>
-
-  <!-- Card Nativo de Instalação para Android (Samsung / Motorola / Chrome) -->
-  <div id="android-install-banner" class="android-install-banner hidden" role="region" aria-label="Instalação do Aplicativo Android">
-    <div class="android-install-info">
-      <img src="icons/icon-192.png" alt="GeoFish MS" class="android-install-icon" width="48" height="48">
-      <div class="android-install-text">
-        <strong>Instalar GeoFish MS</strong>
-        <span>Funciona 100% offline no barco sem sinal de celular</span>
-      </div>
-    </div>
-    <div class="android-install-actions">
-      <button id="btn-android-dismiss" class="btn-android-dismiss" aria-label="Dispensar aviso">Depois</button>
-      <button id="btn-android-install" class="btn-android-install" aria-label="Instalar aplicativo agora">📲 Instalar</button>
-    </div>
-  </div>
-
-  <!-- Painel Inferior Retrátil de Detalhes (Bottom Sheet) -->
   <aside id="bottom-sheet" class="bottom-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Painel de detalhes da feição selecionada">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header-row">
@@ -775,1741 +466,163 @@
     <div id="sheet-content"></div>
   </aside>
 
-  <!-- Modal "Sobre os Dados" e Legislação Oficial -->
-  <!-- 1. Template Modal Sobre os Dados -->
+  <!-- ========================================================
+       4. TEMPLATES DE MODAIS (SOS, ESPÉCIES, DIÁRIO, CARTILHA)
+       ======================================================== -->
+
+  <!-- Template Modal Sobre -->
   <template id="template-modal-sobre">
-  <div id="modal-sobre" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sobre os dados do GeoFish MS">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2>
-          <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>Sobre os Dados e Governança</span>
-        </h2>
-        <button id="btn-fechar-sobre" class="modal-close-btn" aria-label="Fechar janela sobre os dados">&times;</button>
-      </div>
-      <div class="modal-body">
-        <!-- Autoria Cívica & Declaração de Independência -->
-        <div class="author-credits-box" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <span style="font-size: 1.25rem;">👤</span>
-            <strong style="color: #14532d; font-size: 0.95rem;">Autoria &amp; Iniciativa Cidadã</strong>
-          </div>
-          <p style="font-size: 0.85rem; color: #1e2922; line-height: 1.5; margin: 0 0 8px 0;">
-            O <strong>GeoFish MS</strong> é um projeto cívico independente idealizado, desenvolvido e mantido por <strong>Peterson Martins da Costa</strong> em prol do bem comum, da conservação da Bacia Hidrográfica do Rio Miranda e do apoio às comunidades ribeirinhas pantaneiras.
-          </p>
-          <div style="background: rgba(22, 101, 52, 0.08); border-left: 3px solid #16a34a; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; color: #14532d; font-weight: 600;">
-            🌿 <strong>Declaração de Independência:</strong> Iniciativa comunitária autônoma, sem nenhum tipo de vínculo institucional governamental, patrocínio político ou financiamento público.
-          </div>
+    <div id="modal-sobre" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sobre os dados do GeoFish MS">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>
+            <span aria-hidden="true">🌿</span>
+            <span>Sobre o GeoFish MS &bull; Dados Oficiais</span>
+          </h2>
+          <button id="close-sobre" class="modal-close-btn" aria-label="Fechar informações">&times;</button>
         </div>
-
-        <div class="legal-alert">
-          <strong>⚠️ Aviso Legal Importante:</strong><br>
-          As informações contidas neste aplicativo têm caráter estritamente <strong>orientativo e informativo</strong>, não substituindo em hipótese alguma os atos normativos oficiais e a legislação ambiental vigente no Estado de Mato Grosso do Sul.
-        </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Estado Atual das Camadas no Celular</h3>
-          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">
-            O GeoFish MS mantém cópias locais na memória do seu celular (IndexedDB) para funcionamento ininterrupto mesmo sem sinal de internet em campo:
+        <div class="modal-body">
+          <p style="font-size: 0.9rem; line-height: 1.5; color: #334155; margin-bottom: 12px;">
+            O <strong>GeoFish MS</strong> é um projeto cívico independente e voluntário, concebido por <strong>Peterson Martins da Costa</strong> para promover o turismo regenerativo e a pesca sustentável na Bacia do Rio Miranda.
           </p>
           <div id="layer-status-list" class="layer-status-list"></div>
         </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Bases Normativas de Referência</h3>
-          <ul style="padding-left: 20px; font-size: 0.86rem; color: #334155; display: flex; flex-direction: column; gap: 8px;">
-            <li><strong>Decreto Estadual nº 15.166/2019:</strong> Institui a política de Cota Zero para transporte rodoviário de pescado nativo e define limite para consumo no barco (1 exemplar + 5 piranhas).</li>
-            <li><strong>Lei Estadual nº 5.321 (prorrogada até 2029):</strong> Proíbe expressamente a captura e o abate do Dourado em todo o Mato Grosso do Sul.</li>
-            <li><strong>Licença Ambiental do IMASUL:</strong> Obrigatório o porte da Autorização Ambiental para Pesca Desportiva (carteirinha do IMASUL) acompanhada de documento oficial com foto.</li>
-            <li><strong>Resoluções SEMADESC / IMASUL:</strong> Regulamentam o defeso anual da piracema (05/nov a 28/fev) e os trechos de Pesque e Solte exclusivo (ex: Rio Salobra).</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Governança Participativa e Colônias</h3>
-          <p style="font-size: 0.86rem; color: #334155; line-height: 1.4;">
-            Dados oficiais da SEMADESC / IMASUL / SISLA combinados com o cadastro colaborativo de guias e condutores das <strong>Colônias de Pescadores Profissionais Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito / Águas do Miranda)</strong>.
-          </p>
-        </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Estudos Técnicos e Fontes Territoriais</h3>
-          <ul style="padding-left: 20px; font-size: 0.85rem; color: #334155; display: flex; flex-direction: column; gap: 6px;">
-            <li><strong>Plano de Recursos Hídricos da Bacia do Rio Miranda (IMASUL / SEMAC):</strong> Base cartográfica e hidrológica oficial da área de drenagem (44.740 km²) e seus 23 municípios contribuintes.</li>
-            <li><strong>Bacia Hidrográfica do Rio Miranda: Estado da Arte (WWF-Brasil / CIDEMA / UCDB):</strong> Diagnóstico ambiental da calha principal (490 km) e afluentes formadores da Bacia do Alto Paraguai.</li>
-            <li><strong>Estudos de Navegabilidade e Rios Pantaneiros (Ecoa &amp; Projeto Sete Rios - Brasil das Águas):</strong> Mapeamento do relevo fluvial, restingas de alto curso e calado navegável.</li>
-            <li><strong>Políticas de Ecoturismo &amp; Pesca Sustentável (SECTUR Bonito &amp; FUNDTUR-MS):</strong> Normatização do Distrito Águas do Miranda como polo de pesca e proteção integral dos rios de flutuação.</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #0b4f6c; margin-bottom: 6px;">Acervo Fotográfico e Créditos Culturais</h3>
-          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">
-            Todas as imagens territoriais do GeoFish MS provêm de acervos públicos sob licenças abertas (Wikimedia Commons / Creative Commons):
-          </p>
-          <ul style="padding-left: 20px; font-size: 0.82rem; color: #334155; display: flex; flex-direction: column; gap: 4px;">
-            <li><strong>Rio Miranda (Hero):</strong> Katita Alves (CC BY-SA 4.0)</li>
-            <li><strong>Pesca Esportiva no Miranda:</strong> Rezendevaleria (CC BY-SA 4.0)</li>
-            <li><strong>Passo do Lontra &amp; Foz do Vermelho:</strong> Luiz Ricardo Bernhard (CC BY-SA 4.0)</li>
-            <li><strong>Santuário do Rio Salobra:</strong> Wilmar Carrilho (CC BY-SA 4.0)</li>
-            <li><strong>Fauna Ciliar (Arara-Azul):</strong> Alessandra Marques da Silva Thompson (CC BY-SA 4.0)</li>
-            <li><strong>Estrada Parque Pantanal:</strong> Kaliewhite (CC BY-SA 4.0)</li>
-            <li><strong>Tuiuiú Pantaneiro:</strong> Chuheng Xi (CC BY-SA 4.0)</li>
-            <li><strong>Crepúsculo Pantaneiro:</strong> Alice Pache (CC BY-SA 4.0)</li>
-            <li><strong>Comunidades Ribeirinhas e Piloteiros:</strong> Geoff Gallice (CC BY 2.0)</li>
-          </ul>
+        <div class="modal-footer">
+          <button type="button" class="btn-cta" id="btn-fechar-sobre-rodape">Fechar</button>
         </div>
       </div>
     </div>
-  </div>
   </template>
 
-  <!-- Modal "Tabela Oficial de Espécies e Medidas (IMASUL MS)" -->
-  <!-- 2. Template Modal Espécies e Medidas -->
+  <!-- Template Modal Espécies -->
   <template id="template-modal-especies">
-  <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2>
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 3.5 0 5 .85 1.28 1.27 2.22 1.27 3.5 0 1.28-.42 2.22-1.27 3.5-1 1.5-1 3.5 0 5 2.85-.47 4.27-2.5 4.27-5.17"/></svg>
-          <span>Espécies &amp; Tamanhos Permitidos (MS)</span>
-        </h2>
-        <button id="btn-fechar-especies" class="modal-close-btn" aria-label="Fechar janela de espécies">&times;</button>
-      </div>
-      <div class="modal-body">
-        
-        <!-- Guia Prático de Transporte e Cotas Legais (Decretos 15.166/19 e 15.375/20) -->
-        <div style="background-color: #f0fdf4; border: 2px solid #16a34a; border-radius: 8px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border-bottom: 2px solid #bbf7d0; padding-bottom: 10px;">
-            <span style="font-size: 2rem;">📋</span>
-            <div>
-              <h3 style="color: #14532d; font-size: 1.1rem; margin: 0; font-weight: 900; text-transform: uppercase;">Regras de Transporte em Rodovias (MS)</h3>
-              <div style="font-size: 0.75rem; color: #15803d; font-weight: 700; margin-top: 2px;">Decreto Estadual nº 15.166/2019 alterado pelo Decreto nº 15.375/2020</div>
-            </div>
-          </div>
-          <p style="font-size: 0.88rem; color: #166534; font-weight: 800; margin-bottom: 12px; line-height: 1.4;">
-            É permitido transportar em veículos particulares nas rodovias de MS:
-          </p>
-          
-          <div style="background: white; border-radius: 6px; padding: 12px; border-left: 5px solid #16a34a; margin-bottom: 12px;">
-            <strong style="font-size: 0.85rem; color: #14532d; display: block; margin-bottom: 6px;">✅ O que você pode levar para casa com segurança:</strong>
-            <ul style="font-size: 0.82rem; color: #1e293b; margin-left: 20px; line-height: 1.6; font-weight: 600;">
-              <li><strong>1 (um) exemplar de espécie nativa</strong> dentro da faixa de tamanho mínimo e máximo permitida (ex: Pintado 85 a 125 cm ou Pacu 45 a 65 cm).</li>
-              <li><strong>Mais até 5 exemplares de piranhas</strong>.</li>
-              <li><strong>Espécies exóticas (Tucunaré, Corvina, Tilápia):</strong> Cota livre de peso e tamanho.</li>
-              <li><strong style="color: #dc2626;">Dourado:</strong> 100% PROIBIDO o abate ou transporte até 2029 (Lei nº 6.190/24). Pesque e Solte obrigatório.</li>
-            </ul>
-          </div>
-          
-          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #92400e; line-height: 1.45;">
-            <strong>⚠️ Transporte Permitido Exclusivamente Dentro de MS (Proibido Interestadual):</strong><br>
-            1. O peixe deve estar <strong>INTEIRO</strong> no gelo (com cabeça, cauda, escamas ou couro; proibido transportar em filés).<br>
-            2. Tenha a <strong>Licença de Pesca do IMASUL</strong> ativa (o IMASUL emite apenas a carteirinha; <strong>não existe selo turismo</strong>).<br>
-            3. Pare em <strong>qualquer Pelotão, Batalhão ou Posto da PMA de MS</strong> (como em Miranda na BR-262 km 565, Aquidauana, Corumbá ou Bonito) para vistoria oficial, colocação do lacre plástico numerado e emissão da <strong>Guia de Controle de Pescado (GCP)</strong> gratuita.
-          </div>
+    <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>
+            <span aria-hidden="true">🐟</span>
+            <span>Espécies &amp; Medidas Oficiais (MS)</span>
+          </h2>
+          <button id="btn-fechar-especies" class="modal-close-btn" aria-label="Fechar tabela de espécies">&times;</button>
         </div>
-        
-        <p style="font-size: 0.85rem; color: #475569;">
-          Tabela oficial com base no <strong>Decreto 15.166/2019</strong> e na <strong>Lei 5.321</strong> (Dourado Proibido).
-        </p>
-
-        <!-- Calculadora / Verificador de Medida Rápido no Barco -->
-        <div class="measure-checker-card">
-          <div class="checker-title">
-            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>
-            <span>Verificador Rápido no Barco: Posso Embarcar?</span>
+        <div class="modal-body">
+          <div style="margin-bottom: 14px;">
+            <input type="text" id="input-busca-especie" placeholder="Buscar peixe (ex: Pintado, Pacu, Cachara...)" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
           </div>
-          <div class="checker-form">
-            <select id="checker-species" class="checker-select" aria-label="Selecione o peixe">
-              <option value="pintado">Pintado / Surubim (85 a 125 cm)</option>
-              <option value="pacu">Pacu (45 a 65 cm)</option>
-              <option value="cachara">Cachara (80 a 120 cm)</option>
-              <option value="jau">Jaú (95 a 130 cm)</option>
-              <option value="piraputanga">Piraputanga (Mínimo 30 cm)</option>
-              <option value="curimbata">Curimbatá (Mínimo 38 cm)</option>
-              <option value="piavucu">Piavussu (Mínimo 38 cm)</option>
-              <option value="barbado">Barbado (Mínimo 60 cm)</option>
-              <option value="pati">Pati (Mínimo 65 cm)</option>
-              <option value="jurupoca">Jurupoca (Mínimo 40 cm)</option>
-              <option value="jurupensem">Jurupensém (Mínimo 35 cm)</option>
-              <option value="armao">Armado (Mínimo 35 cm)</option>
-              <option value="palmito">Palmito (Mínimo 35 cm)</option>
-              <option value="mandi">Mandi (Mínimo 25 cm)</option>
-              <option value="piau">Piau (Mínimo 25 cm)</option>
-              <option value="pacupeva">Pacupeva (Mínimo 20 cm)</option>
-              <option value="tucunare">Tucunaré (Livre / Exótica)</option>
-              <option value="corvina">Corvina (Livre / Alóctone)</option>
-              <option value="dourado">Dourado (PROIBIDO)</option>
-            </select>
-            <input type="number" id="checker-length" class="checker-input" placeholder="Comprimento (cm)" min="1" max="250" aria-label="Comprimento em centímetros">
-            <button id="btn-run-check" class="btn-check-measure">Verificar</button>
-          </div>
-          <div id="measure-result" class="measure-result-box"></div>
+          <div id="grid-especies-cards" class="species-grid"></div>
         </div>
-
-        <!-- Campo de Busca de Espécies -->
-        <div class="species-search-box">
-          <input type="text" id="species-search-input" class="species-search-input" placeholder="🔍 Buscar peixe (ex: Pintado, Dourado, Pacu)..." aria-label="Filtrar espécies">
-        </div>
-
-        <!-- Grid de Cartões de Espécies -->
-        <div id="species-grid" class="species-grid"></div>
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- Modal Instruções de Instalação no Celular (Android Samsung / Motorola / iOS) -->
-  <!-- 3. Template Modal Instalação PWA -->
-  <template id="template-modal-install">
-  <div id="modal-install" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Como instalar no celular">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2>
-          <svg class="icon-svg" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span>Instalar o App no Celular</span>
-        </h2>
-        <button id="btn-fechar-install" class="modal-close-btn" aria-label="Fechar instruções">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.9rem; color: #334155; margin-bottom: 12px;">
-          Instale o GeoFish MS direto no seu celular para abrir como um aplicativo nativo e <strong>navegar no rio mesmo sem sinal de internet</strong>:
-        </p>
-
-        <div class="install-guide-card android-guide">
-          <div class="guide-header">
-            <span class="guide-badge">🤖 Celulares Android (Samsung, Motorola, Xiaomi)</span>
-          </div>
-          <div class="guide-steps">
-            <div class="guide-step">
-              <span class="guide-num">1</span>
-              <span>No navegador (Google Chrome ou Samsung Internet), toque no menu de <strong>3 pontinhos (⋮)</strong> no canto superior ou no menu (☰) inferior.</span>
-            </div>
-            <div class="guide-step">
-              <span class="guide-num">2</span>
-              <span>Selecione a opção <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</span>
-            </div>
-            <div class="guide-step">
-              <span class="guide-num">3</span>
-              <span>Confirme em <strong>"Instalar"</strong>. O ícone aparecerá junto aos seus outros aplicativos!</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="install-guide-card ios-guide" style="margin-top: 14px;">
-          <div class="guide-header">
-            <span class="guide-badge ios">🍎 iPhone / iPad (Safari)</span>
-          </div>
-          <div class="guide-steps">
-            <div class="guide-step">
-              <span class="guide-num">1</span>
-              <span>No Safari, toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima) na barra inferior.</span>
-            </div>
-            <div class="guide-step">
-              <span class="guide-num">2</span>
-              <span>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</span>
-            </div>
-          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cta" id="btn-fechar-especies-rodape">Entendido</button>
         </div>
       </div>
     </div>
-  </div>
   </template>
 
-
-
-
-  <!-- FAB Container (Ações Secundárias Direita) -->
-  <div class="fab-container">
-    <button id="btn-abrir-diario" class="fab-btn" title="Diário de Pesca" aria-label="Registrar Peixe no Diário">
-      📸
-    </button>
-    <button id="btn-abrir-denuncia" class="fab-btn btn-denuncia" title="Denunciar Crime Ambiental" aria-label="Denunciar Rede Irregular">
-      🚨
-    </button>
-  </div>
-
-  <!-- Modal Central de Emergência & S.O.S Fluvial -->
-  <!-- 4. Template Modal S.O.S Fluvial -->
+  <!-- Template Modal SOS Fluvial -->
   <template id="template-modal-sos">
-  <div id="modal-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sos-title">
-    <div class="modal-dialog">
-      <div class="modal-header sos-modal-header">
-        <h2 id="sos-title" style="font-size: 1.15rem;">
-          <svg class="icon-svg" viewBox="0 0 24 24" style="color: #ffffff;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
-          <span>Emergência &amp; S.O.S Fluvial</span>
-        </h2>
-        <button id="btn-fechar-sos" class="modal-close-btn" aria-label="Fechar alerta">&times;</button>
-      </div>
-      <div class="modal-body">
-        
-        <div class="sos-legal-disclaimer">
-          <strong>Aviso Legal (Isenção de Responsabilidade):</strong> Este aplicativo é um utilitário de informações públicas e não possui vínculo com os serviços citados. Em caso de perigo iminente, falha técnica ou falta de sinal, busque a autoridade mais próxima.
+    <div id="modal-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sos-title">
+      <div class="modal-dialog">
+        <div class="modal-header" style="background: #dc2626; color: #ffffff;">
+          <h2 id="sos-title" style="color: #ffffff;">
+            <span aria-hidden="true">🚨</span>
+            <span>SOS Fluvial &bull; Emergência no Rio</span>
+          </h2>
+          <button id="btn-fechar-sos" class="modal-close-btn" style="color: #ffffff;" aria-label="Fechar emergência">&times;</button>
         </div>
-
-        <div class="sos-coords-card">
-          <div class="sos-coords-header">
-            <span class="sos-coords-icon">🚨</span>
-            <div>
-              <div style="font-size: 0.85rem; color: #0b4f6c; font-weight: 800;">Plantão de Emergência &amp; Resgate Fluvial</div>
-              <div id="sos-coords-display" class="sos-coords-text" style="font-size: 0.8rem; color: #334155; margin-top: 3px;">Em caso de pane de motor, acidente náutico ou socorro médico na calha do Rio Miranda e Aquidauana, acione as forças públicas de segurança:</div>
-            </div>
+        <div class="modal-body">
+          <p style="font-size: 0.9rem; color: #991b1b; font-weight: 700; margin-bottom: 12px;">
+            Em caso de naufrágio, pane motora, acidente ou socorro imediato nas águas pantaneiras:
+          </p>
+          <div id="sos-coordenadas-box" style="background: #f8fafc; border: 2px dashed #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 14px; font-family: monospace; font-size: 0.95rem; text-align: center;">
+            Obtendo coordenadas do GPS náutico...
           </div>
-          <div class="sos-coords-actions">
-            <button type="button" id="btn-atualizar-gps-sos" class="btn-sos-action btn-gps-refresh" style="background: #0284c7; color: #ffffff; cursor: pointer; font-weight: 700;">📍 Obter / Atualizar GPS</button>
-            <button id="btn-copiar-resgate" class="btn-sos-action btn-copy-action">📋 Copiar Mensagem de Emergência</button>
-            <button type="button" id="btn-wpp-resgate" class="btn-sos-action btn-wpp-action" style="cursor: pointer;">💬 Compartilhar via WhatsApp</button>
-          </div>
-        </div>
-
-        <div class="sos-buttons-grid">
-          
-          <button class="sos-call-btn btn-marinha" data-service="Marinha do Brasil" data-number="185">
-            <div class="sos-btn-badge">185</div>
-            <div>
-              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Marinha do Brasil</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Capitania Fluvial - Emergência</div>
-            </div>
-          </button>
-
-          <button class="sos-call-btn btn-pma" data-service="Polícia Militar Ambiental (Miranda)" data-number="06732424344">
-            <div class="sos-btn-badge">3242-4344</div>
-            <div>
-              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">PMA - Pelotão Miranda</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Atendimento Local Bacia Miranda</div>
-            </div>
-          </button>
-
-          <button class="sos-call-btn btn-pma" data-service="Polícia Militar Ambiental (Plantão Estadual)" data-number="06733571500">
-            <div class="sos-btn-badge">3357-1500</div>
-            <div>
-              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">PMA - Plantão Estadual MS</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Comando Geral / Emergência 190</div>
-            </div>
-          </button>
-
-          <button class="sos-call-btn btn-bombeiros" data-service="Corpo de Bombeiros" data-number="193">
-            <div class="sos-btn-badge">193</div>
-            <div>
-              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Corpo de Bombeiros</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Resgate e Salvamento</div>
-            </div>
-          </button>
-
-          <button class="sos-call-btn btn-samu" data-service="Hospital de Miranda" data-number="06732421222">
-            <div class="sos-btn-badge">3242-1222</div>
-            <div>
-              <div style="font-weight: 800; color: #0b4f6c; font-size: 0.9rem;">Hospital de Miranda</div>
-              <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Pronto Atendimento Médico</div>
-            </div>
-          </button>
-
-        </div>
-
-        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 0.73rem; color: #64748b; text-align: center;">
-          🛡️ <em>Contatos oficiais checados e confirmados: Outubro/2026. Em caso de crime ambiental urgente ou emergência, disque 190.</em>
-        </div>
-
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- Modal Diário de Pesca (Gamificação) -->
-  <!-- 5. Template Modal Diário de Pesca -->
-  <template id="template-modal-diario">
-  <div id="modal-diario" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2500;">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2 style="font-size: 1.15rem; color: #0b4f6c;">📸 Meu Diário de Troféus</h2>
-        <button id="btn-fechar-diario" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Guarde o registro fotográfico dos seus peixes no seu celular. Armazenamento 100% local e privado.</p>
-        
-        <input type="file" id="input-foto-diario" accept="image/*" capture="environment" style="display: none;">
-        <div id="preview-box-diario" class="photo-preview-box">
-          <div class="preview-placeholder">
-            <div style="font-size: 2rem;">📷</div>
-            <div style="margin-top: 8px; font-weight: 600;">Tirar Foto do Peixe</div>
-          </div>
-          <img id="img-diario" src="" alt="Troféu">
-        </div>
-
-        <!-- Seção de Identificação Visual com Google Lens (Gratuito e Sem Chaves) -->
-        <div id="lens-id-section" class="lens-id-section">
-          <div class="lens-header">
-            <span style="font-size: 1.25rem;">🔍</span>
-            <div>
-              <strong style="color: #0369a1; font-size: 0.85rem; display: block;">Identificar Espécie com Google Lens</strong>
-              <span style="font-size: 0.74rem; color: #64748b;">Reconhecimento visual nativo do Google, sem chave e sem complicação.</span>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
-            <button type="button" id="btn-abrir-lens" class="btn-lens-action" title="Abrir Google Lens no navegador">
-              <span>🔍 Abrir Google Lens</span>
-            </button>
-            <button type="button" id="btn-compartilhar-lens" class="btn-lens-secondary" title="Compartilhar foto tirada para o Google Lens / Fotos">
-              <span>📲 Enviar Foto p/ Lens</span>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="tel:6732424344" class="btn-cta" style="background: #b91c1c; text-align: center; text-decoration: none;">
+              📞 Pelotão PMA Miranda: (67) 3242-4344
+            </a>
+            <a href="tel:190" class="btn-cta" style="background: #0b4f6c; text-align: center; text-decoration: none;">
+              📞 Polícia Militar: 190
+            </a>
+            <a href="tel:193" class="btn-cta" style="background: #ea580c; text-align: center; text-decoration: none;">
+              📞 Bombeiros (Resgate): 193
+            </a>
+            <a href="tel:185" class="btn-cta" style="background: #0284c7; text-align: center; text-decoration: none;">
+              ⚓ Marinha do Brasil (Emergência Fluvial): 185
+            </a>
+            <button type="button" id="btn-compartilhar-sos-whatsapp" class="btn-cta" style="background: #16a34a; border: none; cursor: pointer;">
+              💬 Enviar Minhas Coordenadas no WhatsApp
             </button>
           </div>
-
-          <div id="lens-dica-box" class="lens-dica-box">
-            💡 <strong>Dica Pantaneira:</strong> No celular Android, você também pode abrir a foto tirada no seu aplicativo de fotos (Google Fotos ou Galeria) e tocar no botão <strong>Lens</strong> para ver o nome exato do peixe na hora!
-          </div>
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Espécie:</label>
-          <select id="select-especie-diario" class="checker-select" style="margin-bottom: 0;">
-            <option value="pintado">Pintado / Surubim</option>
-            <option value="pacu">Pacu</option>
-            <option value="cachara">Cachara</option>
-            <option value="jau">Jaú</option>
-            <option value="dourado">Dourado (Proibido Abate)</option>
-            <option value="piraputanga">Piraputanga</option>
-            <option value="curimbata">Curimbatá</option>
-            <option value="piavucu">Piavuçu</option>
-            <option value="barbado">Barbado</option>
-            <option value="outro">Outro...</option>
-          </select>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Comprimento (cm):</label>
-          <input type="number" id="input-tamanho-diario" class="checker-input" placeholder="Ex: 85" style="margin-bottom: 0;">
-        </div>
-
-        <div class="lgpd-container">
-          <input type="checkbox" id="cb-lgpd-diario" class="lgpd-checkbox">
-          <label for="cb-lgpd-diario" class="lgpd-text">
-            <strong>Armazenamento Local e Privado:</strong> Confirmo que este registro é pessoal e fica guardado exclusivamente na memória do meu navegador/aparelho, para consulta própria no mapa.
-          </label>
-        </div>
-
-        <div style="display: flex; gap: 8px; margin-top: 4px;">
-          <button id="btn-salvar-diario" class="btn-cta" style="background: #0284c7; border: none; min-height: 48px; margin-top: 0; flex: 1;">
-            💾 Salvar Troféu (Offline)
-          </button>
-          <button type="button" id="btn-limpar-diario" class="btn-limpar-dados" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; border-radius: 8px; padding: 0 14px; font-size: 0.8rem; cursor: pointer;" title="Apagar todos os troféus salvos neste aparelho">
-            🗑️ Limpar
-          </button>
         </div>
       </div>
     </div>
-  </div>
   </template>
 
-  <!-- Modal Denúncia Cidadã -->
-  <!-- 6. Template Modal Denúncia PMA -->
-  <template id="template-modal-denuncia">
-  <div id="modal-denuncia" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2500;">
-    <div class="modal-dialog">
-      <div class="modal-header" style="background-color: #b91c1c;">
-        <h2 style="font-size: 1.15rem;">🚨 Registro de Evidência Ambiental</h2>
-        <button id="btn-fechar-denuncia" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">Presenciou crime ambiental? Fotografe e guarde a evidência com coordenadas na memória do seu celular. Para denunciar formalmente à Polícia Militar Ambiental: <strong>Pelotão de Miranda (67) 3242-4344</strong>, <strong>Plantão Estadual (67) 3357-1500</strong> ou emergência <strong>190</strong>.</p>
-        
-        <input type="file" id="input-foto-denuncia" accept="image/*" capture="environment" style="display: none;">
-        <div id="preview-box-denuncia" class="photo-preview-box" style="border-color: #fca5a5;">
-          <div class="preview-placeholder">
-            <div style="font-size: 2rem;">📸</div>
-            <div style="margin-top: 8px; font-weight: 600; color: #b91c1c;">Fotografar Irregularidade</div>
-          </div>
-          <img id="img-denuncia" src="" alt="Denúncia">
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Tipo de Crime:</label>
-          <select id="select-crime-denuncia" class="checker-select" style="margin-bottom: 0;">
-            <option value="rede">Rede / Tarrafa armada</option>
-            <option value="espinhel">Espinhel / Anzol de Galha</option>
-            <option value="pesca_predatoria">Pesca Predatória / Dourado</option>
-            <option value="poluicao">Poluição / Desmatamento</option>
-          </select>
-        </div>
-
-        <div class="lgpd-container" style="background: #fef2f2; border-color: #fca5a5;">
-          <input type="checkbox" id="cb-lgpd-denuncia" class="lgpd-checkbox">
-          <label for="cb-lgpd-denuncia" class="lgpd-text">
-            <strong>Registro de Evidência Local:</strong> Confirmo a veracidade da imagem e declaro ciência de que ela fica salva neste aparelho como registro pessoal para apresentação às autoridades competentes (PMA / MPF). Falsa comunicação de crime constitui infração penal (Art. 340 do CP).
-          </label>
-        </div>
-
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <button id="btn-salvar-denuncia" class="btn-cta" style="background: #dc2626; border: none; min-height: 48px; margin-top: 0; flex: 1;">
-            💾 Guardar Evidência no Dispositivo
-          </button>
-          <button type="button" id="btn-limpar-denuncias" class="btn-limpar-dados" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; border-radius: 8px; padding: 0 14px; font-size: 0.8rem; cursor: pointer;" title="Apagar todas as evidências salvas neste aparelho">
-            🗑️ Limpar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- Diálogo de Confirmação Anti-Toque Acidental -->
-  <!-- 7. Template Modal Confirmação SOS -->
-  <template id="template-modal-confirm-sos">
-  <div id="modal-confirm-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 3000;">
-    <div class="modal-dialog modal-dialog-sm">
-      <div class="modal-header confirm-modal-header">
-        <h3 style="color: #b91c1c; font-size: 1.15rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 1.4rem;">🚨</span> Ação de Emergência
-        </h3>
-      </div>
-      <div class="modal-body" style="padding: 16px;">
-        <p id="confirm-sos-text" style="font-size: 0.9rem; color: #334155; margin-bottom: 24px; line-height: 1.5;"></p>
-        <div class="confirm-actions-row">
-          <button id="btn-cancelar-sos-call" class="btn-confirm-cancel">❌ Cancelar</button>
-          <button id="btn-executar-sos-call" class="btn-confirm-danger">Ligar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- 4. Modais de Parcerias Locais e Apoio Comunitário (Monetização Cidadã) -->
-  <!-- 8. Template Modal Parcerias Locais -->
-  <template id="template-modal-parceiros">
-  <div id="modal-parceiros" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
-    <div class="modal-dialog">
-      <div class="modal-header" style="background-color: #0b4f6c;">
-        <h2 style="font-size: 1.15rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-          <svg class="icon-svg" style="stroke: #ffffff; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Central de Cadastros &amp; Parcerias</span>
-        </h2>
-        <button id="btn-fechar-parceiros" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.85rem; color: #475569; margin-bottom: 12px; line-height: 1.4;">
-          O <strong>GeoFish MS</strong> conecta o pescador esportivo e o turista diretamente a quem vive e trabalha na beira do rio, unindo sustentabilidade financeira e responsabilidade social no Pantanal.
-        </p>
-
-        <!-- Seletor de Abas da Central de Cadastros -->
-        <div class="parcerias-tabs" role="tablist">
-          <button type="button" id="tab-btn-pousadas" class="parceria-tab-btn active" role="tab" aria-selected="true">
-            🏨 Pousadas &amp; Ranchos (Anúncio Pago)
-          </button>
-          <button type="button" id="tab-btn-piloteiros" class="parceria-tab-btn" role="tab" aria-selected="false">
-            🚤 Piloteiros Z-1 / Z-7 / Z-11 (100% Grátis)
-          </button>
-        </div>
-
-        <!-- ABA 1: POUSADAS & RANCHOS (COMERCIAL / PAGO) -->
-        <div id="tab-pane-pousadas" class="tab-pane">
-          <div class="parceria-callout-box parceria-callout-comercial">
-            <strong>💼 Sustentabilidade e Parceria Comercial:</strong> Divulgue sua pousada, rancho ou marina com presença destacada no WebGIS, fotos da rampa de descida, amenidades e botão direto para seu WhatsApp de reservas — sem comissões abusivas de plataformas internacionais.
-          </div>
-
-          <form id="form-parceria-pousada">
-            <div style="margin-bottom: 10px;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome do Rancho / Pousada / Marina:</label>
-              <input type="text" id="pousada-nome" class="checker-input" placeholder="Ex: Pousada Pantaneira Beira Rio" required style="margin-bottom: 0;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Localização no Rio:</label>
-                <select id="pousada-rio" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
-                  <option value="Rio Miranda (Urbano / Porto Geral)">Rio Miranda (Urbano / Porto Geral)</option>
-                  <option value="Rio Miranda (Passo do Lontra / Vermelho)">Rio Miranda (Passo do Lontra / Vermelho)</option>
-                  <option value="Rio Miranda (Distrito Águas do Miranda / Bonito)">Rio Miranda (Distrito Águas do Miranda / Bonito)</option>
-                  <option value="Rio Aquidauana (Urbano / Anastácio)">Rio Aquidauana (Urbano / Anastácio)</option>
-                  <option value="Rio Aquidauana (Palmeiras / Piraputanga)">Rio Aquidauana (Palmeiras / Piraputanga)</option>
-                  <option value="Estrada Parque Pantanal MS-184">Estrada Parque Pantanal MS-184</option>
-                  <option value="Outro Trecho da Bacia">Outro Trecho da Bacia</option>
-                </select>
-              </div>
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp de Reservas:</label>
-                <input type="tel" id="pousada-wpp" class="checker-input" placeholder="(67) 99999-9999" required style="margin-bottom: 0;">
-              </div>
-            </div>
-
-            <div style="margin-bottom: 10px;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Descrição da Rampa e Estrutura Náutica:</label>
-              <input type="text" id="pousada-rampa" class="checker-input" placeholder="Ex: Rampa de concreto homologada para lanchas e voadeiras" style="margin-bottom: 0;">
-            </div>
-
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Serviços e Comodidades Oferecidas:</label>
-            <div class="amenities-checkbox-grid">
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Rampa de Concreto"> ⚓ Rampa Concreto
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Aluguel de Voadeiras"> 🚤 Voadeiras 25/40hp
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Venda de Isca Viva"> 🧊 Venda Isca Viva
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Apartamentos Climatizados"> ❄️ Ar-Condicionado
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Restaurante / Pensão Completa"> 🍽️ Pensão Completa
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Gasolina Náutica"> ⛽ Gasolina Náutica
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Wi-Fi Beira Rio"> 📶 Wi-Fi Beira Rio
-              </label>
-              <label class="amenity-checkbox-item">
-                <input type="checkbox" name="pousada-amenity" value="Piloteiros Credenciados"> 🎣 Piloteiros Nativos
-              </label>
-            </div>
-
-            <button type="button" id="btn-enviar-proposta-pousada" class="btn-cta" style="background: #16a34a; font-size: 0.9rem; padding: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <span>📲</span>
-              <span>Enviar Proposta de Anúncio via WhatsApp</span>
-            </button>
-          </form>
-        </div>
-
-        <!-- ABA 2: PILOTEIROS & GUIAS (100% GRATUITO VIA Z-1, Z-7 E Z-11) -->
-        <div id="tab-pane-piloteiros" class="tab-pane hidden">
-          <div class="parceria-callout-box parceria-callout-social" style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px; border-radius: 6px; margin-bottom: 14px;">
-            <strong style="color: #14532d; font-size: 0.95rem; display: block; margin-bottom: 4px;">🚤 Compromisso Social com os Pescadores do Pantanal:</strong>
-            <p style="color: #166534; font-size: 0.83rem; margin: 0; line-height: 1.45;">
-              Piloteiros e pescadores tradicionais das <strong>Colônias Z-1 (Miranda/Corumbá)</strong>, <strong>Z-7 (Aquidauana/Anastácio)</strong> e <strong>Z-11 (Bonito/Águas do Miranda)</strong> têm cadastro <strong>100% GRATUITO</strong>. Não cobramos mensalidade, taxa de inscrição nem comissão sobre passeios.
-            </p>
-          </div>
-
-          <!-- CARD PRINCIPAL: WHATSAPP-FIRST POR ÁUDIO OU MENSAGEM -->
-          <div style="background: #ffffff; border: 2px solid #22c55e; border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15); text-align: center;">
-            <div style="font-size: 2.2rem; margin-bottom: 4px;">🎙️💬</div>
-            <h3 style="font-size: 1.15rem; color: #0f172a; margin: 0 0 6px 0; font-weight: 800;">
-              Cadastro Fácil por Áudio no WhatsApp
-            </h3>
-            <p style="font-size: 0.85rem; color: #475569; margin: 0 0 14px 0; line-height: 1.45;">
-              Sem formulários complicados. Basta clicar no botão abaixo para abrir o WhatsApp oficial da Coordenação e <strong>gravar um áudio simples</strong> ou mandar mensagem com seus dados:
-            </p>
-
-            <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; text-align: left; font-size: 0.8rem; color: #334155; line-height: 1.45;">
-              <strong>💡 O que falar no áudio (Exemplo simples):</strong><br>
-              <em>"Olá! Sou o [Seu Nome], piloteiro da Colônia [Z-1/Z-7/Z-11], atendo no porto [Passo do Lontra / Porto Geral / Anastácio], meu barco é [modelo/motor] e atendo no trecho do rio..."</em>
-            </div>
-
-            <button type="button" id="btn-cadastro-piloteiro-whatsapp" class="btn-cta" style="background: #16a34a; color: #ffffff; font-size: 1rem; font-weight: 800; padding: 14px 18px; border-radius: 8px; width: 100%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);">
-              <span>📲</span>
-              <span>Enviar Áudio / Mensagem no WhatsApp</span>
-            </button>
-            <div style="font-size: 0.76rem; color: #64748b; margin-top: 8px;">
-              Canal Oficial de Credenciamento: <strong>+55 (16) 99266-7526</strong>
-            </div>
-          </div>
-
-          <!-- OPÇÃO SANFONA: FORMULÁRIO ESCRITO (PARA QUEM PREFERIR DIGITAR) -->
-          <details style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; color: #475569;">
-            <summary style="font-weight: 700; color: #0b4f6c; cursor: pointer; padding: 4px 0;">
-              ✍️ Prefere preencher os campos por escrito? Clique aqui
-            </summary>
-
-            <form id="form-parceria-guia" style="margin-top: 12px;">
-              <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 8px; margin-bottom: 10px;">
-                <div>
-                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Nome Completo:</label>
-                  <input type="text" id="guia-nome" class="checker-input" placeholder="Ex: Sebastião da Silva" style="margin-bottom: 0;">
-                </div>
-                <div>
-                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Apelido de Rio:</label>
-                  <input type="text" id="guia-apelido" class="checker-input" placeholder="Ex: Mestre Tião" style="margin-bottom: 0;">
-                </div>
-              </div>
-
-              <div style="margin-bottom: 10px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Colônia de Filiação:</label>
-                <select id="guia-colonia" class="checker-select" style="margin-bottom: 0; font-size: 0.8rem;">
-                  <option value="Colônia Z-1 (Miranda / Corumbá)">Colônia Z-1 (Miranda / Corumbá)</option>
-                  <option value="Colônia Z-7 (Aquidauana / Anastácio)">Colônia Z-7 (Aquidauana / Anastácio)</option>
-                  <option value="Colônia Z-11 (Bonito / Águas do Miranda)">Colônia Z-11 (Bonito / Águas do Miranda)</option>
-                  <option value="Outra Associação Ribeirinha">Outra Associação Ribeirinha</option>
-                </select>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                <div>
-                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Porto de Saída Habitual:</label>
-                  <input type="text" id="guia-porto" class="checker-input" placeholder="Ex: Porto Geral de Miranda" style="margin-bottom: 0;">
-                </div>
-                <div>
-                  <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">WhatsApp p/ Contato de Turistas:</label>
-                  <input type="tel" id="guia-wpp" class="checker-input" placeholder="(67) 99999-9999" style="margin-bottom: 0;">
-                </div>
-              </div>
-
-              <div style="margin-bottom: 10px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 3px;">Embarcação e Motor:</label>
-                <input type="text" id="guia-barco" class="checker-input" placeholder="Ex: Bote de alumínio 6m com motor 25HP" style="margin-bottom: 0;">
-              </div>
-
-              <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="background: #2563eb; font-size: 0.9rem; padding: 12px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>🚤</span>
-                <span>Enviar Formulário via WhatsApp</span>
-              </button>
-            </form>
-          </details>
-        </div>
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- Modal Cartilha Oficial do Pescador PMA-MS (Template Dinâmico gerado sob demanda via js/modules/cartilha-modal.js) -->
-
-  <!-- Modal Apoio Comunitário (Chave PIX) -->
-  <!-- 9. Template Modal Apoie PIX -->
-  <template id="template-modal-apoie-pix">
-  <div id="modal-apoie-pix" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
-    <div class="modal-dialog modal-dialog-sm">
-      <div class="modal-header" style="background-color: #047857;">
-        <h2 style="font-size: 1.15rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-          <svg class="icon-svg" style="stroke: #ffffff; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <span>Apoie esta Iniciativa Cidadã</span>
-        </h2>
-        <button id="btn-fechar-pix" class="modal-close-btn">&times;</button>
-      </div>
-      <div class="modal-body" style="text-align: center;">
-        <p style="font-size: 0.85rem; color: #334155; margin-bottom: 12px; line-height: 1.4;">
-          O <strong>GeoFish MS</strong> é um projeto independente de código aberto mantido sem verba pública, criado para proteger o Pantanal e apoiar os pescadores no rio.
-        </p>
-        <div style="background: #ecfdf5; border: 1px dashed #059669; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
-          <div style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Iniciativa Cidadã &bull; Peterson Martins da Costa</div>
-          <div id="pix-chave-texto" style="font-size: 0.88rem; font-weight: 700; color: #047857; line-height: 1.4; padding: 4px 0;">Apoio direto ao mantenedor voluntário para custeio de mapas e servidores</div>
-          <p style="font-size: 0.78rem; color: #334155; margin: 6px 0 0 0;">Para apoiar ou patrocinar este projeto sem fins lucrativos, solicite os dados bancários diretamente ao idealizador Peterson Martins da Costa.</p>
-          <button id="btn-copiar-chave-pix" class="btn-cta" style="background: #059669; font-size: 0.8rem; padding: 8px 12px; margin-top: 8px;">
-            📋 Copiar Informações de Apoio
-          </button>
-        </div>
-        <small style="font-size: 0.75rem; color: #64748b; line-height: 1.3; display: block;">
-          Qualquer valor contribui para manter a infraestrutura de satélites e mapas atualizada para toda a comunidade!
-        </small>
-      </div>
-    </div>
-  </div>
-  </template>
-
-  <!-- 10. Template Modal Cartilha Oficial do Pescador PMA-MS -->
+  <!-- Template Modal Cartilha PMA -->
   <template id="template-modal-cartilha">
     <div id="modal-cartilha" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Cartilha Oficial do Pescador PMA-MS" style="z-index: 2650;">
       <div class="modal-dialog modal-dialog-lg">
-        <div class="modal-header cartilha-modal-header" style="background-color: #14532d;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <svg class="icon-svg" style="stroke: #86efac; width: 28px; height: 28px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <div>
-              <h2 style="margin: 0; font-size: 1.15rem; color: #ffffff;">Cartilha Oficial do Pescador — PMA/MS</h2>
-              <span style="font-size: 0.78rem; color: #86efac;">Batalhão de Polícia Militar Ambiental (BPMA/MS)</span>
-            </div>
-          </div>
+        <div class="modal-header">
+          <h2>
+            <span aria-hidden="true">📖</span>
+            <span>Cartilha Oficial do Pescador de MS (BPMA)</span>
+          </h2>
           <button id="btn-fechar-cartilha" class="modal-close-btn" aria-label="Fechar cartilha">&times;</button>
         </div>
-
-        <!-- Abas de Navegação pelos Capítulos da Cartilha -->
-        <div class="cartilha-tabs-nav" role="tablist">
-          <button id="tab-btn-rios-proibidos" class="cartilha-tab-btn active" data-tab="rios">
-            🚫 Rios Proibidos &amp; Reservas
-          </button>
-          <button id="tab-btn-iscas" class="cartilha-tab-btn" data-tab="iscas">
-            🐛 Iscas Vivas (Medidas)
-          </button>
-          <button id="tab-btn-transporte" class="cartilha-tab-btn" data-tab="transporte">
-            📋 Guia (GCP) &amp; Fiscalização
-          </button>
-          <button id="tab-btn-petrechos" class="cartilha-tab-btn" data-tab="petrechos">
-            ⚠️ Petrechos &amp; Ceva
-          </button>
-          <button id="tab-btn-contatos" class="cartilha-tab-btn" data-tab="contatos">
-            📞 Telefones da PMA
-          </button>
+        <div class="modal-body">
+          <div class="cartilha-tabs">
+            <button class="cartilha-tab-btn active" data-tab-cartilha="regras">Regras Gerais</button>
+            <button class="cartilha-tab-btn" data-tab-cartilha="iscas">Iscas Vivas</button>
+            <button class="cartilha-tab-btn" data-tab-cartilha="rios">Rios Proibidos</button>
+            <button class="cartilha-tab-btn" data-tab-cartilha="gcp">Lacre &amp; GCP</button>
+          </div>
+          <div id="conteudo-cartilha-tab" style="padding-top: 14px; font-size: 0.88rem; line-height: 1.5; color: #334155;"></div>
         </div>
-
-        <div class="modal-body cartilha-modal-body">
-          <!-- PAINEL 1: RIOS PROIBIDOS, PESQUE E SOLTE E RESERVAS -->
-          <div id="panel-cartilha-rios" class="cartilha-tab-panel active">
-            <div class="cartilha-box alert-red-box">
-              <h4>🚫 Rios Onde a Pesca é Proibida em Qualquer Período (Pág. 16)</h4>
-              <p><strong>A pesca nestes rios é CRIME AMBIENTAL com detenção de 1 a 3 anos e apreensão do barco e motor:</strong></p>
-              <ul class="cartilha-list">
-                <li><strong>Rio Salobra (Miranda e Bodoquena):</strong> Proibida qualquer pesca. Navegação permitida <strong>exclusivamente com motor de 4 tempos de potência até 15hp</strong>.</li>
-                <li><strong>Córrego Azul:</strong> Município de Bodoquena.</li>
-                <li><strong>Rio da Prata:</strong> Municípios de Bonito e Jardim.</li>
-                <li><strong>Rio Nioaque:</strong> Municípios de Nioaque e Anastácio.</li>
-                <li><strong>Rio Formoso e Rio Mimoso:</strong> Município de Bonito.</li>
-                <li><strong>Unidades de Conservação de Proteção Integral:</strong> Parque Estadual das Várzeas do Rio Ivinhema e demais parques estaduais/nacionais.</li>
-              </ul>
-            </div>
-
-            <div class="cartilha-box notice-blue-box" style="margin-top: 14px;">
-              <h4>🎣 Áreas de Pesque e Solte Exclusivo Obrigatório (Pág. 9)</h4>
-              <ul class="cartilha-list">
-                <li><strong>Rio Negro:</strong> Trecho da confluência com o córrego Lajeado (Rio Negro) até o brejo no limite oeste da fazenda Fazendinha (Aquidauana).</li>
-                <li><strong>Rio Perdido:</strong> Em toda sua extensão (Bonito, Jardim, Caracol e Porto Murtinho).</li>
-                <li><strong>Rio Abobral:</strong> Em toda sua extensão (Aquidauana e Corumbá).</li>
-                <li><strong>Rio Vermelho:</strong> Em toda sua extensão no município de Corumbá.</li>
-              </ul>
-            </div>
-
-            <div class="cartilha-box notice-yellow-box" style="margin-top: 14px;">
-              <h4>🛑 Reservas de Pesca &amp; Pontes Históricas (Págs. 10 e 11)</h4>
-              <ul class="cartilha-list">
-                <li><strong>Bacia do Rio Miranda:</strong> Proibida a pesca acima da <strong>Ponte Velha de Miranda</strong> (acesso a Bodoquena) e seus afluentes.</li>
-                <li><strong>Bacia do Rio Aquidauana:</strong> Proibida a pesca acima da <strong>Ponte Velha</strong> que liga Aquidauana a Anastácio.</li>
-                <li><strong>Distâncias Permanentes:</strong> 200m de cachoeiras, corredeiras, embocaduras de baías e escadas de peixes; 1.000m de barragens e ninhais.</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- PAINEL 2: ISCAS VIVAS & MEDIDAS MÍNIMAS -->
-          <div id="panel-cartilha-iscas" class="cartilha-tab-panel">
-            <div class="cartilha-box notice-green-box">
-              <h4>🐛 Tamanhos Mínimos Oficiais de Captura de Iscas Vivas (Pág. 8)</h4>
-              <p>A captura de iscas vivas só pode ser realizada por <strong>pescadores profissionais habilitados</strong>. No período de defeso da piracema, a captura de iscas só é permitida <strong>a partir de 20 de fevereiro</strong>. A captura desrespeitando essas medidas é crime punível com <strong>prisão de até 3 anos</strong>.</p>
-            </div>
-
-            <div class="species-table-wrapper" style="margin-top: 12px; overflow-x: auto;">
-              <table class="portal-species-table" style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: #f1f5f9; text-align: left;">
-                    <th style="padding: 8px;">Espécie de Isca</th>
-                    <th style="padding: 8px;">Nome Científico</th>
-                    <th style="padding: 8px;">Medida Mínima Permitida</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Tuvira (Bacia do Rio Paraguai)</strong></td>
-                    <td style="padding: 6px 8px;"><em>Gymnotus inaequilabiatus / paraguaiensis</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">17 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Tuvira (Bacia do Rio Paraná)</strong></td>
-                    <td style="padding: 6px 8px;"><em>Gymnotus carapo</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">20 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Mussum</strong></td>
-                    <td style="padding: 6px 8px;"><em>Synbranchus marmoratus</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">20 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Pirambóia</strong></td>
-                    <td style="padding: 6px 8px;"><em>Lepidosiren paradoxa</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">20 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Chimboré / Timboré / Taguara</strong></td>
-                    <td style="padding: 6px 8px;"><em>Schizodon spp</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">15 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Cambota / Camboatá</strong></td>
-                    <td style="padding: 6px 8px;"><em>Callichthys callichthys</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">13 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Jejum / Jeju</strong></td>
-                    <td style="padding: 6px 8px;"><em>Hoplerythrinus unitaeniatus</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">10 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Lambari</strong></td>
-                    <td style="padding: 6px 8px;"><em>Astyanax spp</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">5 cm</span></td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #e2e8f0;">
-                    <td style="padding: 6px 8px;"><strong>Caramujo</strong></td>
-                    <td style="padding: 6px 8px;"><em>Pomacea spp</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">4 cm</span></td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 6px 8px;"><strong>Caranguejo</strong></td>
-                    <td style="padding: 6px 8px;"><em>Dilocarcinus pagel</em></td>
-                    <td style="padding: 6px 8px;"><span class="measure-pill min" style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: bold;">3 cm</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- PAINEL 3: GUIA (GCP), TRANSPORTE E FISCALIZAÇÃO -->
-          <div id="panel-cartilha-transporte" class="cartilha-tab-panel">
-            <div class="cartilha-box notice-blue-box">
-              <h4>📋 Guia de Controle de Pescado (GCP) &amp; Lacre Oficial da PMA (Pág. 6 e 15)</h4>
-              <p>O transporte é <strong>permitido EXCLUSIVAMENTE dentro do território de Mato Grosso do Sul</strong> (sendo estritamente proibido o transporte interestadual ou internacional). O pescador licenciado deve se dirigir a <strong>qualquer Quartel, Pelotão ou Posto da Polícia Militar Ambiental (PMA)</strong> em MS para <strong>vistoriar, colocar o lacre plástico numerado e declarar seu pescado</strong>, onde receberá gratuitamente a <strong>Guia de Controle de Pescado (GCP)</strong> (o IMASUL emite apenas a carteira de pesca; não existe taxa ou selo turismo).</p>
-              <p style="color: #b91c1c; font-weight: 700; margin-top: 6px;">⚠️ A falta da Guia (GCP) ou do lacre da PMA implica em autuação por crime ambiental, multa e apreensão de veículos e materiais!</p>
-            </div>
-
-            <div class="cartilha-box alert-red-box" style="margin-top: 14px;">
-              <h4>🐟 Exigência Obrigatória: Peixe Inteiro na Fiscalização</h4>
-              <p>O pescado <strong>NÃO PODE</strong> estar com as características descaracterizadas:</p>
-              <ul class="cartilha-list">
-                <li>❌ <strong>PROIBIDO:</strong> Peixe sem cabeça, descamado, filetado ou em postas nas caixas térmicas sem documento comprobatório.</li>
-                <li>✅ <strong>OBRIGATÓRIO:</strong> O peixe deve ser mantido <strong>INTEIRO</strong> com cabeça, nadadeira caudal e escamas ou couro em local de fácil acesso para os policiais da PMA realizarem a medição.</li>
-              </ul>
-            </div>
-
-            <div class="cartilha-box notice-yellow-box" style="margin-top: 14px;">
-              <h4>📦 Declaração Obrigatória de Estoque na Piracema (Pág. 5)</h4>
-              <p>Nos frigoríficos, pousadas, peixarias, hotéis e restaurantes, os estoques de pescado <em>in natura</em> ou congelados devem ser declarados ao IMASUL em até <strong>48 horas após o início da piracema</strong>. A falta de declaração, mesmo com nota fiscal, acarreta apreensão de todo o estoque e multa pesada.</p>
-            </div>
-          </div>
-
-          <!-- PAINEL 4: PETRECHOS PROIBIDOS & CEVA -->
-          <div id="panel-cartilha-petrechos" class="cartilha-tab-panel">
-            <div class="cartilha-box alert-red-box">
-              <h4>🚫 Petrechos e Métodos Proibidos ao Pescador Amador (Pág. 12)</h4>
-              <p>A utilização destes métodos constitui <strong>CRIME AMBIENTAL</strong> (Lei Federal nº 9.605/98), sujeito a detenção, multa e apreensão imediata de embarcação, motor e petrechos:</p>
-              <ul class="cartilha-list">
-                <li>❌ <strong>CEVA:</strong> É proibido o emprego de qualquer processo que facilite a concentração artificial de cardumes (como a "ceva").</li>
-                <li>❌ <strong>CAVALO-DE-PAU:</strong> É proibida a prática de pesca embarcada com motor ligado em movimento circular ("cavalo-de-pau").</li>
-                <li>❌ <strong>PETRECHOS PROIBIDOS:</strong> Cercado, pari, anzol de galho, boia fixa (cavalinho), joão-bobo, garateia/fisga por lambada ou chasco, arpão, flecha, covo, espinhel, tarrafão e qualquer rede de malha.</li>
-              </ul>
-            </div>
-
-            <div class="cartilha-box notice-green-box" style="margin-top: 14px;">
-              <h4>✅ O que é Permitido ao Pescador Amador (Pág. 17)</h4>
-              <p>Ao pescador amador/desportista licenciado é permitido <strong>exclusivamente</strong> o uso de:</p>
-              <ul class="cartilha-list">
-                <li>🎣 Linha de mão simples;</li>
-                <li>🎣 Caniço simples (vara caipira);</li>
-                <li>🎣 Caniço com molinete ou carretilha (pesca de arremesso ou rodada).</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- PAINEL 5: TELEFONES E E-MAILS DE TODOS OS PELOTÕES DA PMA -->
-          <div id="panel-cartilha-contatos" class="cartilha-tab-panel">
-            <div class="cartilha-box notice-blue-box">
-              <h4>📞 Telefones e E-mails do Batalhão de Polícia Militar Ambiental (BPMA/MS)</h4>
-              <p>Toque no botão para ligar diretamente em caso de dúvidas, denúncias ou emergências na calha do rio:</p>
-            </div>
-
-            <div class="pma-contacts-grid" style="margin-top: 14px;">
-              <div class="pma-unit-card">
-                <div class="unit-name">Pelotão PMA de Miranda</div>
-                <div class="unit-river">Bacia do Rio Miranda &bull; Salobra</div>
-                <a href="tel:6732424344" class="btn-pma-tel">📞 (67) 3242-4344</a>
-                <span class="unit-email">ambientalpantanal@hotmail.com</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">Pelotão PMA de Aquidauana</div>
-                <div class="unit-river">Bacia do Rio Aquidauana</div>
-                <a href="tel:6739042070" class="btn-pma-tel">📞 (67) 3904-2070</a>
-                <span class="unit-email">ppma_aquidauana@yahoo.com.br</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">Posto Buraco das Piranhas</div>
-                <div class="unit-river">Passo do Lontra &bull; Estrada Parque</div>
-                <a href="tel:6732314444" class="btn-pma-tel">📞 (67) 3231-4444</a>
-                <span class="unit-email">Fiscalização 24h na BR-262</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">Posto GPMA Anastácio</div>
-                <div class="unit-river">BR-262, Km 482</div>
-                <a href="tel:67999946477" class="btn-pma-tel">📞 (67) 99994-6477</a>
-                <span class="unit-email">Posto Rodoviário de Controle</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">2ª Cia / 15º BPMA Corumbá</div>
-                <div class="unit-river">Rio Paraguai &bull; Porto Geral</div>
-                <a href="tel:6739075461" class="btn-pma-tel">📞 (67) 3907-5461</a>
-                <span class="unit-email">2cia15bpma@gmail.com</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">Pelotão PMA de Bonito</div>
-                <div class="unit-river">Rio Formoso &bull; Peixe Vivo</div>
-                <a href="tel:6732551247" class="btn-pma-tel">📞 (67) 3255-1247</a>
-                <span class="unit-email">bonito4cpma@hotmail.com</span>
-              </div>
-
-              <div class="pma-unit-card">
-                <div class="unit-name">Comando Geral BPMA</div>
-                <div class="unit-river">Campo Grande &bull; Central Geral</div>
-                <a href="tel:6733571500" class="btn-pma-tel">📞 (67) 3357-1500</a>
-                <span class="unit-email">pma_ms@yahoo.com.br</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer cartilha-modal-footer" style="padding: 14px 20px; background: #f8fafc; border-top: 1px solid #cbd5e1; text-align: center;">
-          <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-cta" style="background: #15803d; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;" target="_blank" rel="noopener noreferrer">
-            <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Baixar Cartilha Oficial Completa em PDF (PMA-MS)</span>
+        <div class="modal-footer">
+          <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-cta" style="text-decoration: none;">
+            📥 Baixar PDF Completo
           </a>
+          <button type="button" class="btn-cta" id="btn-fechar-cartilha-rodape" style="background: #64748b;">Fechar</button>
         </div>
       </div>
     </div>
   </template>
 
-  <!-- Modal Lista de Profissionais / Alternativa Textual ao Mapa (Fase 2) -->
-  <template id="template-modal-lista-guias">
-  <div id="modal-lista-guias" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Lista de Piloteiros e Guias de Pesca">
-    <div class="modal-dialog" style="max-width: 580px;">
-      <div class="modal-header">
-        <h2>
-          <span aria-hidden="true">🚤</span>
-          <span>Piloteiros &amp; Guias Locais</span>
-        </h2>
-        <button id="btn-fechar-lista-guias" class="modal-close-btn" aria-label="Fechar lista de profissionais">&times;</button>
-      </div>
-      <div class="modal-body" style="padding: 16px;">
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.4;">
-          Profissionais nativos das <strong>Colônias Z-1, Z-7 e Z-11</strong> na Bacia do Rio Miranda. O contato é direto via WhatsApp, sem intermediários nem taxas.
-        </p>
-        <div id="container-lista-guias-itens" style="display: flex; flex-direction: column; gap: 12px;"></div>
+  <!-- Template Modal Parcerias -->
+  <template id="template-modal-parcerias">
+    <div id="modal-parcerias" class="modal-backdrop hidden" role="dialog" aria-modal="true" style="z-index: 2600;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2>
+            <span aria-hidden="true">🤝</span>
+            <span>Parcerias &bull; Cadastrar Barco ou Pousada</span>
+          </h2>
+          <button id="btn-fechar-parcerias" class="modal-close-btn" aria-label="Fechar parcerias">&times;</button>
+        </div>
+        <div class="modal-body" style="font-size: 0.88rem; line-height: 1.5; color: #334155;">
+          <p>
+            O <strong>GeoFish MS</strong> é um canal direto de integração com a comunidade ribeirinha e trade turístico do Pantanal:
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+            <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Sou%20piloteiro%20e%20gostaria%20de%20cadastrar%20minha%20embarca%C3%A7%C3%A3o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #16a34a; text-decoration: none; text-align: center;">
+              🚤 Cadastrar Piloteiro / Barco (Gratuito)
+            </a>
+            <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Gostaria%20de%20anunciar%20minha%20pousada/rancho%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-cta" style="background: #0284c7; text-decoration: none; text-align: center;">
+              🏨 Anunciar Pousada, Rancho ou Marina
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
   </template>
 
-
-  <!-- ========================================================
-       GUIA PRÁTICO DO TURISTA PESCADOR (PLANEJAMENTO & SEGURANÇA)
-       ======================================================== -->
-
-  <section class="tourist-section" aria-label="Guia do Turista Pescador">
-
-    <!-- CARD: JORNADA COMPLETA DO TURISTA: ANTES, DURANTE E DEPOIS -->
-    <article id="secao-jornada-turista" class="tourist-card" style="border-left: 6px solid #0284c7;">
-      <div class="tourist-card-header">
-        <span class="tourist-card-icon">
-          <svg class="icon-svg" style="stroke: #0284c7; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </span>
-        <div>
-          <span class="editorial-section-kicker" style="color: #0284c7; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px;">GOVERNANÇA &amp; EXPERIÊNCIA DO VISITANTE</span>
-          <h2 class="tourist-card-title" style="font-family: var(--font-editorial); font-size: 1.6rem; font-weight: 900; color: var(--color-leaf);">A Jornada Completa do Turista: Antes, Durante e Depois</h2>
-          <span class="tourist-card-sub">Como o GeoFish MS integra cidadania ribeirinha, navegação offline e legalidade ambiental</span>
-        </div>
-      </div>
-      
-      <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
-        Uma experiência de pescaria esportiva sustentável e sem imprevistos no Pantanal se divide em 3 momentos estratégicos:
-      </p>
-
-      <div class="steps-grid">
-        <div class="step-item highlight-step">
-          <span class="step-badge" style="background: #0284c7;">1</span>
-          <h3 class="step-title">1. Antes da Viagem (Planejamento Conectado)</h3>
-          <p class="step-desc">
-            Ainda em seu estado de origem (SP, PR, MG, etc.), o turista explora os trechos navegáveis no WebGIS, emite a <strong>Licença Digital no IMASUL</strong> e escolhe seu piloteiro homologado pelas <strong>Colônias Z-1, Z-7 ou Z-11</strong>, combinando a diária diretamente pelo WhatsApp sem taxas de agenciamento.
-          </p>
-        </div>
-
-        <div class="step-item highlight-step">
-          <span class="step-badge" style="background: #0d9488;">2</span>
-          <h3 class="step-title">2. Durante a Pescaria (No Barco 100% Offline)</h3>
-          <p class="step-desc">
-            Sem sinal de 4G no rio, o pescador abre o GeoFish MS em cache (PWA), monitora sua posição náutica em tempo real, consulta as regras de zonas restritas (como o <strong>Rio Salobra — Decreto nº 15.166/19</strong>) e afere espécies nativas na régua digital de tamanhos permitidos.
-          </p>
-        </div>
-
-        <div class="step-item highlight-step">
-          <span class="step-badge" style="background: #16a34a;">3</span>
-          <h3 class="step-title">3. No Retorno à Rodovia (Posto PMA &amp; Lacre GCP)</h3>
-          <p class="step-desc">
-            Ao sair da calha fluvial para as rodovias (BR-262, MS-184 ou MS-345), o aplicativo localiza o <strong>Pelotão da Polícia Militar Ambiental (PMA)</strong> mais próximo. O turista apresenta o exemplar inteiro no gelo para conferência, lacre oficial gratuito e emissão da <strong>GCP (Guia de Controle de Pescado)</strong>.
-          </p>
-        </div>
-      </div>
-    </article>
-
-    <!-- CARD 1: VOU LEVAR PEIXE PARA CASA: PASSO A PASSO OFICIAL -->
-    <article id="secao-transporte-passo-a-passo" class="tourist-card" style="border-left: 6px solid #16a34a;">
-      <div class="tourist-card-header">
-        <span class="tourist-card-icon">
-          <svg class="icon-svg" style="stroke: #16a34a; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .5 6.5-1.5 1.5-1.5 5-.5 6.5C5.58 18.03 7 16 7 13.33"/></svg>
-        </span>
-        <div>
-          <span class="editorial-section-kicker" style="color: var(--color-emerald); font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px;">LEGISLAÇÃO &amp; CONFORMIDADE AMBIENTAL</span>
-          <h2 class="tourist-card-title" style="font-family: var(--font-editorial); font-size: 1.6rem; font-weight: 900; color: var(--color-leaf);">Vou Levar Peixe para Casa: Passo a Passo Sem Medo de Multa</h2>
-          <span class="tourist-card-sub">Regras Oficiais vigentes em Mato Grosso do Sul (Decreto Estadual nº 15.166/19 e Decreto nº 15.375/20)</span>
-        </div>
-      </div>
-      
-      <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
-        Muitos pescadores têm medo de transportar pescado por desinformação. No MS, o transporte rodoviário em veículo particular é <strong>permitido por lei EXCLUSIVAMENTE DENTRO DO ESTADO</strong> (terminantemente proibido o transporte interestadual ou para o exterior), desde que você siga rigorosamente estes 4 passos:
-      </p>
-
-      <div class="steps-grid">
-        <div class="step-item highlight-step">
-          <span class="step-badge">1</span>
-          <h3 class="step-title">Respeite a Cota e Medida</h3>
-          <p class="step-desc">
-            Você pode transportar <strong>1 (um) exemplar nativo</strong> dentro da faixa legal (ex: Pintado de 85 a 125 cm ou Pacu de 45 a 65 cm) + <strong>até 5 piranhas</strong>. Espécies exóticas (tucunaré, corvina) são livres. <em>Dourado é 100% Pesque e Solte até 2029.</em>
-          </p>
-        </div>
-
-        <div class="step-item highlight-step">
-          <span class="step-badge">2</span>
-          <h3 class="step-title">Peixe Sempre Inteiro</h3>
-          <p class="step-desc">
-            O peixe deve viajar <strong>INTEIRO no gelo</strong> (com cabeça, cauda, escamas ou couro e vísceras). É expressamente proibido transportar em filés ou postas na estrada para permitir a conferência oficial pela PMA.
-          </p>
-        </div>
-
-        <div class="step-item highlight-step">
-          <span class="step-badge">3</span>
-          <h3 class="step-title">Licença de Pesca IMASUL</h3>
-          <p class="step-desc">
-            Emita previamente sua <strong>Autorização Ambiental para Pesca Amadora</strong> no portal de serviços do IMASUL (salve o PDF no celular e tenha uma cópia impressa). O IMASUL emite apenas a carteira de pesca — <strong>não existe selo turismo no Estado</strong>.
-          </p>
-        </div>
-
-        <div class="step-item highlight-step">
-          <span class="step-badge">4</span>
-          <h3 class="step-title">Lacre e Guia GCP na PMA</h3>
-          <p class="step-desc">
-            Antes de seguir viagem, pare em <strong>qualquer Batalhão, Pelotão ou Posto da Polícia Militar Ambiental (PMA)</strong> do Estado de MS — como o Pelotão de Miranda (km 565 da BR-262), Pelotão de Aquidauana, Corumbá, Bonito ou Campo Grande. A PMA afere a régua oficial, coloca o lacre plástico numerado e emite a <strong>Guia de Controle de Pescado (GCP)</strong> gratuitamente. Com o peixe lacrado e a GCP, sua viagem <strong>dentro do Estado</strong> está 100% legalizada!
-          </p>
-        </div>
-      </div>
-    </article>
-
-    <!-- CARD 2: ESPAÇO PUBLICITÁRIO - AGÊNCIAS DE TURISMO & PACOTES PANTANEIROS -->
-    <article id="secao-agencias-turismo" class="tourist-card ad-agency-card" style="border-left: 6px solid #0284c7;">
-      <div class="tourist-card-header">
-        <span class="tourist-card-icon">
-          <svg class="icon-svg" style="stroke: #0284c7; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-        </span>
-        <div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <span class="ad-badge-gold">⭐ ESPAÇO PUBLICITÁRIO DISPONÍVEL</span>
-          </div>
-          <h2 class="tourist-card-title">Agências de Viagens, Ecoturismo &amp; Pacotes de Pesca</h2>
-          <span class="tourist-card-sub">Divulgue Expedições, Safáris na Estrada Parque, Chalanas e Traslados na Bacia do Rio Miranda</span>
-        </div>
-      </div>
-
-      <p style="font-size: 0.88rem; color: #475569; line-height: 1.5; margin-bottom: 16px;">
-        Espaço dedicado para <strong>operadoras de ecoturismo, receptivos e organizadores de pacotes</strong> conectarem suas expedições diretamente aos milhares de pescadores e turistas que acessam o portal para planejar sua viagem no Pantanal. Negociação direta, personalizada e sem taxas de comissão!
-      </p>
-
-      <div class="agency-features-grid">
-        <div class="agency-feature-item">
-          <span class="agency-feature-icon">
-            <svg class="icon-svg" style="stroke: #0284c7; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          </span>
-          <div>
-            <h3 class="agency-feature-title">Traslados &amp; Receptivo</h3>
-            <p class="agency-feature-desc">Transfers e vans saindo de Campo Grande, Bonito e Corumbá até as pousadas.</p>
-          </div>
-        </div>
-
-        <div class="agency-feature-item">
-          <span class="agency-feature-icon">
-            <svg class="icon-svg" style="stroke: #0284c7; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.5 0 2.5 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 6.88"/><path d="M12 10V4"/><path d="M8 8l4-4 4 4"/></svg>
-          </span>
-          <div>
-            <h3 class="agency-feature-title">Expedições &amp; Chalanas</h3>
-            <p class="agency-feature-desc">Roteiros fluviais para grupos, contemplação da fauna e safári fotográfico pantaneiro.</p>
-          </div>
-        </div>
-
-        <div class="agency-feature-item">
-          <span class="agency-feature-icon">
-            <svg class="icon-svg" style="stroke: #0284c7; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 12.5V10a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M18 16l4-4-4-4"/></svg>
-          </span>
-          <div>
-            <h3 class="agency-feature-title">Pacotes de Pesca Fechados</h3>
-            <p class="agency-feature-desc">Divulgação de grupos completos com hospedagem, barcos, guias e iscas inclusas.</p>
-          </div>
-        </div>
-
-        <div class="agency-feature-item">
-          <span class="agency-feature-icon">
-            <svg class="icon-svg" style="stroke: #0284c7; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          </span>
-          <div>
-            <h3 class="agency-feature-title">Contato Direto no WhatsApp</h3>
-            <p class="agency-feature-desc">O turista clica e fala direto com a central de reservas da sua agência no WhatsApp.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="agency-cta-box">
-        <div class="agency-cta-info">
-          <strong>Quer divulgar os roteiros ou pacotes da sua agência no GeoFish MS?</strong>
-          <span>Apareça em posição de honra no guia oficial mais consultado da região pantaneira.</span>
-        </div>
-        <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="background: #0284c7; color: #ffffff; border: none; cursor: pointer;">
-          <span>💬 Divulgar Pacotes da Agência</span>
-        </button>
-      </div>
-    </article>
-
-    <!-- BLOCO 3: BANNER DE COMÉRCIO NÁUTICO, ISCAS & SERVIÇOS -->
-    <aside class="ad-banner-nautical" aria-label="Espaço Publicitário de Comércio Náutico">
-      <div class="ad-banner-container">
-        <div class="ad-banner-content">
-          <span class="ad-badge-cyan">⚓ COMÉRCIO NÁUTICO &amp; SERVIÇOS</span>
-          <h3 class="ad-banner-title">Tem Loja de Pesca, Posto de Combustível ou Venda de Isca na Região?</h3>
-          <p class="ad-banner-desc">
-            Apareça para os pescadores no momento exato em que eles calculam os custos da viagem e preparam a tralha. Divulgue seu ponto comercial em Miranda, Aquidauana ou Passo do Lontra!
-          </p>
-        </div>
-        <div class="ad-banner-cta">
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="background: #38bdf8; color: #082f49; border: none; cursor: pointer;">
-            <span>💬 Divulgar meu Negócio no Portal</span>
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- CARD 3: QUANDO IR: CALENDÁRIO PANTANEIRO DE PESCA -->
-    <article id="secao-calendario-pesca" class="tourist-card" style="border-left: 6px solid #eab308;">
-      <div class="tourist-card-header">
-        <span class="tourist-card-icon">
-          <svg class="icon-svg" style="stroke: #d97706; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </span>
-        <div>
-          <h2 class="tourist-card-title">Quando Ir: Calendário Pantaneiro de Pesca (Mês a Mês)</h2>
-          <span class="tourist-card-sub">Entenda a Cheia, a Vazante, a Seca e o Período de Defeso na Bacia do Rio Miranda</span>
-        </div>
-      </div>
-
-      <div class="calendar-seasons-grid">
-        <div class="season-card">
-          <span class="season-badge vazante">Águas Baixando</span>
-          <h3 class="season-title">Vazante Pantaneira</h3>
-          <div class="season-months">Março a Junho</div>
-          <p class="season-desc">
-            A água começa a sair dos campos e volta para os rios. Água límpida descendo da Serra da Bodoquena. Época fantástica para pesca de batida de Pacu com tucum nas margens, Dourado no corrico e Pintado na rodada.
-          </p>
-        </div>
-
-        <div class="season-card season-prime">
-          <span class="season-badge prime">Alta Temporada</span>
-          <h3 class="season-title">Seca / Auge da Pesca</h3>
-          <div class="season-months">Julho a Outubro</div>
-          <p class="season-desc">
-            Rios totalmente na calha com praias de areia expostas. Os peixes se concentram nos poços e canais. Clima agradável com noites frescas. Máxima produtividade para todas as espécies pantaneiras (Pintado, Jaú, Cachara, Pacu e Curimbatá).
-          </p>
-        </div>
-
-        <div class="season-card season-defeso">
-          <span class="season-badge defeso">Pesca Fechada</span>
-          <h3 class="season-title">Piracema / Defeso</h3>
-          <div class="season-months">05 de Novembro a 28 de Fevereiro</div>
-          <p class="season-desc">
-            <strong>PESCA PROIBIDA</strong> em toda a bacia por lei estadual para reprodução dos peixes. Não viaje para pescar neste período. Fiscalização intensiva com barreira 24h na BR-262 e apreensão de veículos e barcos.
-          </p>
-        </div>
-
-        <div class="season-card">
-          <span class="season-badge vazante">Pesque &amp; Solte</span>
-          <h3 class="season-title">Abertura Especial</h3>
-          <div class="season-months">Fevereiro (Portaria Anual)</div>
-          <p class="season-desc">
-            Abertura antecipada da modalidade <em>Pesque e Solte</em> na calha principal dos rios navegáveis de MS autorizados pelo IMASUL. Proibido abater qualquer exemplar. Excelente para aquecer as tralhas antes da temporada aberta.
-          </p>
-        </div>
-      </div>
-    </article>
-
-    <!-- CARD 4: COMO CHEGAR & CHECKLIST DO PESCADOR -->
-    <article id="secao-como-chegar-checklist" class="tourist-card" style="border-left: 6px solid #6366f1;">
-      <div class="tourist-card-header">
-        <span class="tourist-card-icon">
-          <svg class="icon-svg" style="stroke: #6366f1; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </span>
-        <div>
-          <h2 class="tourist-card-title">Como Chegar &amp; Checklist Essencial do Pescador</h2>
-          <span class="tourist-card-sub">Rotas Asfaltadas, Estradas de Terra e o que Não Pode Faltar na sua Mala</span>
-        </div>
-      </div>
-
-      <div class="travel-checklist-grid">
-        <div>
-          <h3 style="font-size: 1rem; color: #1e1b4b; font-weight: 800; margin-bottom: 8px;">🚗 Como Chegar com Segurança</h3>
-          <p style="font-size: 0.83rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
-            <strong>De Campo Grande a Miranda:</strong> 200 km pela <strong>BR-262</strong> (pista asfaltada). Passa por Terenos e Aquidauana. Atenção a animais silvestres na pista à noite.<br><br>
-            <strong>De Miranda a Passo do Lontra:</strong> Siga pela BR-262 até o trevo do Buraco das Piranhas e entre na <strong>MS-184 (Estrada Parque Pantanal)</strong>. Trecho de terra cascalhada com pontes de madeira (trafegável para carros de passeio na seca; na época de cheia, consulte sua pousada).<br><br>
-            <strong>Onde Abastecer:</strong> A cidade de Miranda é o seu último grande ponto urbano com postos 24h, supermercados, distribuidoras de gelo e farmácias antes de entrar no Pantanal profundo.
-          </p>
-        </div>
-
-        <div>
-          <h3 style="font-size: 1rem; color: #1e1b4b; font-weight: 800; margin-bottom: 8px;">🎒 Checklist do Pescador Pantaneiro</h3>
-          <ul class="checklist-items">
-            <li class="checklist-item">
-              <input type="checkbox" id="chk-1" checked>
-              <label for="chk-1"><strong>Licença Digital do IMASUL:</strong> Salva em PDF no WhatsApp ou impressa com documento oficial com foto (RG/CNH).</label>
-            </li>
-            <li class="checklist-item">
-              <input type="checkbox" id="chk-2" checked>
-              <label for="chk-2"><strong>Colete Salva-Vidas Homologado:</strong> Item obrigatório a bordo por norma da Capitania Fluvial da Marinha.</label>
-            </li>
-            <li class="checklist-item">
-              <input type="checkbox" id="chk-3" checked>
-              <label for="chk-3"><strong>Repelente de Alta Eficácia:</strong> Proteção contra pernilongos e mosquito-palha, protetor solar FPS 50+ e camisa UV manga longa.</label>
-            </li>
-            <li class="checklist-item">
-              <input type="checkbox" id="chk-4" checked>
-              <label for="chk-4"><strong>Power Bank (Bateria Portátil):</strong> Essencial para manter o celular com carga e usar o GeoFish MS no barco o dia todo sem tomada.</label>
-            </li>
-            <li class="checklist-item">
-              <input type="checkbox" id="chk-5" checked>
-              <label for="chk-5"><strong>Caixa Térmica Vedada com Gelo:</strong> Se for transportar seu exemplar legalizado e piranhas para casa.</label>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </article>
-
-    <!-- CARD 5: ANTES DE SAIR DA CIDADE: MODO OFFLINE -->
-    <div id="secao-preparar-offline" class="offline-prep-box">
-      <div class="offline-prep-info">
-        <div class="offline-prep-title">
-          <svg class="icon-svg" style="stroke: #1b4d3e; width: 22px; height: 22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span>Antes de Sair da Cidade: Salve o Guia para Usar Sem Sinal</span>
-        </div>
-        <p class="offline-prep-desc">
-          No meio dos corixos do Rio Miranda nenhuma operadora de celular pega. Toque no botão abaixo enquanto estiver no Wi-Fi do hotel ou na cidade de Miranda para carregar o mapa, as réguas de peixes e os telefones de emergência na memória do seu aparelho.
-        </p>
-      </div>
-      <div>
-        <button type="button" id="btn-prep-offline" class="btn-prep-offline">
-          <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Salvar para o Barco (100% Offline)</span>
-        </button>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- BANNER HORIZONTAL NOBRE: ESPAÇO PUBLICITÁRIO OFICIAL -->
-  <aside class="ad-banner-horizontal" aria-label="Espaço Publicitário em Destaque">
-    <div class="ad-banner-container">
-      <div class="ad-banner-content">
-        <span class="ad-badge-gold">⭐ ESPAÇO PUBLICITÁRIO DISPONÍVEL</span>
-        <h2 class="ad-banner-title">Anuncie sua Pousada, Rancho, Marina ou Loja de Pesca Aqui</h2>
-        <p class="ad-banner-desc">
-          Coloque sua marca em evidência para milhares de pescadores esportivos e turistas que planejam sua viagem na Bacia do Rio Miranda. Negociação direta, personalizada e sem intermediários pelo WhatsApp!
-        </p>
-      </div>
-      <div class="ad-banner-cta">
-        <button type="button" data-action="abrir-parcerias-pousadas" class="btn-ad-wpp" style="border: none; cursor: pointer;">
-          <span>💬 Propor Parceria ou Anúncio</span>
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <!-- ========================================================
-       CONTEÚDO DO PORTAL HUB (ABAIXO DO WEBGIS)
-       ======================================================== -->
-
-  <!-- SEÇÃO B: DUAS GRANDES COLUNAS TEMÁTICAS (PESCA & NÁUTICA - PADRÃO TEXAS TPWD) -->
-  <section class="tpwd-columns-section" aria-label="Guias Temáticos de Pesca e Navegação">
-    <div class="tpwd-container tpwd-columns-container">
-      
-      <!-- Coluna 1: Pesca no Pantanal -->
-      <article id="coluna-pesca" class="tpwd-theme-column">
-        <div class="column-header">
-          <div class="column-icon-wrap">
-            <svg class="icon-svg" style="stroke: #166534; width: 24px; height: 24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/><path d="M18 12v.5"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .5 6.5-1.5 1.5-1.5 5-.5 6.5C5.58 18.03 7 16 7 13.33"/></svg>
-          </div>
-          <h2 class="column-title">Pesca no Pantanal</h2>
-        </div>
-        <p class="column-summary">
-          Orientações essenciais para a prática legal e sustentável da pesca esportiva e amadora na calha do Rio Miranda e afluentes.
-        </p>
-
-        <ul class="column-resource-list">
-          <li>
-            <a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="resource-item-link">
-              <div class="item-title">Emissão da Licença Digital IMASUL &rarr;</div>
-              <div class="item-sub">Obrigatória para pescar legalmente nas águas de Mato Grosso do Sul</div>
-            </a>
-          </li>
-          <li>
-            <a href="#secao-transporte-passo-a-passo" class="resource-item-link">
-              <div class="item-title">Regras de Transporte e Medidas &rarr;</div>
-              <div class="item-sub">Decretos nº 15.166/19 e 15.375/20 (1 exemplar nativo + 5 piranhas)</div>
-            </a>
-          </li>
-          <li>
-            <a href="#" data-action="scroll-top" class="resource-item-link">
-              <div class="item-title">Onde Pescar: Trechos &amp; Zonas no WebGIS &rarr;</div>
-              <div class="item-sub">Consulte no mapa se o trecho é Pesque e Solte, Cota Zero ou Reserva</div>
-            </a>
-          </li>
-          <li>
-            <a href="#secao-calendario-pesca" class="resource-item-link">
-              <div class="item-title">Calendário Pantaneiro de Pesca &rarr;</div>
-              <div class="item-sub">Temporadas de seca, vazante e período de defeso da piracema</div>
-            </a>
-          </li>
-          <li>
-            <a href="#secao-historias" class="resource-item-link">
-              <div class="item-title">Bonito &amp; Distrito Águas do Miranda &rarr;</div>
-              <div class="item-sub">O único polo oficial de pesca esportiva do município de Bonito</div>
-            </a>
-          </li>
-        </ul>
-      </article>
-
-      <!-- Coluna 2: Passeios de Barco & Náutica -->
-      <article id="coluna-nautica" class="tpwd-theme-column">
-        <div class="column-header">
-          <div class="column-icon-wrap">
-            <svg class="icon-svg" style="stroke: #0369a1; width: 24px; height: 24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>
-          </div>
-          <h2 class="column-title">Passeios de Barco &amp; Náutica</h2>
-        </div>
-        <p class="column-summary">
-          Infraestrutura portuária, segurança da navegação e diretório de serviços credenciados ao longo da bacia.
-        </p>
-
-        <ul class="column-resource-list">
-          <li>
-            <a href="#" data-action="sos-call-marinha" class="resource-item-link">
-              <div class="item-title">Capitania Fluvial &amp; Marinha (Emergência 185) &rarr;</div>
-              <div class="item-sub">Normas da Capitania e fiscalização de habilitação na calha navegável</div>
-            </a>
-          </li>
-          <li>
-            <a href="#" data-action="abrir-parcerias-pousadas" class="resource-item-link">
-              <div class="item-title">Guias Nativos Credenciados (Colônias Z-1, Z-7 e Z-11) &rarr;</div>
-              <div class="item-sub">Piloteiros experientes para condução segura nos labirintos do Pantanal</div>
-            </a>
-          </li>
-          <li>
-            <a href="#secao-servicos" class="resource-item-link">
-              <div class="item-title">Ranchos, Pousadas e Apoio Náutico &rarr;</div>
-              <div class="item-sub">Descidas de barco, venda de tuvira, gelo e combustível náutico</div>
-            </a>
-          </li>
-          <li>
-            <a href="#" data-action="abrir-sos" class="resource-item-link">
-              <div class="item-title">Central de Apoio &amp; Emergência Fluvial &rarr;</div>
-              <div class="item-sub">Telefones e resgate com a Marinha, PMA e Bombeiros</div>
-            </a>
-          </li>
-        </ul>
-      </article>
-
-    </div>
-  </section>
-
-  <!-- SEÇÃO C: VITRINE DE POUSADAS, RANCHOS & PILOTEIROS NATIVOS (MONETIZAÇÃO COMUNITÁRIA) -->
-  <section id="secao-servicos" class="portal-section" aria-label="Operadores Locais e Pousadas">
-    <div class="portal-section-header">
-      <div class="section-tag">ECOTURISMO & SERVIÇOS NÁUTICOS</div>
-      <h2 class="portal-section-title">Pousadas, Ranchos &amp; Piloteiros Nativos Credenciados</h2>
-      <p class="portal-section-desc">
-        Infraestrutura verificada e condutores das Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito) para uma pescaria segura no Pantanal.
-      </p>
-    </div>
-
-    <!-- Banner de Chamada: Modelo Híbrido Comercial vs Social -->
-    <div class="servicos-banner-callout">
-      <div class="servicos-banner-header">
-        <span class="banner-badge-hub">HUB COMUNITÁRIO &amp; SUSTENTABILIDADE</span>
-        <h3 class="servicos-banner-title">Como Funciona a Presença no GeoFish MS</h3>
-        <p class="servicos-banner-desc">
-          Um modelo transparente que une sustentabilidade financeira para o portal e apoio social total às famílias ribeirinhas do Pantanal:
-        </p>
-      </div>
-      <div class="servicos-banner-grid">
-        <!-- Coluna 1: Pousadas, Ranchos & Marinas (Comercial / Pago) -->
-        <div class="servicos-banner-col col-comercial">
-          <div class="col-icon">🏨</div>
-          <h4>Pousadas, Ranchos &amp; Marinas</h4>
-          <span class="col-tag tag-comercial">Comercial / Anúncio Pago</span>
-          <p>
-            O motor de faturamento e sustentabilidade do projeto. O rancho ou pousada ganha presença destacada no WebGIS, fotos, descrição da rampa de barcos, amenidades e botão direto para o WhatsApp de reservas — sem comissões abusivas.
-          </p>
-          <button type="button" class="btn-banner-action btn-banner-comercial" data-action="abrir-parcerias-pousadas">
-            <span>🏨</span>
-            <span>Anunciar Estabelecimento &rarr;</span>
-          </button>
-        </div>
-
-        <!-- Coluna 2: Piloteiros & Guias Comunitários (100% Gratuito Z-1 / Z-7 / Z-11) -->
-        <div class="servicos-banner-col col-social">
-          <div class="col-icon">🚤</div>
-          <h4>Piloteiros &amp; Guias Nativos</h4>
-          <span class="col-tag tag-social">Colônias Z-1, Z-7 e Z-11 / 100% Grátis</span>
-          <p>
-            Compromisso comunitário e de responsabilidade social com os ribeirinhos. Os piloteiros e pescadores profissionais das Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito / Águas do Miranda) NÃO PAGAM NADA. Cadastro e divulgação 100% livres de taxas.
-          </p>
-          <button type="button" class="btn-banner-action btn-banner-social" data-action="abrir-parcerias-piloteiros">
-            <span>🚤</span>
-            <span>Cadastrar Guia Grátis &rarr;</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="showcase-grid">
-      <!-- Card Comercial: Espaço Publicitário Disponível -->
-      <article class="showcase-card showcase-card-ad">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-ad">🏷️ ESPAÇO PUBLICITÁRIO VIP</span>
-          <h3 class="showcase-name">Sua Pousada ou Empresa em Destaque Aqui</h3>
-          <span class="showcase-location">📍 Bacia do Rio Miranda &bull; Visibilidade em Todo o MS</span>
-        </div>
-        <p class="showcase-desc">
-          Garanta presença no ponto mais nobre do portal com fotos da sua estrutura, rampa de descida de barcos, amenidades e botão direto para o seu WhatsApp pessoal. Sem comissões de plataformas!
-        </p>
-        <div class="showcase-amenities">
-          <span>⭐ Destaque no Mapa</span>
-          <span>📸 Fotos da Estrutura</span>
-          <span>💬 WhatsApp Direto</span>
-          <span>🚫 0% de Comissão</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp btn-showcase-ad" style="border: none; cursor: pointer;">
-            📲 Anuncie Aqui na Vitrine
-          </button>
-        </div>
-      </article>
-
-      <!-- Parceiro 1 -->
-      <article class="showcase-card">
-        <div class="showcase-card-header">
-          <span class="showcase-type">POUSADA PESQUEIRA</span>
-          <h3 class="showcase-name">Pousada & Pesca Beira Rio</h3>
-          <span class="showcase-location">📍 Miranda, MS — Margem do Rio Miranda</span>
-        </div>
-        <p class="showcase-desc">
-          Rampa de concreto de apoio para barcos e lanchas, aluguel de voadeiras 40hp, apartamentos climatizados, restaurante típico e piloteiros pantaneiros nativos.
-        </p>
-        <div class="showcase-amenities">
-          <span>⚓ Rampa Concreto</span>
-          <span>🚤 Barcos 40hp</span>
-          <span>🧊 Isca Viva</span>
-          <span>📶 Wi-Fi</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
-            💬 Informações &amp; Parcerias
-          </button>
-        </div>
-      </article>
-
-      <!-- Parceiro 2 -->
-      <article class="showcase-card">
-        <div class="showcase-card-header">
-          <span class="showcase-type">HOTEL PANTANEIRO</span>
-          <h3 class="showcase-name">Hotel Passo do Lontra</h3>
-          <span class="showcase-location">📍 Estrada Parque MS-184 — Foz do Rio Vermelho</span>
-        </div>
-        <p class="showcase-desc">
-          Localização estratégica na foz do Rio Vermelho com o Rio Miranda. Píer flutuante, posto de combustível náutico, venda de tuvira e barcos de borda alta com coletes da Capitania.
-        </p>
-        <div class="showcase-amenities">
-          <span>⛽ Gasolina Náutica</span>
-          <span>🛥️ Píer Flutuante</span>
-          <span>🎣 Guia Local</span>
-          <span>🍽️ Pensão Completa</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
-            💬 Informações &amp; Parcerias
-          </button>
-        </div>
-      </article>
-
-      <!-- Piloteiro Comunitário: Colônia Z-1 -->
-      <article class="showcase-card card-guide">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-z1">COLÔNIA Z-1 MIRANDA</span>
-          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-1</h3>
-          <span class="showcase-location">📍 Porto Geral de Miranda &bull; Rio Miranda</span>
-        </div>
-        <p class="showcase-desc">
-          Navegadores ribeirinhos tradicionais da Bacia do Rio Miranda. Conhecimento dos canais, poços de pintado, pesca de rodada e condução segura nos balseiros pantaneiros. Espaço comunitário aberto e gratuito para os guias da Colônia Z-1.
-        </p>
-        <div class="showcase-amenities">
-          <span>📜 Colônia Z-1</span>
-          <span>🦺 Coletes Homologados</span>
-          <span>🎯 Conhecimento do Rio</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
-            💬 Cadastrar / Ver Piloteiros Z-1
-          </button>
-        </div>
-      </article>
-
-      <!-- Piloteiro Comunitário: Colônia Z-7 -->
-      <article class="showcase-card card-guide">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-z7">COLÔNIA Z-7 AQUIDAUANA</span>
-          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-7</h3>
-          <span class="showcase-location">📍 Aquidauana &bull; Anastácio &bull; Corredeiras</span>
-        </div>
-        <p class="showcase-desc">
-          Condutores ribeirinhos com vasta experiência nas corredeiras e restingas do Rio Aquidauana. Prática de pesca esportiva responsável, condução segura e respeito aos ciclos do Pantanal. Cadastro 100% gratuito.
-        </p>
-        <div class="showcase-amenities">
-          <span>📜 Colônia Z-7</span>
-          <span>🚤 Voadeira &amp; Motor</span>
-          <span>🐟 Pesque &amp; Solte</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
-            💬 Cadastrar / Ver Piloteiros Z-7
-          </button>
-        </div>
-      </article>
-
-      <!-- Piloteiro Comunitário: Colônia Z-11 (Bonito / Águas do Miranda) -->
-      <article class="showcase-card card-guide">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-z1" style="background: #e0f2fe; color: #0369a1;">COLÔNIA Z-11 BONITO</span>
-          <h3 class="showcase-name">Piloteiros Nativos &bull; Colônia Z-11</h3>
-          <span class="showcase-location">📍 Bonito &bull; Distrito Águas do Miranda &bull; Rio Miranda</span>
-        </div>
-        <p class="showcase-desc">
-          Condutores ribeirinhos e pescadores profissionais da Colônia Z-11 atuantes em Águas do Miranda e região de Bonito. Conhecimento ímpar das águas cênicas do Rio Miranda e afluentes, preservação ecológica e turismo sustentável. Cadastro 100% gratuito.
-        </p>
-        <div class="showcase-amenities">
-          <span>📜 Colônia Z-11</span>
-          <span>🌿 Águas do Miranda</span>
-          <span>🐟 Pesca Sustentável</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-piloteiros" class="btn-showcase-wpp" style="border: none; cursor: pointer;">
-            💬 Cadastrar / Ver Piloteiros Z-11
-          </button>
-        </div>
-      </article>
-
-      <!-- Card de Monetização e Apoio Comunitário -->
-      <article class="showcase-card card-sponsor" id="card-apoio-comunitario">
-        <div class="showcase-card-header">
-          <span class="showcase-type badge-sponsor" style="background: #ecfdf5; color: #065f46;">DIVULGAÇÃO &amp; APOIO LOCAL</span>
-          <h3 class="showcase-name">Divulgue sua Pousada, Rancho ou Barco</h3>
-          <span class="showcase-location">📍 Miranda, Aquidauana, Bonito e Passo do Lontra</span>
-        </div>
-        <p class="showcase-desc">
-          Este portal é uma iniciativa cidadã sem verba pública. Ao divulgar sua pousada, rancho ou loja de pesca aqui, você conecta seu negócio diretamente ao pescador esportivo e ajuda a manter a plataforma gratuita para os piloteiros nativos.
-        </p>
-        <div class="showcase-amenities">
-          <span>⭐ Destaque no Portal</span>
-          <span>📍 Ponto no WebGIS</span>
-          <span>📲 Botão Direto para seu WhatsApp</span>
-        </div>
-        <div class="showcase-footer">
-          <button type="button" data-action="abrir-parcerias-pousadas" class="btn-showcase-sponsor" style="background: #166534; color: #ffffff; border: none; cursor: pointer;">
-            💬 Anunciar Pousada ou Rancho &rarr;
-          </button>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- SEÇÃO D: CARTILHA OFICIAL DO PESCADOR DA POLÍCIA MILITAR AMBIENTAL (PMA-MS) -->
-  <section id="secao-cartilha" class="portal-section" aria-label="Cartilha Oficial do Pescador PMA-MS">
-    <div class="cartilha-banner-card">
-      <div class="cartilha-banner-header">
-        <div class="section-tag" style="background: #14532d; color: #86efac;">DOCUMENTO OFICIAL DA POLÍCIA MILITAR AMBIENTAL (BPMA/MS)</div>
-      </div>
-      <div class="cartilha-banner-content">
-        <div class="cartilha-text-col">
-          <h3 class="cartilha-title">Cartilha Oficial do Pescador de Mato Grosso do Sul</h3>
-          <p class="cartilha-desc">
-            Manual de bolso oficial elaborado pelo Batalhão de Polícia Militar Ambiental (BPMA/MS) contendo as normas de pesca, tamanhos mínimos de iscas vivas (tuvira, mussum, lambari), rios proibidos (Salobra com motor 4 tempos 15hp, Prata, Formoso), áreas de pesque e solte, guia de controle de pescado (GCP), exigência de peixe inteiro e telefones de todos os pelotões pantaneiros.
-          </p>
-          <div class="cartilha-features-pills">
-            <span>📄 PDF Oficial Completo</span>
-            <span>🐛 Medidas de Iscas Vivas</span>
-            <span>🚫 Rios Proibidos &amp; Reservas</span>
-            <span>📞 Contatos dos Pelotões PMA</span>
-          </div>
-        </div>
-        <div class="cartilha-action-col">
-          <a href="docs/cartilha_do_pescador_pma_ms.pdf" download="Cartilha_do_Pescador_PMA_MS.pdf" class="btn-cartilha-download" target="_blank" rel="noopener noreferrer">
-            <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Baixar Cartilha (PDF)</span>
-          </a>
-          <button type="button" class="btn-cartilha-read" data-action="abrir-cartilha">
-            <svg class="icon-svg" style="stroke: currentColor; width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span>Consultar Cartilha Online</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5. Rodapé Nobre Editorial do GeoFish MS (Iniciativa Cidadã) -->
-  <footer id="portal-footer" class="portal-footer" role="contentinfo">
-    <div class="portal-footer-inner">
-      <div class="footer-grid">
-        <div class="footer-col footer-col-main">
-          <div class="footer-brand" style="display: flex; align-items: center; gap: 8px;">
-            <svg class="icon-svg" style="stroke: #86efac; width: 24px; height: 24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/><path d="M18 12v.5"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .5 6.5-1.5 1.5-1.5 5-.5 6.5C5.58 18.03 7 16 7 13.33"/></svg>
-            <strong style="color: #ffffff; font-size: 1.2rem; font-family: var(--font-editorial);">GeoFish MS</strong>
-          </div>
-          <p class="footer-desc">
-            Iniciativa Cidadã voluntária idealizada, concebida e mantida por <strong>Peterson Martins da Costa</strong> em prol do bem comum, da preservação da Bacia Hidrográfica do Rio Miranda e do fortalecimento das comunidades ribeirinhas pantaneiras.
-          </p>
-          <div class="footer-independent-badge">
-            🌿 <strong>Projeto Independente:</strong> Realizado de forma voluntária por um cidadão. Não possui vínculo institucional governamental, apoio político nem financiamento público.
-          </div>
-          <div class="footer-tagline">
-            Operação 100% gratuita &bull; Funciona sem sinal de internet no barco.
-          </div>
-        </div>
-
-        <div class="footer-col">
-          <span class="footer-kicker">CONFORMAÇÃO &amp; SERVIÇOS</span>
-          <h4 class="footer-col-title">Governança da Pesca</h4>
-          <ul class="footer-links">
-            <li><button class="footer-link-btn" data-action="abrir-cartilha">📖 Cartilha do Pescador (PMA-MS)</button></li>
-            <li><a href="#secao-parceiros-turismo" class="footer-link-btn">🏨 Pousadas &amp; Barcos-Hotéis</a></li>
-            <li><button class="footer-link-btn" id="footer-btn-piloteiros" data-action="abrir-parcerias-piloteiros">🚤 Piloteiros Locais (Colônias Z-1, Z-7 e Z-11)</button></li>
-            <li><a href="https://www.pescaamadora.imasul.ms.gov.br/#/onboard" target="_blank" rel="noopener noreferrer" class="footer-link-btn">🪪 Emitir Licença no IMASUL</a></li>
-            <li><a href="#secao-transporte-passo-a-passo" class="footer-link-btn">⚖️ Regras de Transporte Sem Multa</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col">
-          <span class="footer-kicker">CIDADANIA &amp; CÓDIGO</span>
-          <h4 class="footer-col-title">Transparência &amp; Futuro</h4>
-          <ul class="footer-links">
-            <li><button class="footer-link-btn" id="footer-btn-pix">☕ Contribuir com a Iniciativa (PIX Cidadão)</button></li>
-            <li><a href="https://github.com/petermar23/geofish-ms" target="_blank" rel="noopener noreferrer" class="footer-link-btn">💻 Código Aberto no GitHub</a></li>
-            <li><button class="footer-link-btn" id="footer-btn-replicar">🗺️ Replicar na sua Bacia Hidrográfica</button></li>
-            <li><button class="footer-link-btn" data-action="abrir-sobre">ℹ️ Fontes Técnicas &amp; Autoria</button></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div class="footer-disclaimer">
-          <strong>Aviso de Utilidade Pública:</strong> O GeoFish MS é uma criação cívica independente de Peterson Martins da Costa para o bem coletivo. As normas ambientais e limites de captura reproduzem atos oficiais da SEMADESC, IMASUL e PMA para orientar o pescador e incentivar a conservação da vida aquática.
-        </div>
-        <div class="footer-copy">
-          &copy; 2026 GeoFish MS &bull; Desenvolvido por <strong>Peterson Martins da Costa</strong> &bull; Feito por quem vive e respeita o Pantanal.
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Contêiner de Mensagens Toast Acessíveis -->
+  <!-- Contêiner de Mensagens Toast -->
   <div id="toast-container" aria-live="polite"></div>
 
-  <!-- Scripts Locais PWA & Leaflet GIS -->
+  <!-- Scripts da Aplicação -->
   <script src="lib/leaflet/leaflet.js"></script>
   <script src="js/db.js"></script>
-  <!-- Catálogo Centralizado de Imagens Territoriais -->
   <script type="module" src="js/geoFishImages.js"></script>
-  <!-- Núcleo da Aplicação WebGIS e Orquestrador em Módulos ES6 -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
