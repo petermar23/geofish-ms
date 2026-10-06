@@ -4,6 +4,7 @@
  */
 
 import { vibrar, showToast } from './utils.js';
+import GeoFishDB from '../db.js';
 
 let deferredInstallPrompt = null;
 
@@ -69,8 +70,9 @@ export function initPWAOffline() {
   atualizarStatusRede();
 
   // Solicita persistência de dados no dispositivo para evitar expurgo de cache/IndexedDB
-  if (typeof window !== 'undefined' && window.GeoFishDB) {
-    window.GeoFishDB.solicitarPersistencia();
+  const db = GeoFishDB || (typeof window !== 'undefined' ? window.GeoFishDB : null);
+  if (db && typeof db.solicitarPersistencia === 'function') {
+    db.solicitarPersistencia();
   }
 
   window.addEventListener('online', () => {
@@ -192,9 +194,10 @@ export function initPWAOffline() {
             navigator.serviceWorker.controller.postMessage({ type: 'PRECACHE_CHECK' });
           }
 
+          const storageDb = GeoFishDB || (typeof window !== 'undefined' ? window.GeoFishDB : null);
           // Solicita armazenamento persistente no navegador
-          if (window.GeoFishDB) {
-            await window.GeoFishDB.solicitarPersistencia();
+          if (storageDb && typeof storageDb.solicitarPersistencia === 'function') {
+            await storageDb.solicitarPersistencia();
           }
 
           for (let i = 0; i < total; i++) {
@@ -207,8 +210,8 @@ export function initPWAOffline() {
                 const json = await resp.json();
                 if (json && json.features && json.features.length > 0) {
                   const etag = resp.headers.get('ETag') || '1.0';
-                  if (window.GeoFishDB) {
-                    await window.GeoFishDB.salvarCamada(c.key, json, etag, etag);
+                  if (storageDb && typeof storageDb.salvarCamada === 'function') {
+                    await storageDb.salvarCamada(c.key, json, etag, etag);
                   }
                   if ('caches' in window) {
                     const cache = await caches.open('geofish-geojson-v2');
@@ -240,9 +243,10 @@ export function initPWAOffline() {
         } else {
           // Usuário já está offline: checa quantas camadas de fato existem no IndexedDB
           let salvasOffline = 0;
-          if (window.GeoFishDB) {
+          const storageDb = GeoFishDB || (typeof window !== 'undefined' ? window.GeoFishDB : null);
+          if (storageDb && typeof storageDb.obterCamada === 'function') {
             for (const c of CAMADAS_PARA_OFFLINE) {
-              const cached = await window.GeoFishDB.obterCamada(c.key);
+              const cached = await storageDb.obterCamada(c.key);
               if (cached && cached.data && cached.data.features && cached.data.features.length > 0) {
                 salvasOffline++;
               }

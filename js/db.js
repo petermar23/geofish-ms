@@ -207,6 +207,22 @@ class GeoFishDB {
     });
   }
 
+  static async obterTodasDenuncias() {
+    const db = await this.open();
+    if (!db) return [];
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction(STORE_DENUNCIAS, 'readonly');
+        const req = tx.objectStore(STORE_DENUNCIAS).getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
+      } catch (err) {
+        console.warn('[GeoFishDB] Erro ao obter denúncias:', err);
+        resolve([]);
+      }
+    });
+  }
+
   static async obterRegistrosPendentesDeSincronizacao(storeName) {
     const db = await this.open();
     if (!db) return [];
