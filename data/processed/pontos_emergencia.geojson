@@ -8,6 +8,7 @@
         "id_infra": 501,
         "tipo": "PMA",
         "nome": "Pelotão da Polícia Militar Ambiental (PMA) de Miranda",
+        "servico": "Fiscalização, Medição, Lacre do Pescado e Emissão de Guia (GCP)",
         "telefone_emergencia": "06732424344",
         "endereco": "BR-262, km 565, Miranda - MS",
         "possui_rampa": 0
@@ -44,9 +45,11 @@
         "id_infra": 504,
         "tipo": "Rampa",
         "nome": "Porto Geral e Rampa Municipal de Miranda",
-        "telefone_emergencia": "190",
+        "telefone_emergencia": null,
+        "contato_status": "sem_telefone",
         "endereco": "Margem Urbana do Rio Miranda, Miranda - MS",
-        "possui_rampa": 1
+        "possui_rampa": 1,
+        "info": "Acesso público náutico. Sem telefone direto cadastrado."
       }
     },
     {
@@ -56,7 +59,8 @@
         "id_infra": 505,
         "tipo": "PMA",
         "nome": "Posto Operacional PMA Passo do Lontra",
-        "telefone_emergencia": "190",
+        "telefone_emergencia": "06732424344",
+        "servico": "Fiscalização Fluvial e Informações (Pelotão Miranda)",
         "endereco": "Estrada Parque Pantanal MS-184, Rio Miranda",
         "possui_rampa": 1
       }
@@ -68,9 +72,11 @@
         "id_infra": 506,
         "tipo": "Rampa",
         "nome": "Rampa Pública Passo do Lontra (Ponte de Madeira)",
-        "telefone_emergencia": "190",
+        "telefone_emergencia": null,
+        "contato_status": "sem_telefone",
         "endereco": "MS-184 ao lado da ponte do Rio Miranda",
-        "possui_rampa": 1
+        "possui_rampa": 1,
+        "info": "Acesso público náutico. Sem telefone direto cadastrado."
       }
     },
     {
@@ -80,6 +86,7 @@
         "id_infra": 507,
         "tipo": "PMA",
         "nome": "Posto de Fiscalização 24h Buraco das Piranhas",
+        "servico": "Fiscalização Rodoviária e Vistoria de Cota",
         "telefone_emergencia": "06732314444",
         "endereco": "Trevo BR-262 com MS-184",
         "possui_rampa": 0
@@ -92,6 +99,7 @@
         "id_infra": 508,
         "tipo": "PMA",
         "nome": "Pelotão da Polícia Militar Ambiental de Aquidauana",
+        "servico": "Fiscalização, Medição, Lacre do Pescado e Emissão de Guia (GCP)",
         "telefone_emergencia": "06739042070",
         "endereco": "BR-262, Aquidauana - MS",
         "possui_rampa": 0

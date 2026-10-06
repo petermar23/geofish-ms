@@ -1587,6 +1587,86 @@ body.sheet-open .btn-gps {
   line-height: 1.35;
 }
 
+/* Régua Visual de Espécies */
+.species-ruler-wrap {
+  margin: 6px 0 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.species-ruler-bar {
+  display: flex;
+  height: 20px;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 20px;
+  position: relative;
+  background: #e2e8f0;
+}
+
+.ruler-seg-forbidden {
+  background: #fee2e2;
+  color: #991b1b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ruler-seg-allowed {
+  background: #bbf7d0;
+  color: #166534;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ruler-seg-matrix {
+  background: #ffedd5;
+  color: #9a3412;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.species-ruler-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 600;
+  padding: 0 2px;
+}
+
+.ruler-interactive-pin {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 4px;
+  background: #0f172a;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  border-radius: 2px;
+  z-index: 5;
+  transform: translateX(-50%);
+}
+
+.ruler-interactive-tag {
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  z-index: 6;
+}
+
 /* Radar de Campo no Popup do Usuário */
 .radar-compliance-box {
   background: #f8fafc;

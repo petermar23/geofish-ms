@@ -108,7 +108,11 @@
 
       <!-- Abas Principais da Barra Lateral -->
       <nav class="sidebar-tabs" role="tablist" aria-label="Seções do Painel">
-        <button class="sidebar-tab-btn active" data-tab="guias" role="tab" aria-selected="true" aria-controls="pane-guias" id="tab-guias">
+        <button class="sidebar-tab-btn active" data-tab="inicio" role="tab" aria-selected="true" aria-controls="pane-inicio" id="tab-inicio">
+          <span class="tab-icon" aria-hidden="true">🏠</span>
+          <span>Início</span>
+        </button>
+        <button class="sidebar-tab-btn" data-tab="guias" role="tab" aria-selected="false" aria-controls="pane-guias" id="tab-guias">
           <span class="tab-icon" aria-hidden="true">🚤</span>
           <span>Piloteiros</span>
         </button>
@@ -133,13 +137,82 @@
       <!-- Área de Conteúdo com Rolagem Independente -->
       <div class="sidebar-content-area">
 
+        <!-- ABA INICIAL: 3 CAMINHOS CLAROS DE ENTRADA -->
+        <section id="pane-inicio" class="sidebar-pane active" role="tabpanel" aria-labelledby="tab-inicio">
+          <div class="welcome-card" style="background: linear-gradient(135deg, #0b4f6c 0%, #0369a1 100%); color: #ffffff; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+            <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;">🌿 WebGIS Bacia do Rio Miranda</div>
+            <p style="font-size: 0.78rem; opacity: 0.95; line-height: 1.4; margin: 0;">
+              Plataforma cívica para navegação responsável, turismo de pesca e conformidade com as regras ambientais em MS.
+            </p>
+          </div>
+
+          <div style="font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+            🎯 Escolha uma tarefa:
+          </div>
+
+          <div class="task-selector-grid" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Tarefa 1: Explorar a Região no Mapa -->
+            <div class="task-card" data-action="tarefa-explorar-mapa" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.4rem;" aria-hidden="true">🗺️</span>
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #0b4f6c;">1. Explorar a Região no Mapa</div>
+                  <p style="font-size: 0.76rem; color: #64748b; margin: 2px 0 6px 0; line-height: 1.35;">
+                    Visualizar rios navegáveis, trechos de pesca, áreas restritas e rampas da Bacia.
+                  </p>
+                  <button type="button" class="btn-top-action" style="padding: 4px 10px; font-size: 0.75rem; background: #0b4f6c; color: #fff;">
+                    <span>Focar no Mapa</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarefa 2: Consultar Regras e Espécies -->
+            <div class="task-card" data-action="tarefa-consultar-regras" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.4rem;" aria-hidden="true">📏</span>
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #166534;">2. Consultar Regras &amp; Medidas</div>
+                  <p style="font-size: 0.76rem; color: #64748b; margin: 2px 0 6px 0; line-height: 1.35;">
+                    Verificador com régua de medidas de Pacu, Pintado, Cachara, cota e postos de lacre da PMA.
+                  </p>
+                  <button type="button" class="btn-top-action" style="padding: 4px 10px; font-size: 0.75rem; background: #15803d; color: #fff;">
+                    <span>Abrir Verificador de Espécies</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarefa 3: Encontrar Hospedagem e Piloteiros -->
+            <div class="task-card" data-action="tarefa-encontrar-servicos" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.4rem;" aria-hidden="true">🚤</span>
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #0369a1;">3. Hospedagem &amp; Piloteiros</div>
+                  <p style="font-size: 0.76rem; color: #64748b; margin: 2px 0 6px 0; line-height: 1.35;">
+                    Filtros por polo (Miranda, Aquidauana, Bonito) com rampas náuticas e condutores da região.
+                  </p>
+                  <button type="button" class="btn-top-action" style="padding: 4px 10px; font-size: 0.75rem; background: #0284c7; color: #fff;">
+                    <span>Ver por Polo Regional</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nota Normativa de Transparência -->
+          <div style="margin-top: 14px; background: #f8fafc; border-left: 3px solid #0b4f6c; padding: 8px 10px; border-radius: 4px; font-size: 0.74rem; color: #475569; line-height: 1.4;">
+            <strong>⚖️ Base Normativa:</strong> Decretos nº 15.166/19, 15.375/20 e Lei nº 6.190/24. <em>Informativo: confirme sempre com o IMASUL e PMA antes de embarcar.</em>
+          </div>
+        </section>
+
         <!-- ABA 1: PILOTEIROS & GUIAS NATIVOS -->
-        <section id="pane-guias" class="sidebar-pane active" role="tabpanel" aria-labelledby="tab-guias">
+        <section id="pane-guias" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-guias">
           <h2 class="sidebar-section-title">
-            <span>🚤</span> <span>Piloteiros &amp; Guias Nativos</span>
+            <span>🚤</span> <span>Piloteiros &amp; Guias Tradicionais</span>
           </h2>
           <p class="sidebar-section-desc">
-            Condutores ribeirinhos homologados pelas <strong>Colônias Z-1 (Miranda), Z-7 (Aquidauana) e Z-11 (Bonito)</strong>. Negociação direta por WhatsApp, sem intermediários.
+            Condutores ribeirinhos da Bacia do Rio Miranda. Negociação direta e comunitária, sem intermediários.
           </p>
 
           <!-- Filtros Rápidos de Região (Ergonomia ao Toque 44px+) -->
@@ -162,21 +235,21 @@
           <div id="sidebar-guias-list" class="sidebar-cards-container" aria-live="polite">
             <div style="padding: 16px; text-align: center; color: #64748b;">
               <span class="spinner" style="display: inline-block; margin-bottom: 6px;"></span>
-              <div>Carregando piloteiros homologados...</div>
+              <div>Carregando piloteiros da bacia...</div>
             </div>
           </div>
 
-          <!-- Card de Chamada para Cadastro Oficial via WhatsApp -->
+          <!-- Card de Chamada para Cadastro Oficial -->
           <div style="margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
             <div style="font-size: 0.82rem; font-weight: 800; color: #166534;">
               📢 É Piloteiro ou Guia Tradicional?
             </div>
             <div style="font-size: 0.76rem; color: #15803d; line-height: 1.4;">
-              O cadastro é 100% gratuito. Envie uma mensagem ou áudio no WhatsApp oficial para homologação com sua Colônia:
+              O cadastro é 100% gratuito na fase piloto. Envie seus dados para validação cadastral com sua Colônia (Z-1, Z-7 ou Z-11):
             </div>
-            <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Sou%20piloteiro/pescador%20artesanal%20e%20gostaria%20de%20cadastrar%20minha%20embarca%C3%A7%C3%A3o%20no%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="margin-top: 4px;">
-              <span>📲 Enviar Áudio no WhatsApp da Colônia</span>
-            </a>
+            <button type="button" class="btn-guia-wa" style="margin-top: 4px; background: #15803d;" data-action="abrir-parcerias-piloteiros">
+              <span>📲 Cadastrar Embarcação</span>
+            </button>
           </div>
         </section>
 
@@ -263,15 +336,36 @@
             </ul>
           </div>
 
-          <!-- Postos da Polícia Militar Ambiental -->
+          <!-- Postos da Polícia Militar Ambiental (Medição, Lacre e Guia) -->
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
             <div style="font-weight: 800; color: #991b1b; font-size: 0.85rem; margin-bottom: 4px;">
-              🚨 Postos de Atendimento da PMA
+              🚨 Postos PMA: Medição, Lacre &amp; Guia (GCP)
             </div>
-            <div style="font-size: 0.76rem; color: #b91c1c; line-height: 1.4;">
-              &bull; <strong>Pelotão Miranda:</strong> BR-262, km 565 &bull; Tel: (67) 3242-4344<br>
-              &bull; <strong>Pelotão Aquidauana:</strong> Tel: (67) 3241-1188<br>
-              &bull; <strong>Plantão Estadual PMA-MS:</strong> (67) 3357-1500 / 190
+            <p style="font-size: 0.74rem; color: #7f1d1d; margin-bottom: 8px; line-height: 1.35;">
+              Para transportar o peixe nas rodovias de MS (BR-262, MS-184), dirija-se a um posto para inspeção, lacre do exemplar e emissão da Guia de Controle de Pescado (GCP):
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.76rem; color: #b91c1c;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #fca5a5; padding-bottom: 4px;">
+                <div>
+                  <strong>Pelotão PMA Miranda:</strong> BR-262, km 565<br>
+                  <span style="font-size: 0.72rem; color: #64748b;">Tel: (67) 3242-4344</span>
+                </div>
+                <button type="button" class="btn-guia-focar" data-lat="-20.2415" data-lng="-56.3820" data-nome="Pelotão PMA Miranda" style="padding: 3px 8px; font-size: 0.7rem;">Ver no Mapa</button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #fca5a5; padding-bottom: 4px;">
+                <div>
+                  <strong>Buraco das Piranhas (24h):</strong> Trevo BR-262 / MS-184<br>
+                  <span style="font-size: 0.72rem; color: #64748b;">Fiscalização Rodoviária</span>
+                </div>
+                <button type="button" class="btn-guia-focar" data-lat="-19.6400" data-lng="-56.9600" data-nome="Posto PMA Buraco das Piranhas" style="padding: 3px 8px; font-size: 0.7rem;">Ver no Mapa</button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>Pelotão PMA Aquidauana:</strong> BR-262<br>
+                  <span style="font-size: 0.72rem; color: #64748b;">Tel: (67) 3904-2070</span>
+                </div>
+                <button type="button" class="btn-guia-focar" data-lat="-20.4710" data-lng="-55.7870" data-nome="Pelotão PMA Aquidauana" style="padding: 3px 8px; font-size: 0.7rem;">Ver no Mapa</button>
+              </div>
             </div>
           </div>
 
@@ -494,10 +588,10 @@
     </div>
   </template>
 
-  <!-- Template Modal Espécies -->
+  <!-- Template Modal Espécies com Régua Visual e Verificador -->
   <template id="template-modal-especies">
     <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
-      <div class="modal-dialog">
+      <div class="modal-dialog" style="max-width: 680px;">
         <div class="modal-header">
           <h2>
             <span aria-hidden="true">🐟</span>
@@ -506,13 +600,179 @@
           <button id="btn-fechar-especies" class="modal-close-btn" aria-label="Fechar tabela de espécies">&times;</button>
         </div>
         <div class="modal-body">
-          <div style="margin-bottom: 14px;">
-            <input type="text" id="input-busca-especie" placeholder="Buscar peixe (ex: Pintado, Pacu, Cachara...)" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+          <!-- Nota Normativa e Isenção de Responsabilidade -->
+          <div class="legal-reference-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.78rem; color: #475569; line-height: 1.45;">
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+              <span>⚖️</span> <span>Base Normativa: Decretos Estaduais nº 15.166/19, 15.375/20 e Lei nº 6.190/24 (Dourado)</span>
+            </div>
+            <div>
+              <strong>Aviso aos Pescadores:</strong> As medidas e cotas abaixo refletem a regulamentação estadual vigente em Mato Grosso do Sul para a Bacia do Rio Miranda. <em>Esta ferramenta é de caráter informativo e educacional, não substituindo a fiscalização in loco nem a confirmação prévia junto ao IMASUL e à PMA.</em>
+            </div>
           </div>
-          <div id="grid-especies-cards" class="species-grid"></div>
+
+          <!-- Verificador Interativo Imediato de Medida -->
+          <div class="species-checker-calculator" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <div style="font-weight: 800; color: #166534; font-size: 0.88rem; margin-bottom: 6px;">
+              📏 Verificador Imediato: Pode Abater ou Deve Soltar?
+            </div>
+            <p style="font-size: 0.76rem; color: #15803d; margin-bottom: 10px;">
+              Selecione o peixe capturado e informe o comprimento medido para conferir o veredito legal:
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 100px auto; gap: 8px; align-items: end;">
+              <div>
+                <label for="checker-species" style="display: block; font-size: 0.75rem; font-weight: 700; color: #166534; margin-bottom: 4px;">Espécie:</label>
+                <select id="checker-species" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #86efac; font-size: 0.85rem; background: #fff;"></select>
+              </div>
+              <div>
+                <label for="checker-length" style="display: block; font-size: 0.75rem; font-weight: 700; color: #166534; margin-bottom: 4px;">Tamanho (cm):</label>
+                <input type="number" id="checker-length" placeholder="Ex: 88" min="1" max="250" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #86efac; font-size: 0.85rem;">
+              </div>
+              <div>
+                <button type="button" id="btn-run-check" class="btn-cta" style="background: #15803d; padding: 8px 14px; font-size: 0.85rem; white-space: nowrap; height: 38px;">Verificar</button>
+              </div>
+            </div>
+            <div id="measure-result" class="measure-result-box" style="margin-top: 10px; display: none;"></div>
+          </div>
+
+          <!-- Busca e Grade Completa de Espécies -->
+          <div style="margin-bottom: 12px;">
+            <label for="species-search-input" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Pesquisar na Tabela de Espécies:</label>
+            <input type="text" id="species-search-input" placeholder="Buscar por nome popular ou científico (ex: Pacu, Pintado, Dourado...)" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;">
+          </div>
+          <div id="species-grid" class="species-grid"></div>
+          <div id="grid-especies-cards" class="species-grid" style="display: none;"></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-cta" id="btn-fechar-especies-rodape">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template Modal Cadastro de Parcerias (Pousadas & Piloteiros) -->
+  <template id="template-modal-parceiros">
+    <div id="modal-parceiros" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="parceiros-title">
+      <div class="modal-dialog" style="max-width: 600px;">
+        <div class="modal-header">
+          <h2 id="parceiros-title">
+            <span aria-hidden="true">🤝</span>
+            <span>Cadastro de Pousadas &amp; Piloteiros</span>
+          </h2>
+          <button id="btn-fechar-parceiros" class="modal-close-btn" aria-label="Fechar cadastro">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.78rem; color: #475569; line-height: 1.45;">
+            <strong>Aviso de Transparência da Plataforma:</strong> O GeoFish MS é uma plataforma cívica e independente. O cadastro é <strong>gratuito</strong> na fase piloto. Os dados enviados são submetidos à verificação cadastral antes da publicação oficial para garantir segurança aos turistas.
+          </div>
+
+          <!-- Abas do Modal -->
+          <div style="display: flex; gap: 8px; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+            <button type="button" id="tab-btn-pousadas" class="sidebar-tab-btn active" style="flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px;">
+              🏨 Pousadas e Ranchos
+            </button>
+            <button type="button" id="tab-btn-piloteiros" class="sidebar-tab-btn" style="flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px;">
+              🚤 Piloteiros Tradicionais
+            </button>
+          </div>
+
+          <!-- Aba Pousadas -->
+          <div id="parceria-pane-pousadas">
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+              Divulgue a estrutura da sua pousada ou rancho para os pescadores esportivos:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div>
+                <label for="pousada-nome" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Nome do Estabelecimento *</label>
+                <input type="text" id="pousada-nome" placeholder="Ex: Rancho Beira Rio" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem;">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label for="pousada-rio" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Rio / Localidade *</label>
+                  <select id="pousada-rio" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                    <option value="Rio Miranda (Miranda)">Rio Miranda (Miranda)</option>
+                    <option value="Rio Miranda (Passo do Lontra)">Rio Miranda (Passo do Lontra)</option>
+                    <option value="Rio Aquidauana">Rio Aquidauana</option>
+                    <option value="Rio Salobra (Bonito / Bodoquena)">Rio Salobra (Bonito/Bodoquena)</option>
+                    <option value="Rio Negro (Pantanal)">Rio Negro (Pantanal)</option>
+                    <option value="Outro trecho da Bacia">Outro trecho da Bacia</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="pousada-wpp" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">WhatsApp para Contato *</label>
+                  <input type="tel" id="pousada-wpp" placeholder="(67) 99999-9999" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem;">
+                </div>
+              </div>
+              <div>
+                <label for="pousada-rampa" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Estrutura Náutica / Acesso</label>
+                <input type="text" id="pousada-rampa" placeholder="Ex: Rampa de concreto, atracadouro para barcos..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem;">
+              </div>
+              <div>
+                <span style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 6px;">Comodidades oferecidas:</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.78rem; color: #475569;">
+                  <label><input type="checkbox" name="pousada-amenity" value="Aluguel de Barcos"> Aluguel de Barcos</label>
+                  <label><input type="checkbox" name="pousada-amenity" value="Piloteiros Parceiros"> Piloteiros da Região</label>
+                  <label><input type="checkbox" name="pousada-amenity" value="Iscas Vivas"> Iscas Vivas</label>
+                  <label><input type="checkbox" name="pousada-amenity" value="Gelo / Câmara Fria"> Gelo / Câmara Fria</label>
+                  <label><input type="checkbox" name="pousada-amenity" value="Estacionamento Seguro"> Estacionamento Reboque</label>
+                  <label><input type="checkbox" name="pousada-amenity" value="Refeições"> Refeições Típicas</label>
+                </div>
+              </div>
+              <button type="button" id="btn-enviar-proposta-pousada" class="btn-cta" style="margin-top: 8px; background: #0284c7; justify-content: center;">
+                <span>📋 Enviar Informações para Validação</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Aba Piloteiros -->
+          <div id="parceria-pane-piloteiros" class="hidden">
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+              Piloteiro ribeirinho, cadastre seus dados para turistas consultarem seus serviços:
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button type="button" id="btn-cadastro-piloteiro-whatsapp" class="btn-cta" style="background: #15803d; justify-content: center; padding: 12px;">
+                <span>📲 Iniciar Cadastro por Áudio/Mensagem</span>
+              </button>
+              <div style="text-align: center; font-size: 0.75rem; color: #64748b; margin: 4px 0;">— ou envie o formulário por escrito —</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label for="guia-nome" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Nome Completo *</label>
+                  <input type="text" id="guia-nome" placeholder="Seu nome" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                </div>
+                <div>
+                  <label for="guia-apelido" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Apelido no Rio</label>
+                  <input type="text" id="guia-apelido" placeholder="Ex: Zé do Rio" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label for="guia-colonia" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Colônia de Filiação</label>
+                  <select id="guia-colonia" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                    <option value="Colônia Z-1 (Miranda)">Colônia Z-1 (Miranda)</option>
+                    <option value="Colônia Z-7 (Aquidauana)">Colônia Z-7 (Aquidauana)</option>
+                    <option value="Colônia Z-11 (Bonito)">Colônia Z-11 (Bonito)</option>
+                    <option value="Outra / Em processo">Outra / Em processo</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="guia-porto" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Porto de Saída</label>
+                  <input type="text" id="guia-porto" placeholder="Ex: Passo do Lontra, Porto Geral..." style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>
+                  <label for="guia-barco" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Barco / Motor</label>
+                  <input type="text" id="guia-barco" placeholder="Ex: Bote de alumínio 6m / 25HP" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                </div>
+                <div>
+                  <label for="guia-wpp" style="display: block; font-size: 0.78rem; font-weight: 700; color: #334155; margin-bottom: 4px;">WhatsApp de Contato</label>
+                  <input type="tel" id="guia-wpp" placeholder="(67) 99999-9999" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem;">
+                </div>
+              </div>
+              <button type="button" id="btn-enviar-cadastro-guia" class="btn-cta" style="margin-top: 6px; background: #15803d; justify-content: center;">
+                <span>✅ Enviar Dados para Homologação</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
