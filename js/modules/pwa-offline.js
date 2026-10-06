@@ -168,13 +168,14 @@ export function initPWAOffline() {
   // Catálogo de camadas vetoriais fundamentais para navegação fluvial offline
   const CAMADAS_PARA_OFFLINE = [
     { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: 'Regras de Pesca' },
+    { key: 'hidrografia', url: 'data/processed/hidrografia.geojson', nome: 'Rede Hidrográfica' },
     { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias Credenciados' },
     { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Rampas e Apoio Náutico' },
-    { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: 'Áreas Restritas (UCs)' },
+    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: 'Unidades de Conservação (UCs)' },
     { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: 'Rios Principais' },
-    { key: 'bacias_uepgrh', url: 'data/processed/bacias_uepgrh.geojson', nome: 'Bacias Hidrográficas' },
-    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: 'Bacias Especiais' },
-    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: 'Aglomerados Rurais' }
+    { key: 'bacias_uepgrh', url: 'data/processed/bacia_miranda.geojson', nome: 'Bacia do Rio Miranda' },
+    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: 'Bacias dos Rios Cênicos' },
+    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: 'Comunidades Pantaneiras' }
   ];
 
   // Botão "Salvar para o Barco" (Modo 100% Offline Verificável)

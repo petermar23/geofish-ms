@@ -1,6 +1,6 @@
 {
   "type": "FeatureCollection",
-  "name": "pontos_emergencia",
+  "name": "pontos_apoio_fiscalizacao",
   "xy_coordinate_resolution": 1e-05,
   "features": [
     {

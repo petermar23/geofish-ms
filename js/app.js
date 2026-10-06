@@ -156,8 +156,14 @@ const bottomSheet = document.getElementById('bottom-sheet');
 const sheetContent = document.getElementById('sheet-content');
 const closeSheetBtn = document.getElementById('close-sheet');
 
+let ultimoCliqueFeicaoTimestamp = 0;
+function registrarCliqueFeicao() {
+  ultimoCliqueFeicaoTimestamp = Date.now();
+}
+
 function abrirPainel(htmlContent) {
   if (!sheetContent || !bottomSheet) return;
+  registrarCliqueFeicao();
   sheetContent.innerHTML = htmlContent;
   bottomSheet.classList.remove('hidden');
   bottomSheet.setAttribute('aria-hidden', 'false');
@@ -192,8 +198,11 @@ if (closeSheetBtn) {
   closeSheetBtn.addEventListener('click', fecharPainel);
 }
 
-// Fecha o painel ao clicar em área vazia do mapa
+// Fecha o painel ao clicar em área vazia do mapa (ignora se houver clique recente em feição/popup)
 map.on('click', () => {
+  if (Date.now() - ultimoCliqueFeicaoTimestamp < 450) {
+    return;
+  }
   fecharPainel();
 });
 
@@ -814,19 +823,722 @@ function renderizarPainelTrechoPesca(featureTrecho) {
   }
 }
 
-// 7. Inicialização de Todas as Camadas em Paralelo
+// 7. Funções Utilitárias de Cores e Estilização da Hidrografia
+function obterCorPorStatusPesca(status) {
+  switch (status) {
+    case 'Proibida':
+      return '#dc2626'; // Vermelho vivo para rios cênicos e preservação permanente
+    case 'Pesque e Solte':
+      return '#f59e0b'; // Laranja / Âmbar para pesca esportiva sem abate
+    case 'Permitida com Cota':
+    default:
+      return '#0284c7'; // Azul ciano hidrográfico para calhas na safra
+  }
+}
+
+function obterPesoPorStatusPesca(status) {
+  switch (status) {
+    case 'Proibida':
+      return 3.5;
+    case 'Pesque e Solte':
+      return 3.0;
+    case 'Permitida com Cota':
+    default:
+      return 2.0;
+  }
+}
+
+// Registro global de feições para interação direta com botões de Popups Leaflet
+const featuresRegistradas = {};
+
+// Gerador de Popup para a Hidrografia Contínua (561 cursos d'água da bacia)
+function gerarPopupHidrografia(feature) {
+  const p = feature.properties || {};
+  const nomeRio = p.titulo || 'Curso Fluvial';
+  const status = p.status_pesca || 'Permitida com Cota';
+  const cor = obterCorPorStatusPesca(status);
+  const regras = p.regras_pesca || 'Permitida na safra para pescador devidamente licenciado.';
+  const cota = p.cota_abate || '1 exemplar nativo + 5 piranhas';
+  const comprimento = p.comprimento_km ? `${p.comprimento_km} km` : 'Calha contínua mapeada';
+  const baseLegal = p.base_legal || 'Cartilha do Pescador SEMADESC / IMASUL / PMA';
+
+  let icone = '🎣';
+  if (status === 'Proibida') icone = '🚫';
+  else if (status === 'Pesque e Solte') icone = '🌿';
+
+  const featureId = `hidro_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup hidrografia-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: ${cor};">
+          ${icone} ${escapeHTML(status)}
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(nomeRio)}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Regra:</span>
+          <span class="geofish-popup-val"><strong>${escapeHTML(regras)}</strong></span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Cota de Abate:</span>
+          <span class="geofish-popup-val" style="color: ${cor}; font-weight: 700;">
+            ${escapeHTML(cota)}
+          </span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Extensão:</span>
+          <span class="geofish-popup-val">${escapeHTML(comprimento)}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Base Legal:</span>
+          <span class="geofish-popup-val" style="font-size: 0.72rem; color: #64748b;">${escapeHTML(baseLegal)}</span>
+        </div>
+      </div>
+      <div class="geofish-map-popup-actions">
+        <button type="button" class="btn-popup-ver-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ver Todas as Informações
+        </button>
+        <button type="button" class="btn-popup-medir">
+          📏 Medidas Legais das Espécies
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Renderiza painel detalhado para o curso fluvial da hidrografia
+function renderizarPainelHidrografia(feature) {
+  if (!feature) return;
+  const p = feature.properties || {};
+  const status = p.status_pesca || 'Permitida com Cota';
+  const cor = obterCorPorStatusPesca(status);
+  const isProibido = status === 'Proibida';
+  const isPesqueSolte = status === 'Pesque e Solte';
+  const icone = isProibido ? '🚫' : (isPesqueSolte ? '🌿' : '🎣');
+
+  const guiasTrecho = typeof encontrarGuiasDoTrecho === 'function' ? encontrarGuiasDoTrecho(feature) : [];
+  let guiaHtml = '';
+  if (guiasTrecho.length > 0) {
+    guiaHtml = guiasTrecho.map((guia) => {
+      const gp = guia.properties || {};
+      const waNum = gp.contato_wa || WHATSAPP_CONTATO_SUPORTE;
+      const waUrl = normalizeWhatsApp(waNum);
+      const telUrl = sanitizeTel(gp.contato_tel || waNum);
+      return `
+        <div class="trecho-guide-card">
+          <div class="trecho-guide-head">
+            <div class="trecho-guide-name">${escapeHTML(gp.nome_operacional || gp.nome_completo || 'Piloteiro Credenciado')}</div>
+            <span class="trecho-guide-colonia">${escapeHTML(gp.colonia || 'Colônia Tradicional Pantaneira')}</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #475569; margin: 4px 0;">
+            Porto Base: <strong>${escapeHTML(gp.porto_base || 'Bacia do Miranda')}</strong>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-trecho-wa" style="flex: 1; text-align: center; text-decoration: none; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; background: #25d366; color: #fff;">💬 WhatsApp</a>` : ''}
+            ${telUrl ? `<a href="${telUrl}" class="btn-trecho-tel" style="padding: 6px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; background: #0284c7; color: #fff; text-decoration: none;">📞 Ligar</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const html = `
+    <div class="trecho-sheet-wrap">
+      <div class="trecho-header-badge-row">
+        <span class="badge-tag" style="background-color: ${cor};">
+          ${icone} ${escapeHTML(status)}
+        </span>
+        <span class="trecho-id-label">Rede Fluvial MS</span>
+      </div>
+
+      <h2 class="sheet-title">${escapeHTML(p.titulo || 'Curso Fluvial')}</h2>
+
+      <div class="trecho-section-box">
+        <div class="trecho-section-header">
+          <h3 class="trecho-section-title">⚖️ Normativa e Regras de Pesca</h3>
+        </div>
+        <p style="font-size: 0.85rem; line-height: 1.5; color: #1e293b; margin: 6px 0;">
+          ${escapeHTML(p.regras_pesca || 'Consulte o regulamento estadual.')}
+        </p>
+        <div class="data-group" style="margin-top: 8px;">
+          <div class="data-item">
+            <div class="data-label">Cota de Abate Permitida</div>
+            <div class="data-value" style="color: ${cor}; font-weight: 700;">${escapeHTML(p.cota_abate || '1 nativo + 5 piranhas')}</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Extensão no MS</div>
+            <div class="data-value">${p.comprimento_km ? escapeHTML(p.comprimento_km) + ' km' : 'Mapeamento Contínuo'}</div>
+          </div>
+          <div class="data-item">
+            <div class="data-label">Base Legal</div>
+            <div class="data-value" style="font-size: 0.78rem;">${escapeHTML(p.base_legal || 'Cartilha do Pescador')}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trecho-section-box">
+        <div class="trecho-section-header">
+          <h3 class="trecho-section-title">🐟 Régua de Espécies e Medidas</h3>
+          <span class="trecho-section-sub">Tamanhos Mínimos e Máximos</span>
+        </div>
+        <button type="button" class="btn-cta btn-abrir-verificador-geral" style="width: 100%; margin: 6px 0; background: #0284c7; color: #fff; border: none; padding: 11px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+          📏 Abrir Régua Visual de Espécies
+        </button>
+      </div>
+
+      ${guiaHtml ? `
+        <div class="trecho-section-box">
+          <div class="trecho-section-header">
+            <h3 class="trecho-section-title">🚤 Piloteiro / Condutor Local</h3>
+            <span class="trecho-section-sub">Contato Direto</span>
+          </div>
+          ${guiaHtml}
+        </div>
+      ` : ''}
+
+      <div class="legal-note-box" style="margin-top: 4px;">
+        <strong>Conformidade Territorial:</strong> Dados cartográficos oficiais integrados pelo GeoFish MS para navegação segura e respeito à fauna pantaneira.
+      </div>
+    </div>
+  `;
+
+  abrirPainel(html);
+
+  const painelEl = document.getElementById('sheet-content');
+  if (painelEl) {
+    painelEl.querySelectorAll('.btn-abrir-verificador-geral').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fecharPainel();
+        if (typeof abrirModalEspecies === 'function') {
+          abrirModalEspecies();
+        }
+      });
+    });
+  }
+}
+
+// Gerador de Popup para Trechos de Pesca Principais
+function gerarPopupTrechoPesca(feature) {
+  const p = feature.properties || {};
+  const nomeRio = p.rio || 'Trecho de Pesca';
+  const regra = p.regra || 'Regulamentado';
+  const cor = obterCorPorRegra(p.regra);
+  const isPesqueSolte = Boolean(p.tipo_regra === 'pesque_solte' || (p.regra && p.regra.toLowerCase().includes('solte')));
+  const iconeRegra = isPesqueSolte ? '🌿' : '🎣';
+  const guiasTrecho = typeof encontrarGuiasDoTrecho === 'function' ? encontrarGuiasDoTrecho(feature) : [];
+  const guiaPrincipal = guiasTrecho.length > 0 ? guiasTrecho[0].properties : null;
+  const cotaTexto = isPesqueSolte ? 'Devolução imediata obrigatória à água' : 'Cota: 1 exemplar nativo + 5 piranhas';
+
+  const featureId = p.id_trecho ? `trecho_${p.id_trecho}` : `trecho_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup trecho-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: ${cor};">
+          ${iconeRegra} ${escapeHTML(regra)}
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">🎣 ${escapeHTML(nomeRio)}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Regra Geral:</span>
+          <span class="geofish-popup-val ${isPesqueSolte ? 'text-pesque-solte' : ''}"><strong>${escapeHTML(cotaTexto)}</strong></span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Dourado (Lei 6.190):</span>
+          <span class="geofish-popup-val text-proibido">🚫 100% Proibido até 2029</span>
+        </div>
+        ${guiaPrincipal ? `
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Piloteiro Local:</span>
+            <span class="geofish-popup-val">🚤 ${escapeHTML(guiaPrincipal.nome_operacional || 'Disponível')}</span>
+          </div>
+        ` : ''}
+      </div>
+      <div class="geofish-map-popup-actions">
+        <button type="button" class="btn-popup-ver-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ver Todas as Informações
+        </button>
+        <button type="button" class="btn-popup-medir">
+          📏 Régua de Medidas
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Guias e Piloteiros
+function gerarPopupGuia(feature) {
+  const g = feature.properties || {};
+  const isDemonstrativo = Boolean(g.demonstrativo);
+  const waUrl = normalizeWhatsApp(g.contato_wa);
+  const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
+  const featureId = `guia_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  if (isDemonstrativo) {
+    return `
+      <div class="geofish-map-popup guia-popup">
+        <div class="geofish-map-popup-header">
+          <span class="geofish-map-popup-badge" style="background-color: #d97706;">
+            🚤 Vaga Aberta &bull; Piloteiro
+          </span>
+        </div>
+        <h3 class="geofish-map-popup-title">${escapeHTML(g.nome_operacional || 'Piloteiro Credenciado')}</h3>
+        <div class="geofish-map-popup-body">
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Porto / Base:</span>
+            <span class="geofish-popup-val">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</span>
+          </div>
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Colônia:</span>
+            <span class="geofish-popup-val">${escapeHTML(g.colonia || 'Z-1 / Z-7 / Z-11')}</span>
+          </div>
+        </div>
+        <div class="geofish-map-popup-actions">
+          <button type="button" class="btn-popup-cadastrar-guia">
+            ✍️ Cadastrar Barco Gratuitamente
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="geofish-map-popup guia-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: #0284c7;">
+          🚤 Piloteiro Comunitário
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(g.nome_operacional || g.nome_completo || 'Piloteiro Local')}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Porto Base:</span>
+          <span class="geofish-popup-val">${escapeHTML(g.porto_base || 'Pantanal')}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Colônia:</span>
+          <span class="geofish-popup-val">${escapeHTML(g.colonia || 'Tradicional')}</span>
+        </div>
+        ${g.tipo_barco ? `
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Barco:</span>
+            <span class="geofish-popup-val">${escapeHTML(g.tipo_barco)}</span>
+          </div>
+        ` : ''}
+      </div>
+      <div class="geofish-map-popup-actions">
+        ${waUrl ? `
+          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-popup-action-wa">
+            💬 WhatsApp
+          </a>
+        ` : ''}
+        ${telUrl ? `
+          <a href="${telUrl}" class="btn-popup-action-tel">
+            📞 Ligar
+          </a>
+        ` : ''}
+        <button type="button" class="btn-popup-ver-guia-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ficha Completa
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Apoio Náutico e Rampas
+function gerarPopupPontoApoio(feature) {
+  const a = feature.properties || {};
+  const isRampa = Boolean(a.tipo && a.tipo.toLowerCase().includes('rampa'));
+  const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
+  const featureId = `apoio_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup apoio-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: ${isRampa ? '#0d9488' : '#ef4444'};">
+          ${isRampa ? '⚓ Rampa e Apoio Náutico' : '🚨 Apoio e Emergência'}
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(a.nome || 'Ponto de Apoio')}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Tipo:</span>
+          <span class="geofish-popup-val">${escapeHTML(a.tipo || 'Apoio')}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Rampa de Barco:</span>
+          <span class="geofish-popup-val">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</span>
+        </div>
+        ${a.endereco ? `
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Localização:</span>
+            <span class="geofish-popup-val">${escapeHTML(a.endereco)}</span>
+          </div>
+        ` : ''}
+      </div>
+      <div class="geofish-map-popup-actions">
+        ${telUrl ? `
+          <a href="${telUrl}" class="btn-popup-action-tel" style="background: #ef4444;">
+            📞 Ligar Emergência
+          </a>
+        ` : ''}
+        <button type="button" class="btn-popup-ver-apoio-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ver Detalhes
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Unidades de Conservação (uc_ms.geojson)
+function gerarPopupAreaRestrita(feature) {
+  const u = feature.properties || {};
+  const uNome = u.titulo || u.nome || 'Unidade de Conservação';
+  const uCat = u.subtitulo || u.categoria || u.grupo || 'Área Protegida';
+  const uRegras = u.regras_pesca || 'Unidade de conservação com zoneamento ambiental específico e normas restritivas de pesca.';
+  const featureId = `restrita_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup restrita-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: #f59e0b;">
+          ⚠️ Área Restrita &bull; UC
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(uNome)}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Classificação:</span>
+          <span class="geofish-popup-val">${escapeHTML(uCat)}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Município:</span>
+          <span class="geofish-popup-val">${escapeHTML(u.municipio || 'Mato Grosso do Sul')}</span>
+        </div>
+        <div class="geofish-popup-item text-alerta-uc">
+          <span>⚠️ ${escapeHTML(uRegras)}</span>
+        </div>
+      </div>
+      <div class="geofish-map-popup-actions">
+        <button type="button" class="btn-popup-ver-restrita-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ler Regulamento da UC
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Rios Principais
+function gerarPopupRioPrincipal(feature) {
+  const r = feature.properties || {};
+  const nomeRio = r.titulo || r.rio || 'Rio da Bacia';
+  const featureId = `rio_${Math.random().toString(36).substr(2, 9)}`;
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup rio-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: #0ea5e9;">
+          🌊 Calha Fluvial Principal
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(nomeRio)}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Extensão:</span>
+          <span class="geofish-popup-val">${r.comprimento_km ? escapeHTML(r.comprimento_km) + ' km' : (r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Hidrografia Base')}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Cota Geral MS:</span>
+          <span class="geofish-popup-val">1 nativo + 5 piranhas (Dourado Proibido)</span>
+        </div>
+      </div>
+      <div class="geofish-map-popup-actions">
+        <button type="button" class="btn-popup-ver-rio-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Informações do Rio
+        </button>
+        <button type="button" class="btn-popup-medir">
+          📏 Medidas Legais
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Bacia do Miranda
+function gerarPopupBacia(feature) {
+  const b = feature.properties || {};
+  const bNome = b.titulo || b.nome_bacia || 'Bacia do Rio Miranda';
+  return `
+    <div class="geofish-map-popup bacia-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: #0284c7;">
+          🗺️ Delimitação Hidrográfica
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(bNome)}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Região:</span>
+          <span class="geofish-popup-val">${escapeHTML(b.subtitulo || 'Região Hidrográfica do Paraguai')}</span>
+        </div>
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Área da Bacia:</span>
+          <span class="geofish-popup-val">${b.area_km2 ? Number(b.area_km2).toLocaleString('pt-BR') + ' km²' : '43.008 km²'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Delegador de Eventos para os Popups Leaflet no Mapa
+map.on('popupopen', (e) => {
+  const popupEl = e.popup.getElement();
+  if (!popupEl) return;
+
+  L.DomEvent.disableClickPropagation(popupEl);
+  L.DomEvent.disableScrollPropagation(popupEl);
+
+  popupEl.addEventListener('click', () => {
+    registrarCliqueFeicao();
+  });
+
+  // Botão Ver Painel (Trecho ou Hidrografia)
+  popupEl.querySelectorAll('.btn-popup-ver-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat) {
+        if (feat.properties && feat.properties.status_pesca) {
+          renderizarPainelHidrografia(feat);
+        } else {
+          renderizarPainelTrechoPesca(feat);
+        }
+      }
+    });
+  });
+
+  // Botão Régua de Medidas
+  popupEl.querySelectorAll('.btn-popup-medir').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      if (typeof abrirModalEspecies === 'function') {
+        abrirModalEspecies();
+      }
+    });
+  });
+
+  // Botão Cadastrar Guia
+  popupEl.querySelectorAll('.btn-popup-cadastrar-guia').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      if (typeof window.abrirModalParceriasTab === 'function') {
+        window.abrirModalParceriasTab('piloteiros');
+      }
+    });
+  });
+
+  // Botão Ficha do Guia
+  popupEl.querySelectorAll('.btn-popup-ver-guia-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat && feat.properties) {
+        const g = feat.properties;
+        const waUrl = normalizeWhatsApp(g.contato_wa);
+        const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
+        abrirPainel(`
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span class="badge-tag" style="background-color: #0b4f6c; margin: 0;">Piloteiro Local &bull; Cadastro Comunitário</span>
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Declarado</span>
+          </div>
+          <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(g.nome_operacional || g.nome_completo || 'Piloteiro')}</h2>
+          <div class="data-group">
+            <div class="data-item">
+              <div class="data-label">Colônia de Pescadores</div>
+              <div class="data-value">${escapeHTML(g.colonia || 'Não informada')}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Porto / Base de Saída</div>
+              <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Embarcação / Motor</div>
+              <div class="data-value">${escapeHTML(g.tipo_barco || 'Barco homologado')}</div>
+            </div>
+          </div>
+          <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.45;">
+            🤝 <strong>Contato Direto:</strong> Combine disponibilidade, roteiro e valores diretamente com o profissional.
+          </div>
+          <div style="display: flex; gap: 8px;">
+            ${waUrl ? `
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
+                💬 WhatsApp
+              </a>
+            ` : ''}
+            ${telUrl ? `
+              <a href="${telUrl}" class="btn-cta" style="background: #0284c7; padding: 0 16px; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                📞 Ligar
+              </a>
+            ` : ''}
+          </div>
+        `);
+      }
+    });
+  });
+
+  // Botão Ficha de Apoio / Rampa
+  popupEl.querySelectorAll('.btn-popup-ver-apoio-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat && feat.properties) {
+        const a = feat.properties;
+        const isRampa = a.tipo && a.tipo.toLowerCase().includes('rampa');
+        const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
+        abrirPainel(`
+          <span class="badge-tag" style="background-color: ${isRampa ? '#0284c7' : '#d32f2f'};">${isRampa ? 'Apoio Náutico &bull; Rampa' : 'Apoio e Emergência'}</span>
+          <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
+          <div class="data-group">
+            <div class="data-item">
+              <div class="data-label">Tipo de Ponto</div>
+              <div class="data-value">${escapeHTML(a.tipo)}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Rampa de Barco</div>
+              <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
+            </div>
+            ${(!isRampa && a.telefone_emergencia) ? `
+              <div class="data-item">
+                <div class="data-label">Telefone de Emergência</div>
+                <div class="data-value">${escapeHTML(a.telefone_emergencia)}</div>
+              </div>
+            ` : ''}
+            ${a.endereco ? `
+              <div class="data-item">
+                <div class="data-label">Localização</div>
+                <div class="data-value">${escapeHTML(a.endereco)}</div>
+              </div>
+            ` : ''}
+          </div>
+          ${telUrl ? `
+            <a href="${telUrl}" class="btn-cta btn-emergency">
+              📞 Ligar para Emergência
+            </a>
+          ` : ''}
+        `);
+      }
+    });
+  });
+
+  // Botão Ler Regulamento da UC
+  popupEl.querySelectorAll('.btn-popup-ver-restrita-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat && feat.properties) {
+        const u = feat.properties;
+        const uNome = u.titulo || u.nome || 'Unidade de Conservação';
+        const uCat = u.subtitulo || u.categoria || u.grupo || 'Área Protegida';
+        const uRegras = u.regras_pesca || 'Unidade de Conservação com regras ambientais específicas.';
+        abrirPainel(`
+          <span class="badge-tag" style="background-color: #f57c00;">Unidade de Conservação (${escapeHTML(u.esfera || 'Estadual/Federal')})</span>
+          <h2 class="sheet-title">${escapeHTML(uNome)}</h2>
+          <div class="data-group">
+            <div class="data-item">
+              <div class="data-label">Categoria de Manejo</div>
+              <div class="data-value">${escapeHTML(uCat)}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Município(s)</div>
+              <div class="data-value">${escapeHTML(u.municipio || 'Mato Grosso do Sul')}</div>
+            </div>
+          </div>
+          <div class="legal-note-box">
+            <strong>Alerta Ambiental:</strong> ${escapeHTML(uRegras)}
+          </div>
+        `);
+      }
+    });
+  });
+
+  // Botão Informações do Rio Principal
+  popupEl.querySelectorAll('.btn-popup-ver-rio-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat) {
+        const r = feat.properties || {};
+        const nomeRio = r.titulo || r.rio || 'Rio Principal';
+        abrirPainel(`
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span class="badge-tag" style="background-color: #0288d1; margin: 0;">Eixo Hidrográfico Principal</span>
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Troncal Fluvial</span>
+          </div>
+          <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(nomeRio)}</h2>
+          <div class="data-group">
+            <div class="data-item">
+              <div class="data-label">Extensão Mapeada</div>
+              <div class="data-value">${r.comprimento_km ? escapeHTML(r.comprimento_km) + ' km' : (r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Hidrografia Base')}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Regra Geral de Pesca (MS)</div>
+              <div class="data-value">Cota de 1 nativo na medida regulamentar + 5 piranhas (Dourado Proibido - Pesque e Solte)</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+            <button type="button" class="btn-cta btn-abrir-especies-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
+              📏 Consultar Medidas Legais
+            </button>
+          </div>
+        `);
+        const btnEsp = document.querySelector('.btn-abrir-especies-rio');
+        if (btnEsp) {
+          btnEsp.addEventListener('click', () => {
+            fecharPainel();
+            if (typeof abrirModalEspecies === 'function') abrirModalEspecies();
+          });
+        }
+      }
+    });
+  });
+});
+
+// 8. Inicialização de Todas as Camadas Vetoriais Otimizadas
 async function carregarTodasCamadas() {
   const loadingIndicator = document.getElementById('loading-indicator');
   const loadingText = document.getElementById('loading-text');
 
   const definicoesCamadas = [
     { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: '🎣 Trechos de Pesca (Regras)', ativa: true },
+    { key: 'hidrografia', url: 'data/processed/hidrografia.geojson', nome: '💧 Rede Hidrográfica e Regras de Pesca', ativa: true },
     { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias Credenciados', ativa: true },
     { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: '⚓ Rampas e Apoio Náutico', ativa: true },
-    { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: '⚠️ Áreas Restritas (UCs)', ativa: true },
+    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: '⚠️ Unidades de Conservação (UCs)', ativa: true },
     { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: '🌊 Rios Principais', ativa: true },
-    { key: 'bacias_uepgrh', url: 'data/processed/bacias_uepgrh.geojson', nome: '🗺️ Bacias Hidrográficas (UEPGRH)', ativa: false },
-    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: '🎯 Bacias Especiais (Manejo)', ativa: false },
+    { key: 'bacias_uepgrh', url: 'data/processed/bacia_miranda.geojson', nome: '🗺️ Delimitação da Bacia do Miranda', ativa: false },
+    { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: '🛡️ Bacias dos Rios Cênicos (Manejo)', ativa: false },
     { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: '🏘️ Aglomerados Rurais', ativa: false }
   ];
 
@@ -849,7 +1561,7 @@ async function carregarTodasCamadas() {
 
       let camadaLeaflet = null;
 
-      // Montagem de cada camada com o pane correto
+      // Montagem de cada camada com o pane correto e popups persistentes
       switch (def.key) {
         case 'trechos_pesca':
           camadaLeaflet = L.geoJSON(dados, {
@@ -872,6 +1584,12 @@ async function carregarTodasCamadas() {
                 sticky: true
               });
 
+              layer.bindPopup(() => gerarPopupTrechoPesca(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
               layer.on({
                 mouseover: (e) => {
                   const l = e.target;
@@ -884,13 +1602,75 @@ async function carregarTodasCamadas() {
                   camadaLeaflet.resetStyle(e.target);
                 },
                 click: (e) => {
-                  L.DomEvent.stopPropagation(e);
-                  renderizarPainelTrechoPesca(feature);
+                  if (e && e.originalEvent) {
+                    L.DomEvent.stopPropagation(e.originalEvent);
+                  }
+                  registrarCliqueFeicao();
+                  if (window.innerWidth >= 900) {
+                    renderizarPainelTrechoPesca(feature);
+                  }
                 }
               });
             }
           });
           break;
+
+        case 'hidrografia':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'hidrografiaBasePane',
+            style: (feature) => {
+              const status = feature.properties?.status_pesca;
+              return {
+                color: obterCorPorStatusPesca(status),
+                weight: obterPesoPorStatusPesca(status),
+                opacity: status === 'Proibida' ? 0.95 : (status === 'Pesque e Solte' ? 0.9 : 0.8),
+                lineCap: 'round',
+                lineJoin: 'round'
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              const p = feature.properties || {};
+              const titulo = p.titulo || 'Curso Fluvial';
+              const status = p.status_pesca || 'Permitida com Cota';
+              layer.bindTooltip(`<strong>${escapeHTML(titulo)}</strong> &bull; ${escapeHTML(status)}`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -6],
+                sticky: true
+              });
+
+              layer.bindPopup(() => gerarPopupHidrografia(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
+              layer.on({
+                mouseover: (e) => {
+                  const l = e.target;
+                  const st = feature.properties?.status_pesca;
+                  l.setStyle({ weight: obterPesoPorStatusPesca(st) + 2.5, opacity: 1 });
+                  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                    l.bringToFront();
+                  }
+                },
+                mouseout: (e) => {
+                  camadaLeaflet.resetStyle(e.target);
+                },
+                click: (e) => {
+                  if (e && e.originalEvent) {
+                    L.DomEvent.stopPropagation(e.originalEvent);
+                  }
+                  registrarCliqueFeicao();
+                  if (window.innerWidth >= 900) {
+                    renderizarPainelHidrografia(feature);
+                  }
+                }
+              });
+            }
+          });
+          break;
+
         case 'guias_credenciados':
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'guiasPane',
@@ -927,88 +1707,17 @@ async function carregarTodasCamadas() {
                 offset: [0, -16]
               });
 
+              layer.bindPopup(() => gerarPopupGuia(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
               layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const g = feature.properties;
-                const waUrl = normalizeWhatsApp(g.contato_wa);
-                const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
-
-                if (g.demonstrativo) {
-                  abrirPainel(`
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                      <span class="badge-tag" style="background-color: #d97706; margin: 0;">Ponto Demonstrativo &bull; Vaga Aberta</span>
-                      <span style="font-size: 0.72rem; color: #b45309; font-weight: 700;">Exemplo</span>
-                    </div>
-                    <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(g.nome_operacional)}</h2>
-                    <div class="data-group">
-                      <div class="data-item">
-                        <div class="data-label">Colônia de Pescadores</div>
-                        <div class="data-value">${escapeHTML(g.colonia || 'Não informada')}</div>
-                      </div>
-                      <div class="data-item">
-                        <div class="data-label">Porto / Base de Saída</div>
-                        <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
-                      </div>
-                      <div class="data-item">
-                        <div class="data-label">Embarcação Sugerida</div>
-                        <div class="data-value">${escapeHTML(g.tipo_barco || 'Barco homologado')}</div>
-                      </div>
-                    </div>
-                    <div style="margin: 12px 0; padding: 10px 12px; background: #fffbeb; border-left: 3px solid #d97706; border-radius: 4px; font-size: 0.8rem; color: #92400e; line-height: 1.45;">
-                      📢 <strong>Cadastro Comunitário Aberto:</strong> Este ponto exemplifica onde guias e piloteiros das Colônias Z-1, Z-7 e Z-11 aparecem no mapa. O cadastro é 100% gratuito para os condutores tradicionais.
-                    </div>
-                    <button type="button" class="btn-cta btn-cadastrar-vaga" style="width: 100%; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
-                      ✍️ Cadastrar Meu Barco Gratuitamente
-                    </button>
-                  `);
-                  const btnCadVaga = document.querySelector('.btn-cadastrar-vaga');
-                  if (btnCadVaga) {
-                    btnCadVaga.addEventListener('click', () => {
-                      fecharPainel();
-                      if (typeof window.abrirModalParceriasTab === 'function') {
-                        window.abrirModalParceriasTab('piloteiros');
-                      }
-                    });
-                  }
-                  return;
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
                 }
-
-                abrirPainel(`
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span class="badge-tag" style="background-color: #0b4f6c; margin: 0;">Piloteiro Local &bull; Cadastro Comunitário</span>
-                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Declarado</span>
-                  </div>
-                  <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(g.nome_operacional)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Colônia de Pescadores</div>
-                      <div class="data-value">${escapeHTML(g.colonia || 'Não informada')}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Porto / Base de Saída</div>
-                      <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Embarcação / Motor</div>
-                      <div class="data-value">${escapeHTML(g.tipo_barco || 'Barco homologado')}</div>
-                    </div>
-                  </div>
-                  <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.45;">
-                    🤝 <strong>Contato Direto:</strong> Você combina disponibilidade, roteiro e valores diretamente com o profissional. O GeoFish MS não faz reservas nem cobra taxas.
-                  </div>
-                  <div style="display: flex; gap: 8px;">
-                    ${waUrl ? `
-                      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
-                        💬 Conversar pelo WhatsApp
-                      </a>
-                    ` : ''}
-                    ${telUrl ? `
-                      <a href="${telUrl}" class="btn-cta" style="background: #0284c7; padding: 0 16px; margin: 0; text-decoration: none; display: flex; align-items: center; justify-content: center;" title="Ligar para o telefone convencional">
-                        📞 Ligar
-                      </a>
-                    ` : ''}
-                  </div>
-                `);
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1051,42 +1760,17 @@ async function carregarTodasCamadas() {
                 offset: [0, -15]
               });
 
+              layer.bindPopup(() => gerarPopupPontoApoio(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
               layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const a = feature.properties;
-                const isRampa = a.tipo && a.tipo.toLowerCase().includes('rampa');
-                const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: ${isRampa ? '#0284c7' : '#d32f2f'};">${isRampa ? 'Apoio Náutico &bull; Rampa' : 'Apoio e Emergência'}</span>
-                  <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Tipo de Ponto</div>
-                      <div class="data-value">${escapeHTML(a.tipo)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Rampa de Barco</div>
-                      <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
-                    </div>
-                    ${(!isRampa && a.telefone_emergencia) ? `
-                      <div class="data-item">
-                        <div class="data-label">Telefone de Emergência</div>
-                        <div class="data-value">${escapeHTML(a.telefone_emergencia)}</div>
-                      </div>
-                    ` : ''}
-                    ${a.endereco ? `
-                      <div class="data-item">
-                        <div class="data-label">Localização</div>
-                        <div class="data-value">${escapeHTML(a.endereco)}</div>
-                      </div>
-                    ` : ''}
-                  </div>
-                  ${telUrl ? `
-                    <a href="${telUrl}" class="btn-cta btn-emergency">
-                      📞 Ligar para Emergência
-                    </a>
-                  ` : ''}
-                `);
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1099,40 +1783,33 @@ async function carregarTodasCamadas() {
               color: '#f59e0b',
               fillColor: '#f59e0b',
               weight: 2,
-              fillOpacity: 0.2,
+              fillOpacity: 0.22,
               dashArray: '5, 5',
               lineCap: 'round',
               lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
-              const uNome = feature.properties?.nome || 'Unidade de Conservação';
-              layer.bindTooltip(escapeHTML(uNome), {
+              const u = feature.properties || {};
+              const uNome = u.titulo || u.nome || 'Unidade de Conservação';
+              const uCat = u.subtitulo || u.categoria || u.grupo || 'Área Protegida';
+              layer.bindTooltip(`<strong>${escapeHTML(uNome)}</strong> &bull; ${escapeHTML(uCat)}`, {
                 className: 'geofish-modern-tooltip',
                 direction: 'top',
                 offset: [0, -8],
                 sticky: true
               });
 
+              layer.bindPopup(() => gerarPopupAreaRestrita(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
               layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const u = feature.properties;
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: #f57c00;">Unidade de Conservação (${escapeHTML(u.esfera)})</span>
-                  <h2 class="sheet-title">${escapeHTML(u.nome)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Categoria de Manejo</div>
-                      <div class="data-value">${escapeHTML(u.categoria)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Município(s)</div>
-                      <div class="data-value">${escapeHTML(u.municipio)}</div>
-                    </div>
-                  </div>
-                  <div class="legal-note-box">
-                    <strong>Alerta Ambiental:</strong> Unidades de Conservação possuem planos de manejo próprios. A atividade pesqueira pode ser restrita ou totalmente vedada.
-                  </div>
-                `);
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1142,85 +1819,40 @@ async function carregarTodasCamadas() {
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'hidrografiaBasePane',
             style: {
-              color: '#0ea5e9',
-              weight: 4,
-              opacity: 0.72,
+              color: '#0284c7',
+              weight: 4.5,
+              opacity: 0.85,
               lineCap: 'round',
               lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
               const r = feature.properties || {};
-              const nomeRio = r.rio || 'Rio da Bacia';
-              layer.bindTooltip(`<strong>${escapeHTML(nomeRio)}</strong> &bull; Hidrografia`, {
+              const nomeRio = r.titulo || r.rio || 'Rio Principal';
+              layer.bindTooltip(`<strong>${escapeHTML(nomeRio)}</strong> &bull; Eixo Troncal`, {
                 className: 'geofish-modern-tooltip',
                 direction: 'top',
                 offset: [0, -4],
                 sticky: true
               });
 
+              layer.bindPopup(() => gerarPopupRioPrincipal(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
+
               layer.on({
                 mouseover: (e) => {
-                  e.target.setStyle({ weight: 6.5, opacity: 0.95 });
+                  e.target.setStyle({ weight: 7, opacity: 1 });
                 },
                 mouseout: (e) => {
                   camadaLeaflet.resetStyle(e.target);
                 },
                 click: (e) => {
-                  L.DomEvent.stopPropagation(e);
-                  const dadosTrechos = dadosCarregados['trechos_pesca'];
-                  let trechoMatch = null;
-                  if (dadosTrechos && dadosTrechos.features) {
-                    const nomeRioLower = (r.rio || '').toLowerCase();
-                    trechoMatch = dadosTrechos.features.find((t) => {
-                      const tNome = (t.properties?.rio || '').toLowerCase();
-                      return tNome.includes(nomeRioLower) || nomeRioLower.includes(tNome.split(' ')[0]);
-                    });
+                  if (e && e.originalEvent) {
+                    L.DomEvent.stopPropagation(e.originalEvent);
                   }
-
-                  if (trechoMatch) {
-                    renderizarPainelTrechoPesca(trechoMatch);
-                  } else {
-                    abrirPainel(`
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span class="badge-tag" style="background-color: #0288d1; margin: 0;">Hidrografia da Bacia do Miranda</span>
-                        <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">Calha Fluvial</span>
-                      </div>
-                      <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(r.rio || 'Rio da Bacia')}</h2>
-                      <div class="data-group">
-                        <div class="data-item">
-                          <div class="data-label">Extensão Mapeada</div>
-                          <div class="data-value">${r.extensao_km ? escapeHTML(r.extensao_km) + ' km' : 'Trecho mapeado pelo IMASUL'}</div>
-                        </div>
-                        <div class="data-item">
-                          <div class="data-label">Regra Geral de Pesca (MS)</div>
-                          <div class="data-value">Cota de 1 nativo na medida regulamentar + 5 piranhas (Dourado Proibido - Pesque e Solte)</div>
-                        </div>
-                      </div>
-                      <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                        <button type="button" class="btn-cta btn-abrir-especies-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0284c7; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
-                          📏 Consultar Medidas Legais
-                        </button>
-                        <button type="button" class="btn-cta btn-abrir-guias-rio" style="flex: 1; min-width: 140px; margin: 0; background: #0b4f6c; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
-                          🚤 Piloteiros da Bacia
-                        </button>
-                      </div>
-                    `);
-
-                    const btnEsp = document.querySelector('.btn-abrir-especies-rio');
-                    if (btnEsp) {
-                      btnEsp.addEventListener('click', () => {
-                        fecharPainel();
-                        if (typeof abrirModalEspecies === 'function') abrirModalEspecies();
-                      });
-                    }
-                    const btnGui = document.querySelector('.btn-abrir-guias-rio');
-                    if (btnGui) {
-                      btnGui.addEventListener('click', () => {
-                        fecharPainel();
-                        if (typeof window.abrirModalParceriasTab === 'function') window.abrirModalParceriasTab('piloteiros');
-                      });
-                    }
-                  }
+                  registrarCliqueFeicao();
                 }
               });
             }
@@ -1233,37 +1865,31 @@ async function carregarTodasCamadas() {
             style: {
               color: '#0284c7',
               fillColor: '#38bdf8',
-              weight: 1.5,
-              fillOpacity: 0.12,
+              weight: 2,
+              fillOpacity: 0.08,
               dashArray: '4, 4',
               lineCap: 'round',
               lineJoin: 'round'
             },
             onEachFeature: (feature, layer) => {
-              const bNome = feature.properties?.nome_bacia || 'Bacia Hidrográfica';
+              const b = feature.properties || {};
+              const bNome = b.titulo || b.nome_bacia || 'Bacia do Rio Miranda';
               layer.bindTooltip(escapeHTML(bNome), {
                 className: 'geofish-modern-tooltip',
                 direction: 'top',
                 offset: [0, -6],
                 sticky: true
               });
+              layer.bindPopup(() => gerarPopupBacia(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 320,
+                autoPan: true
+              });
               layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const b = feature.properties;
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: #1976d2;">Bacia Hidrográfica UEPGRH</span>
-                  <h2 class="sheet-title">${escapeHTML(b.nome_bacia)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Rio Principal</div>
-                      <div class="data-value">${escapeHTML(b.rio_principal)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Área de Drenagem</div>
-                      <div class="data-value">${b.area_km2 ? Number(b.area_km2).toLocaleString('pt-BR') + ' km²' : 'Não informado'}</div>
-                    </div>
-                  </div>
-                `);
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1275,27 +1901,45 @@ async function carregarTodasCamadas() {
             style: {
               color: '#9c27b0',
               fillColor: '#ce93d8',
-              weight: 1.5,
-              fillOpacity: 0.2,
+              weight: 1.8,
+              fillOpacity: 0.18,
               dashArray: '6, 6'
             },
             onEachFeature: (feature, layer) => {
-              layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const s = feature.properties;
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: #9c27b0;">Área Especial de Manejo</span>
-                  <h2 class="sheet-title">${escapeHTML(s.nome_bacia)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Área Total</div>
-                      <div class="data-value">${s.area_ha ? Number(s.area_ha).toLocaleString('pt-BR') + ' ha' : 'Não informado'}</div>
+              const s = feature.properties || {};
+              const nome = s.titulo || s.nome_bacia || 'Bacia Cênica';
+              layer.bindTooltip(`<strong>Bacia do Rio ${escapeHTML(nome)}</strong> &bull; Rio Cênico`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -6],
+                sticky: true
+              });
+              layer.bindPopup(`
+                <div class="geofish-map-popup">
+                  <div class="geofish-map-popup-header">
+                    <span class="geofish-map-popup-badge" style="background-color: #9c27b0;">🛡️ Bacia dos Rios Cênicos</span>
+                  </div>
+                  <h3 class="geofish-map-popup-title">Bacia do Rio ${escapeHTML(nome)}</h3>
+                  <div class="geofish-map-popup-body">
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Categoria:</span>
+                      <span class="geofish-popup-val">${escapeHTML(s.subtitulo || 'Manejo Especial')}</span>
+                    </div>
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Área Total:</span>
+                      <span class="geofish-popup-val">${s.area_ha ? Number(s.area_ha).toLocaleString('pt-BR') + ' ha' : 'Mapeada'}</span>
+                    </div>
+                    <div class="geofish-popup-item text-alerta-uc">
+                      <span>🚫 Pesca proibida nas calhas cênicas principais. Preservação integral.</span>
                     </div>
                   </div>
-                  <div class="legal-note-box">
-                    Áreas de preservação especial sujeitas a zoneamento ambiental específico e normas restritivas de pesca.
-                  </div>
-                `);
+                </div>
+              `, { className: 'geofish-leaflet-popup', maxWidth: 300 });
+              layer.on('click', (e) => {
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1312,27 +1956,37 @@ async function carregarTodasCamadas() {
               dashArray: '3, 3'
             },
             onEachFeature: (feature, layer) => {
-              layer.on('click', (e) => {
-                L.DomEvent.stopPropagation(e);
-                const a = feature.properties;
-                abrirPainel(`
-                  <span class="badge-tag" style="background-color: #795548;">Comunidade / Aglomerado Rural</span>
-                  <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
-                  <div class="data-group">
-                    <div class="data-item">
-                      <div class="data-label">Tipo</div>
-                      <div class="data-value">${escapeHTML(a.tipo)}</div>
+              const a = feature.properties || {};
+              const aNome = a.titulo || a.nome || 'Comunidade';
+              layer.bindTooltip(`<strong>${escapeHTML(aNome)}</strong> &bull; ${escapeHTML(a.municipio || '')}`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -6],
+                sticky: true
+              });
+              layer.bindPopup(`
+                <div class="geofish-map-popup">
+                  <div class="geofish-map-popup-header">
+                    <span class="geofish-map-popup-badge" style="background-color: #795548;">🏘️ Comunidade Pantaneira</span>
+                  </div>
+                  <h3 class="geofish-map-popup-title">${escapeHTML(aNome)}</h3>
+                  <div class="geofish-map-popup-body">
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Classificação:</span>
+                      <span class="geofish-popup-val">${escapeHTML(a.subtitulo || a.tipo || 'Comunidade')}</span>
                     </div>
-                    <div class="data-item">
-                      <div class="data-label">Zona Territorial</div>
-                      <div class="data-value">${escapeHTML(a.zona)}</div>
-                    </div>
-                    <div class="data-item">
-                      <div class="data-label">Município</div>
-                      <div class="data-value">${escapeHTML(a.municipio)}</div>
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Município:</span>
+                      <span class="geofish-popup-val">${escapeHTML(a.municipio || 'Mato Grosso do Sul')}</span>
                     </div>
                   </div>
-                `);
+                </div>
+              `, { className: 'geofish-leaflet-popup', maxWidth: 300 });
+              layer.on('click', (e) => {
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
               });
             }
           });
@@ -1484,13 +2138,14 @@ function abrirModalSobre() {
         layerStatusList.innerHTML = '';
         const nomes = {
           trechos_pesca: 'Regras de Pesca por Trecho',
+          hidrografia: 'Rede Hidrográfica e Regras Fluviais',
           guias_credenciados: 'Guias de Pesca Credenciados',
           pontos_emergencia: 'Rampas Náuticas e Apoio',
-          areas_restritas: 'Áreas Restritas (Unidades de Conservação)',
+          areas_restritas: 'Unidades de Conservação (UCs)',
           rios_principais: 'Rios Principais do Estado',
-          bacias_uepgrh: 'Bacias Hidrográficas (UEPGRH)',
-          bacias_especiais: 'Bacias Especiais de Manejo',
-          aglomerados_rurais: 'Aglomerados e Comunidades Rurais'
+          bacias_uepgrh: 'Delimitação da Bacia do Miranda',
+          bacias_especiais: 'Bacias dos Rios Cênicos',
+          aglomerados_rurais: 'Comunidades Pantaneiras'
         };
 
         for (const [key, nome] of Object.entries(nomes)) {
@@ -1975,6 +2630,7 @@ function aplicarFiltroRapido(tipo) {
 
   if (tipo === 'all') {
     if (camadasInstanciadas['trechos_pesca']) map.addLayer(camadasInstanciadas['trechos_pesca']);
+    if (camadasInstanciadas['hidrografia']) map.addLayer(camadasInstanciadas['hidrografia']);
     if (camadasInstanciadas['guias_credenciados']) map.addLayer(camadasInstanciadas['guias_credenciados']);
     if (camadasInstanciadas['pontos_emergencia']) map.addLayer(camadasInstanciadas['pontos_emergencia']);
     if (camadasInstanciadas['areas_restritas']) map.addLayer(camadasInstanciadas['areas_restritas']);
@@ -1982,8 +2638,9 @@ function aplicarFiltroRapido(tipo) {
     showToast('Exibindo todas as camadas ativas.');
   } else if (tipo === 'regras') {
     if (camadasInstanciadas['trechos_pesca']) map.addLayer(camadasInstanciadas['trechos_pesca']);
+    if (camadasInstanciadas['hidrografia']) map.addLayer(camadasInstanciadas['hidrografia']);
     if (camadasInstanciadas['rios_principais']) map.addLayer(camadasInstanciadas['rios_principais']);
-    showToast('Filtro: Regras de Pesca por Trecho.');
+    showToast('Filtro: Regras de Pesca e Rede Fluvial.');
   } else if (tipo === 'guias') {
     if (camadasInstanciadas['guias_credenciados']) {
       map.addLayer(camadasInstanciadas['guias_credenciados']);
@@ -2190,14 +2847,51 @@ function inicializarBuscaLocal() {
     if (dadosUcs && dadosUcs.features) {
       for (const feat of dadosUcs.features) {
         const p = feat.properties || {};
-        const nomeNorm = formatarTermo(p.nome);
+        const nomeNorm = formatarTermo(p.titulo || p.nome);
         const municNorm = formatarTermo(p.municipio);
-        if (nomeNorm.includes(termoNorm) || municNorm.includes(termoNorm)) {
+        const catNorm = formatarTermo(p.subtitulo || p.categoria || p.grupo);
+        if (nomeNorm.includes(termoNorm) || municNorm.includes(termoNorm) || catNorm.includes(termoNorm)) {
           correspondencias.push({
             tipoIcone: '⚠️',
-            titulo: p.nome,
-            subtitulo: `${p.categoria || 'Unidade de Conservação'} • ${p.municipio || 'MS'}`,
-            categoria: 'Área Restrita',
+            titulo: p.titulo || p.nome || 'Unidade de Conservação',
+            subtitulo: `${p.subtitulo || p.categoria || p.grupo || 'Área Protegida'} • ${p.municipio || 'MS'}`,
+            categoria: 'Unidade de Conservação',
+            feature: feat
+          });
+        }
+      }
+    }
+
+    // 5. Busca na Rede Hidrográfica e Regras Fluviais (561 cursos d'água)
+    const dadosHidro = dadosCarregados['hidrografia'];
+    if (dadosHidro && dadosHidro.features) {
+      for (const feat of dadosHidro.features) {
+        const p = feat.properties || {};
+        const titNorm = formatarTermo(p.titulo);
+        const stNorm = formatarTermo(p.status_pesca);
+        const regNorm = formatarTermo(p.regras_pesca);
+        if (titNorm.includes(termoNorm) || stNorm.includes(termoNorm) || regNorm.includes(termoNorm)) {
+          let coordsCentro = null;
+          if (feat.geometry) {
+            if (feat.geometry.type === 'LineString' && feat.geometry.coordinates.length > 0) {
+              const mid = Math.floor(feat.geometry.coordinates.length / 2);
+              coordsCentro = [feat.geometry.coordinates[mid][1], feat.geometry.coordinates[mid][0]];
+            } else if (feat.geometry.type === 'MultiLineString' && feat.geometry.coordinates.length > 0) {
+              const firstLine = feat.geometry.coordinates[0];
+              const mid = Math.floor(firstLine.length / 2);
+              coordsCentro = [firstLine[mid][1], firstLine[mid][0]];
+            }
+          }
+          let icone = '🎣';
+          if (p.status_pesca === 'Proibida') icone = '🚫';
+          else if (p.status_pesca === 'Pesque e Solte') icone = '🌿';
+
+          correspondencias.push({
+            tipoIcone: icone,
+            titulo: `${p.titulo || 'Curso Fluvial'} (${p.status_pesca || 'Regulado'})`,
+            subtitulo: p.regras_pesca || `Cota: ${p.cota_abate || 'Regulamentada'}`,
+            categoria: 'Rede Fluvial',
+            coords: coordsCentro,
             feature: feat
           });
         }

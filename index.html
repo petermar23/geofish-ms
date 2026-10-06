@@ -402,6 +402,14 @@
 
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">💧</span>
+                <span>Rede Hidrográfica e Regras de Pesca</span>
+              </div>
+              <input type="checkbox" id="layer-chk-hidrografia" checked data-camada-key="hidrografia" aria-label="Ativar camada Rede Hidrográfica">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🌊</span>
                 <span>Rios Principais do Estado</span>
               </div>
@@ -411,37 +419,38 @@
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">⚠️</span>
-                <span>Áreas Restritas (Unidades Conservação)</span>
+                <span>Unidades de Conservação (UCs)</span>
               </div>
-              <input type="checkbox" id="layer-chk-restritas" checked data-camada-key="areas_restritas" aria-label="Ativar camada Áreas Restritas">
+              <input type="checkbox" id="layer-chk-restritas" checked data-camada-key="areas_restritas" aria-label="Ativar camada Unidades de Conservação">
             </label>
 
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🗺️</span>
-                <span>Bacias Hidrográficas (UEPGRH)</span>
+                <span>Delimitação da Bacia do Miranda</span>
               </div>
-              <input type="checkbox" id="layer-chk-uepgrh" data-camada-key="bacias_uepgrh" aria-label="Ativar camada Bacias UEPGRH">
+              <input type="checkbox" id="layer-chk-uepgrh" data-camada-key="bacias_uepgrh" aria-label="Ativar camada Bacia do Miranda">
             </label>
 
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🛡️</span>
-                <span>Bacias Especiais de Manejo</span>
+                <span>Bacias dos Rios Cênicos (Manejo)</span>
               </div>
               <input type="checkbox" id="layer-chk-especiais" data-camada-key="bacias_especiais" aria-label="Ativar camada Bacias Especiais">
             </label>
           </div>
 
           <div class="sidebar-layer-legend" style="margin-top: 14px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 8px;">🎨 Legenda das Camadas:</div>
+            <div style="font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 8px;">🎨 Legenda das Camadas e Regras:</div>
             <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; color: #334155;">
-              <div style="display: flex; align-items: center; gap: 8px;"><span>🚤</span> <span>Piloteiro (Z-1, Z-7, Z-11)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #dc2626; border-radius: 2px;"></span> <span>🔴 Pesca Proibida (Rios Cênicos: Formoso, Salobra, Prata)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #f59e0b; border-radius: 2px;"></span> <span>🟠 Pesque e Solte Exclusivo (Rio Negro, Abobral, Vermelho)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #0284c7; border-radius: 2px;"></span> <span>🔵 Permitida com Cota (Miranda, Aquidauana, Paraguai)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🚤</span> <span>Piloteiro Credenciado (Z-1, Z-7, Z-11)</span></div>
               <div style="display: flex; align-items: center; gap: 8px;"><span>⚓</span> <span>Rampa Náutica &amp; Apoio</span></div>
               <div style="display: flex; align-items: center; gap: 8px;"><span>🚨</span> <span>Posto PMA (Medição e Lacre)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #16a34a; border-radius: 2px;"></span> <span>Cota Permitida (1 Nativo + 5 Piranhas)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #0284c7; border-radius: 2px;"></span> <span>Pesque e Solte Obrigatório</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 14px; height: 14px; background: rgba(220, 38, 38, 0.25); border: 1px solid #dc2626; border-radius: 2px;"></span> <span>Área Restrita / Unidade de Conservação</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 14px; height: 14px; background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; border-radius: 2px;"></span> <span>Unidade de Conservação (UC)</span></div>
             </div>
           </div>
         </section>
