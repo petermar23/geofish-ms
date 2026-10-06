@@ -201,16 +201,6 @@ map.on('click', () => {
   fecharPainel();
 });
 
-// 6. Controle de Camadas no Canto Superior Direito
-const controleCamadas = L.control.layers(null, null, {
-  collapsed: true,
-  position: 'topright'
-}).addTo(map);
-
-// Adiciona opções de mapa base no controle
-controleCamadas.addBaseLayer(sateliteEsri, '🛰️ Esri Satélite (Alta Resolução)');
-controleCamadas.addBaseLayer(relevoEsri, '⛰️ Esri Relevo / Topografia');
-
 // Registro de status das camadas para a janela "Sobre os dados" e dados espaciais carregados
 const statusCamadas = {};
 const dadosCarregados = {};
@@ -1280,7 +1270,6 @@ async function carregarTodasCamadas() {
       if (camadaLeaflet) {
         dadosCarregados[def.key] = dados;
         camadasInstanciadas[def.key] = camadaLeaflet;
-        controleCamadas.addOverlay(camadaLeaflet, def.nome);
         if (def.ativa) {
           camadaLeaflet.addTo(map);
         }
@@ -1867,9 +1856,8 @@ function inicializarSidebarDataGeo() {
 
   const btnSobreTop = document.getElementById('btn-sobre-top');
   if (btnSobreTop) btnSobreTop.addEventListener('click', () => {
-    abrirSidebar();
-    const tabSobre = document.getElementById('tab-sobre');
-    if (tabSobre) tabSobre.click();
+    vibrar(20);
+    abrirModalSobre();
   });
 
   const badgeDefesoTop = document.getElementById('badge-defeso-top');

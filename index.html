@@ -71,10 +71,6 @@
         <span aria-hidden="true">🛰️</span>
         <span class="btn-label-desktop">Satélite</span>
       </button>
-      <button id="btn-gps-top" class="btn-top-action" title="Localizar meu barco no rio em tempo real">
-        <span aria-hidden="true">📍</span>
-        <span class="btn-label-desktop">Meu GPS</span>
-      </button>
       <button id="btn-offline-top" class="btn-top-action" title="Salvar mapa e camadas no celular para navegar sem 4G">
         <span aria-hidden="true">💾</span>
         <span class="btn-label-desktop">Salvar Offline</span>
@@ -127,10 +123,6 @@
         <button class="sidebar-tab-btn" data-tab="camadas" role="tab" aria-selected="false" aria-controls="pane-camadas" id="tab-camadas">
           <span class="tab-icon" aria-hidden="true">🗺️</span>
           <span>Camadas</span>
-        </button>
-        <button class="sidebar-tab-btn" data-tab="sobre" role="tab" aria-selected="false" aria-controls="pane-sobre" id="tab-sobre">
-          <span class="tab-icon" aria-hidden="true">📖</span>
-          <span>Sobre</span>
         </button>
       </nav>
 
@@ -441,58 +433,16 @@
             </label>
           </div>
 
-          <div style="margin-top: 16px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.74rem; color: #64748b;">
-            💡 <strong>Dica de Desempenho:</strong> No celular com sinal fraco no rio, mantenha ativas apenas as camadas essenciais para navegação rápida.
-          </div>
-        </section>
-
-        <!-- ABA 5: SOBRE O PROJETO & TERRITÓRIO -->
-        <section id="pane-sobre" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-sobre">
-          <h2 class="sidebar-section-title">
-            <span>📖</span> <span>Sobre o GeoFish MS</span>
-          </h2>
-          <p class="sidebar-section-desc">
-            Iniciativa Cidadã voluntária desenvolvida por <strong>Peterson Martins da Costa</strong> para governança territorial da Bacia do Rio Miranda.
-          </p>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; font-size: 0.78rem; color: #334155; line-height: 1.5;">
-            <strong>A Bacia do Rio Miranda:</strong> Com 44.740 km² de drenagem, abrange municípios estratégicos como Miranda, Aquidauana, Anastácio, Bonito (Águas do Miranda), Corumbá (Passo do Lontra), Bodoquena e Jardim.
-          </div>
-
-          <!-- Protocolo Institucional -->
-          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-            <div style="font-weight: 800; color: #166534; font-size: 0.82rem; margin-bottom: 4px;">
-              🤝 Protocolo com as Colônias de Pescadores
+          <div class="sidebar-layer-legend" style="margin-top: 14px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 8px;">🎨 Legenda das Camadas:</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; color: #334155;">
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🚤</span> <span>Piloteiro (Z-1, Z-7, Z-11)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>⚓</span> <span>Rampa Náutica &amp; Apoio</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🚨</span> <span>Posto PMA (Medição e Lacre)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #16a34a; border-radius: 2px;"></span> <span>Cota Permitida (1 Nativo + 5 Piranhas)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #0284c7; border-radius: 2px;"></span> <span>Pesque e Solte Obrigatório</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 14px; height: 14px; background: rgba(220, 38, 38, 0.25); border: 1px solid #dc2626; border-radius: 2px;"></span> <span>Área Restrita / Unidade de Conservação</span></div>
             </div>
-            <p style="font-size: 0.76rem; color: #15803d; line-height: 1.45; margin: 0;">
-              O cadastro é homologado junto às <strong>Colônias Z-1, Z-7 e Z-11</strong>, que auditam o RGP do condutor tradicional. Isso combate clandestinos e intermediários predatórios.
-            </p>
-          </div>
-
-          <!-- Indicadores do Prêmio -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-            <div style="font-weight: 800; color: #0b4f6c; font-size: 0.82rem; margin-bottom: 4px;">
-              📊 Indicadores de Impacto (XXI Prêmio Inovação)
-            </div>
-            <ul style="font-size: 0.76rem; color: #475569; line-height: 1.45; padding-left: 16px; margin: 0;">
-              <li><strong>Renda Local Direta:</strong> 100% da diária paga diretamente à família do piloteiro.</li>
-              <li><strong>Conformidade Preventiva:</strong> Consultas cidadãs que evitam autuações da PMA.</li>
-              <li><strong>Custo para o Estado:</strong> R$ 0,00 (100% software livre e GitHub Pages).</li>
-            </ul>
-          </div>
-
-          <!-- Transparência Offline -->
-          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-            <div style="font-weight: 800; color: #1e40af; font-size: 0.82rem; margin-bottom: 4px;">
-              📶 Transparência do Modo Offline
-            </div>
-            <p style="font-size: 0.76rem; color: #1d4ed8; line-height: 1.45; margin: 0;">
-              Todas as 8 camadas de rios, regras e piloteiros estão 100% salvas no seu aparelho via IndexedDB. As fotos de satélite são cacheadas conforme você navega (até 1.500 quadrículas). Navegue pelo seu trecho no hotel antes de ir para o rio!
-            </p>
-          </div>
-
-          <div style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 10px;">
-            Versão 2026 &bull; Licença MIT &bull; Feito por quem ama o Pantanal
           </div>
         </section>
 
@@ -532,16 +482,6 @@
         <span aria-hidden="true">📍</span>
         <span>Onde estou</span>
       </button>
-
-      <!-- Legenda Compacta do WebGIS -->
-      <div class="webgis-legend-strip" role="region" aria-label="Legenda do Mapa">
-        <div class="legend-item"><span class="legend-marker marker-guia">🚤</span> <span>Piloteiro (Z-1, Z-7, Z-11)</span></div>
-        <div class="legend-item"><span class="legend-marker marker-rampa">⚓</span> <span>Rampa Náutica</span></div>
-        <div class="legend-item"><span class="legend-marker marker-pma">🚨</span> <span>Posto PMA</span></div>
-        <div class="legend-item"><span class="legend-line line-cota"></span> <span>Cota Permitida</span></div>
-        <div class="legend-item"><span class="legend-line line-pesque-solte"></span> <span>Pesque e Solte</span></div>
-        <div class="legend-item"><span class="legend-box box-restrita"></span> <span>Área Restrita</span></div>
-      </div>
     </main>
 
     <!-- Overlay para Fechar a Sidebar no Celular ao Tocar Fora -->
