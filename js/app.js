@@ -19,6 +19,8 @@ import {
   getPosicaoUsuario
 } from './modules/utils.js';
 
+import GeoFishDB from './db.js';
+
 // Telefone oficial para recebimento das solicitações de parcerias e cadastros comunitários
 // Canal de homologação oficial GeoFish MS (+55 16 99266-7526)
 export const WHATSAPP_CONTATO_OFICIAL = '5516992667526';
