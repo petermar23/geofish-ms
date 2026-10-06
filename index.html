@@ -113,11 +113,12 @@
     </div>
   </aside>
 
-  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Quando Ativo) -->
-  <div id="banner-defeso" class="banner-defeso hidden" role="alert" aria-live="assertive">
+  <!-- Alerta Oficial do Período de Defeso / Piracema no Pantanal (Dinâmico) -->
+  <div id="banner-defeso" class="banner-defeso" role="region" aria-label="Status da Temporada de Pesca e Defeso">
     <div class="banner-defeso-content">
-      <svg class="icon-svg" viewBox="0 0 24 24" style="color: #ffffff; width: 18px; height: 18px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span id="banner-defeso-text">Período de Defeso da Piracema vigente em toda a Bacia. Pesca amadora e profissional suspensa por lei estadual.</span>
+      <span id="banner-defeso-icon" class="banner-defeso-icon" aria-hidden="true">🎣</span>
+      <span id="banner-defeso-text">Carregando status da temporada de pesca no Pantanal...</span>
+      <button type="button" id="btn-fechar-banner-defeso" class="btn-fechar-banner-defeso" aria-label="Recolher aviso da temporada">&times;</button>
     </div>
   </div>
 
@@ -1778,6 +1779,50 @@
        ======================================================== -->
 
   <section class="tourist-section" aria-label="Guia do Turista Pescador">
+
+    <!-- CARD: JORNADA COMPLETA DO TURISTA: ANTES, DURANTE E DEPOIS -->
+    <article id="secao-jornada-turista" class="tourist-card" style="border-left: 6px solid #0284c7;">
+      <div class="tourist-card-header">
+        <span class="tourist-card-icon">
+          <svg class="icon-svg" style="stroke: #0284c7; width: 28px; height: 28px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        <div>
+          <span class="editorial-section-kicker" style="color: #0284c7; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px;">GOVERNANÇA &amp; EXPERIÊNCIA DO VISITANTE</span>
+          <h2 class="tourist-card-title" style="font-family: var(--font-editorial); font-size: 1.6rem; font-weight: 900; color: var(--color-leaf);">A Jornada Completa do Turista: Antes, Durante e Depois</h2>
+          <span class="tourist-card-sub">Como o GeoFish MS integra cidadania ribeirinha, navegação offline e legalidade ambiental</span>
+        </div>
+      </div>
+      
+      <p style="font-size: 0.9rem; color: #334155; line-height: 1.5; margin-bottom: 12px;">
+        Uma experiência de pescaria esportiva sustentável e sem imprevistos no Pantanal se divide em 3 momentos estratégicos:
+      </p>
+
+      <div class="steps-grid">
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #0284c7;">1</span>
+          <h3 class="step-title">1. Antes da Viagem (Planejamento Conectado)</h3>
+          <p class="step-desc">
+            Ainda em seu estado de origem (SP, PR, MG, etc.), o turista explora os trechos navegáveis no WebGIS, emite a <strong>Licença Digital no IMASUL</strong> e escolhe seu piloteiro homologado pelas <strong>Colônias Z-1, Z-7 ou Z-11</strong>, combinando a diária diretamente pelo WhatsApp sem taxas de agenciamento.
+          </p>
+        </div>
+
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #0d9488;">2</span>
+          <h3 class="step-title">2. Durante a Pescaria (No Barco 100% Offline)</h3>
+          <p class="step-desc">
+            Sem sinal de 4G no rio, o pescador abre o GeoFish MS em cache (PWA), monitora sua posição náutica em tempo real, consulta as regras de zonas restritas (como o <strong>Rio Salobra — Decreto nº 15.166/19</strong>) e afere espécies nativas na régua digital de tamanhos permitidos.
+          </p>
+        </div>
+
+        <div class="step-item highlight-step">
+          <span class="step-badge" style="background: #16a34a;">3</span>
+          <h3 class="step-title">3. No Retorno à Rodovia (Posto PMA &amp; Lacre GCP)</h3>
+          <p class="step-desc">
+            Ao sair da calha fluvial para as rodovias (BR-262, MS-184 ou MS-345), o aplicativo localiza o <strong>Pelotão da Polícia Militar Ambiental (PMA)</strong> mais próximo. O turista apresenta o exemplar inteiro no gelo para conferência, lacre oficial gratuito e emissão da <strong>GCP (Guia de Controle de Pescado)</strong>.
+          </p>
+        </div>
+      </div>
+    </article>
 
     <!-- CARD 1: VOU LEVAR PEIXE PARA CASA: PASSO A PASSO OFICIAL -->
     <article id="secao-transporte-passo-a-passo" class="tourist-card" style="border-left: 6px solid #16a34a;">

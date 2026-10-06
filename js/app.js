@@ -263,12 +263,27 @@ function verificarPeriodoDefeso() {
   const emDefeso = estaEmDefeso();
   const banner = document.getElementById('banner-defeso');
   const bannerText = document.getElementById('banner-defeso-text');
+  const bannerIcon = document.getElementById('banner-defeso-icon');
+  const btnFechar = document.getElementById('btn-fechar-banner-defeso');
+
   if (banner && bannerText) {
+    if (btnFechar && !btnFechar.dataset.listenerAttached) {
+      btnFechar.dataset.listenerAttached = 'true';
+      btnFechar.addEventListener('click', () => {
+        banner.classList.add('hidden');
+      });
+    }
+
     if (emDefeso) {
-      banner.classList.remove('hidden');
-      bannerText.innerHTML = `<strong>⚠️ ALERTA OFICIAL: Período de Defeso da Piracema em vigor na Bacia do Miranda (05/Nov a 28/Fev).</strong> Pesca amadora e profissional de espécies nativas suspensa por lei estadual.`;
+      banner.classList.remove('hidden', 'temporada-aberta');
+      banner.classList.add('defeso-ativo');
+      if (bannerIcon) bannerIcon.textContent = '⚠️';
+      bannerText.innerHTML = `<strong>ALERTA OFICIAL: Período de Defeso da Piracema em vigor no MS (05/Nov a 28/Fev).</strong> Pesca de espécies nativas suspensa para reprodução. Permitidos apenas ecoturismo/contemplação e pesca de subsistência ribeirinha comprovada.`;
     } else {
-      banner.classList.add('hidden');
+      banner.classList.remove('hidden', 'defeso-ativo');
+      banner.classList.add('temporada-aberta');
+      if (bannerIcon) bannerIcon.textContent = '🎣';
+      bannerText.innerHTML = `<strong>Temporada de Pesca Esportiva Aberta:</strong> Cota de 1 exemplar nativo regulamentar + 5 piranhas (Dourado 100% Pesque e Solte — Lei nº 6.190/24). Lacre e GCP obrigatórios nos postos da PMA antes da rodovia.`;
     }
   }
   return emDefeso;

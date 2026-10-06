@@ -178,12 +178,44 @@ Em seguida, acesse `http://localhost:3000`.
 
 ---
 
-## 🏛️ Governança & Princípios Éticos
+## 🏛️ Governança, Inovação Cívica & Gestão Pública
 
-* **Iniciativa Cidadã Independente:** Desenvolvido por **Peterson Martins da Costa** em benefício do Pantanal sul-mato-grossense. Não possui vínculos partidários nem recebe financiamento público.
-* **Sem Fins Lucrativos com Ribeirinhos:** O cadastro para piloteiros das Colônias Z-1, Z-7 e Z-11 é estritamente gratuito. Não cobramos comissões sobre diárias de pesca.
-* **Transparência e Neutralidade:** Não vendemos posicionamento patrocinado nem manipulamos resultados de busca. O turista combina roteiros e valores diretamente com o profissional.
-* **Privacidade e LGPD:** Todos os dados do diário de bordo e fotos de troféus são armazenados exclusivamente na memória do aparelho do usuário (IndexedDB local), com opção clara de exclusão a qualquer instante.
+### 🤝 Protocolo Institucional com as Colônias de Pescadores
+A inserção dos guias ribeirinhos segue um modelo de governança social auditada em parceria com as entidades tradicionais:
+* **Colônia Z-1** (Miranda / Corumbá / Passo do Lontra)
+* **Colônia Z-7** (Aquidauana / Anastácio)
+* **Colônia Z-11** (Bonito / Águas do Miranda)
+
+> **Auditoria e Combate a Clandestinos:** O cadastro **não é aberto a qualquer usuário anônimo na internet**. A adesão ocorre no balcão da Colônia ou pelo canal assistido via WhatsApp (`+55 16 99266-7526`). A diretoria da Colônia valida o **RGP (Registro Geral da Atividade Pesqueira)** ou a filiação profissional do barqueiro antes da inclusão no arquivo auditável `guias_credenciados.geojson`, garantindo segurança ao turista e protegendo o território de piratas do rio.
+
+---
+
+### 🎣 A Jornada Completa do Turista (Antes, Durante e Depois)
+1. **Antes da Viagem (Planejamento Conectado em SP, PR, MG):**
+   * Consulta os trechos náuticos, portos e limites legais no WebGIS.
+   * Emite a Licença Digital de Pesca Amadora no portal do IMASUL.
+   * Agenda a diária de guiamento diretamente com o piloteiro credenciado via WhatsApp, sem taxas ou comissões de intermediários.
+2. **Durante a Pescaria no Rio (No Barco — Modo 100% Offline):**
+   * Navega com GPS e mapa vetorial em cache no PWA sem precisar de sinal de 4G.
+   * Checa imediatamente limites de zonas protegidas (ex.: Rio Salobra — Decreto Estadual nº 15.166/19, apenas Pesque e Solte com motor elétrico/4 tempos).
+   * Afere peixes na régua digital oficial de medidas mínimas e máximas de abate.
+   * Aciona botão de SOS Fluvial com coordenadas formatadas para resgate em caso de pane.
+3. **No Retorno à Rodovia (BR-262 / MS-184 Estrada Parque / MS-345):**
+   * O mapa localiza o Posto da Polícia Militar Ambiental (PMA) mais próximo.
+   * Apresenta o exemplar nativo inteiro no gelo para medição e colocação do lacre oficial numerado.
+   * Recebe a Guia de Controle de Pescado (GCP) gratuita, viajando nas rodovias estaduais em total segurança jurídica.
+
+---
+
+### 📊 Matriz de Indicadores de Impacto na Gestão Pública
+* **Indicador 1 (Renda Local Direta & Justiça Social):** Meta de 40 a 60 guias e piloteiros tradicionais cadastrados no 1º ciclo, revertendo 100% do valor da diária para a economia familiar da bacia do Miranda.
+* **Indicador 2 (Conformidade Ambiental Preventiva):** Mais de 5.000 consultas cidadãs às regras do Rio Salobra (Dec. 15.166/19) e da Cota Zero do Dourado (Lei 5.321/19 e Lei 6.190/24), reduzindo autuações involuntárias da PMA.
+* **Indicador 3 (Eficiência do Gasto Público):** Custo de licenciamento de software para o Estado: **R$ 0,00** (código 100% aberto, hospedagem estática gratuita de alta disponibilidade no GitHub Pages).
+
+---
+
+### 📅 Calendário Automático do Defeso da Piracema
+O sistema avalia dinamicamente o período reprodutivo da bacia pantaneira (05 de Novembro até o fim de Fevereiro) via função matemática nativa no cliente (`estaEmDefeso()`). Em período de defeso, um banner de alerta oficial suspende as orientações de abate e instrui sobre o defeso e a pesca de subsistência ribeirinha. Fora do defeso, sinaliza a temporada regular com as cotas vigentes.
 
 ---
 
