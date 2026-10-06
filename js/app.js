@@ -20,8 +20,8 @@ import {
 } from './modules/utils.js';
 
 // Telefone oficial para recebimento das solicitações de parcerias e cadastros comunitários
-// Altere para o WhatsApp da Coordenação / Colônia Z-1 Miranda (DDI 55 + DDD 67)
-export const WHATSAPP_CONTATO_OFICIAL = '5567999881234';
+// Canal de homologação oficial GeoFish MS (+55 16 99266-7526)
+export const WHATSAPP_CONTATO_OFICIAL = '5516992667526';
 
 import {
   abrirModalCartilha,
@@ -746,7 +746,7 @@ function renderizarPainelTrechoPesca(featureTrecho) {
         e.stopPropagation();
         fecharPainel();
         if (typeof window.abrirModalParceriasTab === 'function') {
-          window.abrirModalParceriasTab('piloteiros');
+          window.abrirModalParceriasTab('piloteiros', { rio: p.rio });
         }
       });
     });
@@ -2350,7 +2350,7 @@ function alternarAbaParcerias(aba = 'pousadas', container = document) {
   }
 }
 
-function abrirModalParcerias(aba = 'pousadas') {
+function abrirModalParcerias(aba = 'pousadas', contexto = null) {
   modalParceirosInstancia = abrirModalDeTemplate('template-modal-parceiros', {
     modalId: 'modal-parceiros',
     onMount: (modalEl, destroy) => {
@@ -2388,8 +2388,7 @@ function abrirModalParcerias(aba = 'pousadas') {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}${foneDestino}`;
+          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
           showToast('Proposta gerada! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
@@ -2397,6 +2396,28 @@ function abrirModalParcerias(aba = 'pousadas') {
         });
       }
 
+      // 1. FLUXO WHATSAPP-FIRST: Botão Principal de Áudio / Mensagem
+      const btnCadastroPiloteiroWpp = modalEl.querySelector('#btn-cadastro-piloteiro-whatsapp');
+      if (btnCadastroPiloteiroWpp) {
+        btnCadastroPiloteiroWpp.addEventListener('click', async () => {
+          let textoMensagem = 'Olá! Sou piloteiro/pescador artesanal e gostaria de cadastrar minha embarcação no GeoFish MS. Seguem meus dados / áudio com meu nome, porto e barco...';
+          if (contexto && contexto.rio) {
+            textoMensagem = `Olá! Sou piloteiro/pescador artesanal e gostaria de cadastrar minha embarcação no GeoFish MS (atendo na região do ${contexto.rio}). Seguem meus dados / áudio com meu nome, porto e barco...`;
+          }
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try { await navigator.clipboard.writeText(textoMensagem); } catch (_) {}
+          }
+
+          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(textoMensagem)}`;
+          window.open(urlWpp, '_blank');
+          vibrar(30);
+          showToast('Abrindo WhatsApp oficial! Grave seu áudio ou envie seus dados.');
+          destroy();
+        });
+      }
+
+      // 2. FLUXO SECUNDÁRIO: Formulário Opcional por Escrito
       const btnEnviarCadastroGuia = modalEl.querySelector('#btn-enviar-cadastro-guia');
       if (btnEnviarCadastroGuia) {
         btnEnviarCadastroGuia.addEventListener('click', async () => {
@@ -2407,42 +2428,24 @@ function abrirModalParcerias(aba = 'pousadas') {
           const wpp = modalEl.querySelector('#guia-wpp')?.value.trim();
           const barco = modalEl.querySelector('#guia-barco')?.value.trim();
 
-          if (!nome) { vibrar(30); return showToast('Informe o seu nome completo.'); }
-          if (!porto) { vibrar(30); return showToast('Informe seu porto de saída habitual.'); }
-          if (!wpp) { vibrar(30); return showToast('Informe o WhatsApp para os pescadores te contatarem.'); }
-
-          const diferenciais = [];
-          modalEl.querySelectorAll('input[name="guia-diferencial"]:checked').forEach(cb => diferenciais.push(cb.value));
+          if (!nome) { vibrar(30); return showToast('Informe seu nome ou apelido.'); }
 
           const texto = `*CADASTRO COMUNITÁRIO DE PILOTEIRO - GEOFISH MS*\n\n` +
             `🚤 *Nome:* ${nome} ${apelido ? `("${apelido}")` : ''}\n` +
             `📜 *Colônia de Filiação:* ${colonia}\n` +
-            `📍 *Porto de Saída:* ${porto}\n` +
-            `⛵ *Embarcação / Motor:* ${barco || 'Barco pantaneiro homologado'}\n` +
-            `💬 *WhatsApp Turistas:* ${wpp}\n` +
-            `🦺 *Diferenciais:* ${diferenciais.length > 0 ? diferenciais.join(', ') : 'Navegação nativa'}\n\n` +
-            `Olá! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
+            `📍 *Porto de Saída:* ${porto || 'A combinar'}\n` +
+            `⛵ *Embarcação / Motor:* ${barco || 'Barco homologado'}\n` +
+            `💬 *WhatsApp Turistas:* ${wpp || 'Mesmo número deste WhatsApp'}\n\n` +
+            `Olá Peterson! Sou piloteiro da Bacia do Miranda e gostaria de incluir meu ponto e contato comunitário no WebGIS!`;
 
           if (navigator.clipboard && navigator.clipboard.writeText) {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}${foneDestino}`;
+          const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
           window.open(urlWpp, '_blank');
           vibrar(30);
           showToast('Dados formatados! Encaminhando diretamente à coordenação do GeoFish MS via WhatsApp.');
-          destroy();
-        });
-      }
-
-      const btnCadastroAssistido = modalEl.querySelector('#btn-cadastro-assistido');
-      if (btnCadastroAssistido) {
-        btnCadastroAssistido.addEventListener('click', () => {
-          const textoAssistido = `Olá Peterson! Sou piloteiro da Bacia do Miranda e gostaria de ajuda para cadastrar meu barco e contato no GeoFish MS.`;
-          const foneDestino = WHATSAPP_CONTATO_OFICIAL ? `&phone=${WHATSAPP_CONTATO_OFICIAL}` : '';
-          const urlWpp = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAssistido)}${foneDestino}`;
-          window.open(urlWpp, '_blank');
           destroy();
         });
       }
@@ -2460,7 +2463,7 @@ function fecharModalParceiros() {
   }
 }
 
-window.abrirModalParceriasTab = (aba) => abrirModalParcerias(aba);
+window.abrirModalParceriasTab = (aba, contexto = null) => abrirModalParcerias(aba, contexto);
 window.abrirModalParceiros = () => abrirModalParcerias('pousadas');
 
 const btnParceirosTopo = document.getElementById('btn-parceiros-topo');
