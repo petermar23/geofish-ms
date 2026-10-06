@@ -6,11 +6,11 @@
   <meta name="color-scheme" content="light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
 
-  <title>GeoFish MS - Bacia do Rio Miranda (WebGIS & Governança Territorial)</title>
-  <meta name="description" content="Plataforma WebGIS PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS). Inspirado nos portais PIN-MS e DataGEO.">
+  <title>GeoFish MS - Bacia do Rio Miranda (WebGIS Independente)</title>
+  <meta name="description" content="Plataforma WebGIS PWA aberta e independente para navegação náutica, turismo sustentável e orientação aos pescadores na Bacia do Rio Miranda (MS).">
   
   <meta property="og:title" content="GeoFish MS - Bacia do Rio Miranda">
-  <meta property="og:description" content="Navegação náutica e governança da pesca esportiva na Bacia do Rio Miranda (Mato Grosso do Sul).">
+  <meta property="og:description" content="Navegação náutica e consulta às normas da pesca esportiva na Bacia do Rio Miranda (Mato Grosso do Sul).">
   <meta property="og:type" content="website">
 
   <!-- PWA & Android / iOS Meta Tags -->
@@ -33,7 +33,7 @@
 <body class="geofish-geoportal-app">
 
   <!-- ========================================================
-       1. HEADER SUPERIOR INSTITUCIONAL (PADRÃO PIN-MS / ARCGIS)
+       1. HEADER SUPERIOR DO GEOPORTAL
        ======================================================== -->
   <header class="geofish-top-bar" role="banner">
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -87,14 +87,14 @@
        ======================================================== -->
   <div class="geofish-workspace">
 
-    <!-- PAINEL LATERAL ESQUERDO (PADRÃO DATAGEO / PIN-MS) -->
+    <!-- PAINEL LATERAL ESQUERDO -->
     <aside id="geofish-sidebar" class="geofish-sidebar" role="region" aria-label="Painel de Ferramentas e Serviços">
       
       <!-- Cabeçalho do Painel -->
       <div class="sidebar-header">
         <div class="sidebar-header-title">
           <span aria-hidden="true">🧭</span>
-          <span>Governança &amp; Serviços</span>
+          <span>Navegação &amp; Serviços</span>
         </div>
         <button id="btn-close-sidebar" class="btn-close-sidebar" aria-label="Recolher painel lateral">
           <span aria-hidden="true">◀</span>
@@ -231,13 +231,13 @@
             </div>
           </div>
 
-          <!-- Card de Chamada para Cadastro Oficial -->
+          <!-- Card de Chamada para Cadastro Comunitário de Piloteiros -->
           <div style="margin-top: 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
             <div style="font-size: 0.82rem; font-weight: 800; color: #166534;">
               📢 É Piloteiro ou Guia Tradicional?
             </div>
             <div style="font-size: 0.76rem; color: #15803d; line-height: 1.4;">
-              O cadastro é 100% gratuito na fase piloto. Envie seus dados para validação cadastral com sua Colônia (Z-1, Z-7 ou Z-11):
+              O cadastro é 100% gratuito. Envie seus dados para inclusão da sua embarcação na rede comunitária do mapa:
             </div>
             <button type="button" class="btn-guia-wa" style="margin-top: 4px; background: #15803d;" data-action="abrir-parcerias-piloteiros">
               <span>📲 Cadastrar Embarcação</span>
@@ -293,7 +293,7 @@
           <!-- Verificador Interativo de Espécies -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
             <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem; margin-bottom: 4px;">
-              📏 Régua Oficial &amp; Medidas de Abate
+              📏 Régua de Espécies &amp; Medidas Permitidas
             </div>
             <p style="font-size: 0.76rem; color: #64748b; line-height: 1.4; margin-bottom: 8px;">
               Consulte medidas mínimas e máximas de Pintado, Pacu, Cachara, Jaú e outras espécies nativas.
@@ -362,17 +362,17 @@
           </div>
 
           <button type="button" class="btn-top-action" style="width: 100%; background: #15803d; color: #ffffff; justify-content: center;" data-action="abrir-cartilha">
-            <span>📖 Consultar Cartilha Oficial PMA-MS</span>
+            <span>📖 Consultar Cartilha do Pescador (BPMA)</span>
           </button>
         </section>
 
-        <!-- ABA 4: CAMADAS CARTOGRÁFICAS (PADRÃO DATAGEO) -->
+        <!-- ABA 4: CAMADAS CARTOGRÁFICAS -->
         <section id="pane-camadas" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-camadas">
           <h2 class="sidebar-section-title">
-            <span>🗺️</span> <span>Camadas do WebGIS (PIN-MS)</span>
+            <span>🗺️</span> <span>Camadas do WebGIS Pantanal</span>
           </h2>
           <p class="sidebar-section-desc">
-            Bases espaciais oficiais em SIRGAS 2000 / UTM 21S provenientes do IMASUL e SEMADESC.
+            Bases espaciais em SIRGAS 2000 / UTM 21S organizadas a partir de dados públicos abertos.
           </p>
 
           <div class="layer-checkbox-group" role="group" aria-label="Controle de visibilidade das camadas">
@@ -494,14 +494,14 @@
   <aside id="bottom-sheet" class="bottom-sheet hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Painel de detalhes da feição selecionada">
     <div class="sheet-handle-bar"></div>
     <div class="sheet-header-row">
-      <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Informações Oficiais</span>
+      <span style="font-size: 0.82rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Informações do Ponto</span>
       <button id="close-sheet" class="close-btn" aria-label="Fechar painel de detalhes">&times;</button>
     </div>
     <div id="sheet-content"></div>
   </aside>
 
   <!-- ========================================================
-       4. TEMPLATES DE MODAIS (SOS, ESPÉCIES, DIÁRIO, CARTILHA)
+       4. TEMPLATES DE MODAIS (TELEFONES, ESPÉCIES, CARTILHA)
        ======================================================== -->
 
   <!-- Template Modal Sobre -->
@@ -511,13 +511,13 @@
         <div class="modal-header">
           <h2>
             <span aria-hidden="true">🌿</span>
-            <span>Sobre o GeoFish MS &bull; Dados Oficiais</span>
+            <span>Sobre o GeoFish MS &bull; Dados Abertos</span>
           </h2>
           <button id="close-sobre" class="modal-close-btn" aria-label="Fechar informações">&times;</button>
         </div>
         <div class="modal-body">
           <p style="font-size: 0.9rem; line-height: 1.5; color: #334155; margin-bottom: 12px;">
-            O <strong>GeoFish MS</strong> é um projeto cívico independente e voluntário, concebido por <strong>Peterson Martins da Costa</strong> para promover o turismo regenerativo e a pesca sustentável na Bacia do Rio Miranda.
+            O <strong>GeoFish MS</strong> é um projeto cívico, 100% independente e voluntário, concebido por <strong>Peterson Martins da Costa</strong> para promover o turismo regenerativo, a orientação náutica e a pesca sustentável na Bacia do Rio Miranda.
           </p>
           <div id="layer-status-list" class="layer-status-list"></div>
         </div>
@@ -530,12 +530,12 @@
 
   <!-- Template Modal Espécies com Régua Visual e Verificador -->
   <template id="template-modal-especies">
-    <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela Oficial do Pescador e Medidas Permitidas">
+    <div id="modal-especies" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Tabela do Pescador e Medidas Permitidas">
       <div class="modal-dialog" style="max-width: 680px;">
         <div class="modal-header">
           <h2>
             <span aria-hidden="true">🐟</span>
-            <span>Espécies &amp; Medidas Oficiais (MS)</span>
+            <span>Espécies &amp; Medidas Permitidas (MS)</span>
           </h2>
           <button id="btn-fechar-especies" class="modal-close-btn" aria-label="Fechar tabela de espécies">&times;</button>
         </div>
@@ -602,7 +602,7 @@
         </div>
         <div class="modal-body">
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.78rem; color: #475569; line-height: 1.45;">
-            <strong>Aviso de Transparência da Plataforma:</strong> O GeoFish MS é uma plataforma cívica e independente. O cadastro é <strong>gratuito</strong> na fase piloto. Os dados enviados são submetidos à verificação cadastral antes da publicação oficial para garantir segurança aos turistas.
+            <strong>Aviso de Transparência da Plataforma:</strong> O GeoFish MS é uma plataforma cívica e independente. O cadastro é <strong>gratuito</strong>. Os dados enviados são submetidos à checagem básica antes da publicação no mapa para garantir segurança aos turistas.
           </div>
 
           <!-- Abas do Modal -->
@@ -718,14 +718,14 @@
     </div>
   </template>
 
-  <!-- Template Modal Telefones Úteis & Apoio Oficial -->
+  <!-- Template Modal Telefones Úteis & Contatos de Emergência -->
   <template id="template-modal-telefones">
     <div id="modal-telefones" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="telefones-title">
       <div class="modal-dialog modal-dialog-md" style="max-width: 520px;">
         <div class="modal-header" style="background: #0b4f6c; color: #ffffff;">
           <h2 id="telefones-title" style="color: #ffffff; display: flex; align-items: center; gap: 8px;">
             <span aria-hidden="true">📞</span>
-            <span>Telefones Úteis &amp; Apoio Oficial</span>
+            <span>Telefones Úteis &amp; Contatos de Emergência</span>
           </h2>
           <button id="btn-fechar-telefones" class="modal-close-btn" style="color: #ffffff;" aria-label="Fechar contatos">&times;</button>
         </div>
@@ -808,12 +808,12 @@
 
   <!-- Template Modal Cartilha PMA -->
   <template id="template-modal-cartilha">
-    <div id="modal-cartilha" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Cartilha Oficial do Pescador PMA-MS" style="z-index: 2650;">
+    <div id="modal-cartilha" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Cartilha do Pescador PMA-MS" style="z-index: 2650;">
       <div class="modal-dialog modal-dialog-lg">
         <div class="modal-header">
           <h2>
             <span aria-hidden="true">📖</span>
-            <span>Cartilha Oficial do Pescador de MS (BPMA)</span>
+            <span>Cartilha do Pescador de MS (BPMA)</span>
           </h2>
           <button id="btn-fechar-cartilha" class="modal-close-btn" aria-label="Fechar cartilha">&times;</button>
         </div>

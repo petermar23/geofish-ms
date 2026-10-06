@@ -1,6 +1,6 @@
 /**
- * GeoFish MS - Módulo do Leitor da Cartilha Oficial PMA-MS
- * Apresenta normas oficiais do BPMA / IMASUL / SEMADESC de forma didática.
+ * GeoFish MS - Módulo do Guia de Regras de Pesca
+ * Apresenta compilação didática da legislação de pesca de MS.
  * Decretos Estaduais nº 15.166/19, 15.375/20 e Lei nº 6.190/24.
  */
 
@@ -27,7 +27,7 @@ const CONTEUDO_CARTILHA = {
       <ul style="margin: 0; padding-left: 20px; font-size: 0.84rem; color: #7f1d1d; line-height: 1.45;">
         <li><strong>Dourado (<em>Salminus brasiliensis</em>):</strong> Captura, abate e transporte PROIBIDOS até 2029 (Lei Estadual nº 6.190/2024). Prática EXCLUSIVA de Pesque e Solte.</li>
         <li><strong>Transporte Interestadual:</strong> É expressamente PROIBIDO retirar pescado nativo para fora do território de Mato Grosso do Sul. Todo o peixe transportado deve ter como destino o consumo interno no estado.</li>
-        <li><strong>Filetagem na margem/barco:</strong> O peixe deve ser transportado inteiro, com cabeça, escamas ou couro, para permitir medição precisa da PMA.</li>
+        <li><strong>Filetagem na margem/barco:</strong> O peixe deve ser transportado inteiro, com cabeça, escamas ou couro, para permitir medição precisa da fiscalização.</li>
       </ul>
     </div>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #475569; line-height: 1.45;">
@@ -74,12 +74,12 @@ const CONTEUDO_CARTILHA = {
     <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
       <h3 style="color: #1e40af; font-size: 0.95rem; margin-top: 0; margin-bottom: 6px;">🏷️ Vistoria, Lacre e Emissão da GCP</h3>
       <p style="margin: 0 0 8px 0; font-size: 0.84rem; color: #1e3a8a; line-height: 1.45;">
-        Para transportar legalmente o exemplar nativo da cota na rodovia, siga o protocolo oficial:
+        Para transportar legalmente o exemplar nativo da cota na rodovia, siga as orientações recomendadas:
       </p>
       <ol style="margin: 0; padding-left: 20px; font-size: 0.84rem; color: #1e3a8a; line-height: 1.5;">
         <li><strong>Não filete o peixe:</strong> O exemplar deve estar inteiro, eviscerado e com cabeça no gelo.</li>
         <li><strong>Compareça a um Posto da PMA:</strong> Em Miranda (BR-262), Aquidauana, Corumbá ou Bonito.</li>
-        <li><strong>Medição Oficial:</strong> O policial ambiental afere o comprimento com régua padrão.</li>
+        <li><strong>Medição no Posto:</strong> O policial ambiental afere o comprimento com régua padrão.</li>
         <li><strong>Colocação do Lacre:</strong> O peixe recebe o lacre numerado inviolável da PMA.</li>
         <li><strong>Emissão da GCP:</strong> É emitida a Guia de Controle de Pescado vinculada à sua licença estadual.</li>
       </ol>

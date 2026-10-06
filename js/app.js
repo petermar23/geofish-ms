@@ -21,8 +21,8 @@ import {
 
 import GeoFishDB from './db.js';
 
-// Canal oficial a ser configurado mediante homologação formal do projeto
-export const WHATSAPP_CONTATO_OFICIAL = null;
+// Canal de suporte comunitário do projeto
+export const WHATSAPP_CONTATO_SUPORTE = null;
 
 import {
   abrirModalCartilha,
@@ -588,8 +588,8 @@ function renderizarPainelTrechoPesca(featureTrecho) {
     guiaHtml = guiasTrecho.map((guia) => {
       const gp = guia.properties || {};
       const coordsGuia = guia.geometry?.coordinates || null;
-      const waNum = gp.contato_wa || WHATSAPP_CONTATO_OFICIAL;
-      const waMsg = encodeURIComponent(`Olá ${gp.nome_operacional || 'Piloteiro'}! Vi seu contato credenciado no GeoFish MS para o trecho do ${p.rio}. Gostaria de consultar diária de pesca e saída no porto ${gp.porto_base}.`);
+      const waNum = gp.contato_wa || WHATSAPP_CONTATO_SUPORTE;
+      const waMsg = encodeURIComponent(`Olá ${gp.nome_operacional || 'Piloteiro'}! Vi seu contato no GeoFish MS para o trecho do ${p.rio}. Gostaria de consultar diária de pesca e saída no porto ${gp.porto_base}.`);
       const waUrl = `https://wa.me/${waNum}?text=${waMsg}`;
 
       return `
@@ -1579,7 +1579,7 @@ if (navBtnPousadas) {
 }
 
 // ========================================================
-// CONTROLE DA SIDEBAR E ABAS NO MODELO DATAGEO / PIN-MS
+// CONTROLE DA SIDEBAR E ABAS DO WEBGIS
 // ========================================================
 
 function renderizarSidebarGuias(filtroRegiao = 'todas') {
@@ -2176,7 +2176,7 @@ function inicializarBuscaLocal() {
           correspondencias.push({
             tipoIcone: '🎣',
             titulo: `${p.rio || 'Trecho'} - ${p.regra || 'Regra de Pesca'}`,
-            subtitulo: p.descricao || `Regra oficial: ${p.regra}`,
+            subtitulo: p.descricao || `Regra regulamentar: ${p.regra}`,
             categoria: 'Trecho de Pesca',
             coords: coordsCentro,
             feature: feat
@@ -2261,7 +2261,7 @@ function inicializarBuscaLocal() {
 }
 
 
-// 16. Módulo de Telefones Úteis e Apoio Oficial delegado para js/modules/telefones-apoio.js
+// 16. Módulo de Telefones Úteis e Emergência delegado para js/modules/telefones-apoio.js
 
 
 // ========================================================
@@ -2358,12 +2358,12 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          if (WHATSAPP_CONTATO_OFICIAL) {
-            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
+          if (WHATSAPP_CONTATO_SUPORTE) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_SUPORTE}?text=${encodeURIComponent(texto)}`;
             window.open(urlWpp, '_blank');
-            showToast('Proposta gerada! Encaminhando diretamente à coordenação.');
+            showToast('Proposta gerada! Encaminhando ao suporte comunitário.');
           } else {
-            showToast('Dados copiados para a área de transferência para validação cadastral!');
+            showToast('Dados copiados para a área de transferência!');
           }
           vibrar(30);
           destroy();
@@ -2374,19 +2374,19 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
       const btnCadastroPiloteiroWpp = modalEl.querySelector('#btn-cadastro-piloteiro-whatsapp');
       if (btnCadastroPiloteiroWpp) {
         btnCadastroPiloteiroWpp.addEventListener('click', async () => {
-          let textoMensagem = 'Olá! Sou piloteiro/pescador artesanal e gostaria de cadastrar minha embarcação no GeoFish MS. Seguem meus dados / áudio com meu nome, porto e barco...';
+          let textoMensagem = 'Olá! Sou piloteiro/pescador tradicional e gostaria de cadastrar minha embarcação no GeoFish MS. Seguem meus dados / áudio com meu nome, porto e barco...';
           if (contexto && contexto.rio) {
-            textoMensagem = `Olá! Sou piloteiro/pescador artesanal e gostaria de cadastrar minha embarcação no GeoFish MS (atendo na região do ${contexto.rio}). Seguem meus dados / áudio com meu nome, porto e barco...`;
+            textoMensagem = `Olá! Sou piloteiro/pescador tradicional e gostaria de cadastrar minha embarcação no GeoFish MS (atendo na região do ${contexto.rio}). Seguem meus dados / áudio com meu nome, porto e barco...`;
           }
 
           if (navigator.clipboard && navigator.clipboard.writeText) {
             try { await navigator.clipboard.writeText(textoMensagem); } catch (_) {}
           }
 
-          if (WHATSAPP_CONTATO_OFICIAL) {
-            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(textoMensagem)}`;
+          if (WHATSAPP_CONTATO_SUPORTE) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_SUPORTE}?text=${encodeURIComponent(textoMensagem)}`;
             window.open(urlWpp, '_blank');
-            showToast('Abrindo WhatsApp oficial! Grave seu áudio ou envie seus dados.');
+            showToast('Abrindo WhatsApp! Grave seu áudio ou envie seus dados.');
           } else {
             showToast('Texto de apresentação copiado para a área de transferência!');
           }
@@ -2420,10 +2420,10 @@ function abrirModalParcerias(aba = 'pousadas', contexto = null) {
             try { await navigator.clipboard.writeText(texto); } catch (_) {}
           }
 
-          if (WHATSAPP_CONTATO_OFICIAL) {
-            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=${encodeURIComponent(texto)}`;
+          if (WHATSAPP_CONTATO_SUPORTE) {
+            const urlWpp = `https://wa.me/${WHATSAPP_CONTATO_SUPORTE}?text=${encodeURIComponent(texto)}`;
             window.open(urlWpp, '_blank');
-            showToast('Dados formatados! Encaminhando diretamente à coordenação.');
+            showToast('Dados formatados! Encaminhando ao suporte comunitário.');
           } else {
             showToast('Dados do piloteiro copiados para a área de transferência!');
           }
@@ -2467,7 +2467,7 @@ window.abrirModalParceiros = abrirModalParceiros;
 window.abrirModalCartilha = abrirModalCartilha;
 window.fecharModalAtivo = fecharModalAtivo;
 
-// Botão adicional na seção de espécies que abre o verificador de medidas oficial
+// Botão adicional na seção de espécies que abre o verificador de medidas
 const btnPortalOpenSpecies = document.getElementById('btn-portal-open-species');
 if (btnPortalOpenSpecies) {
   btnPortalOpenSpecies.addEventListener('click', () => {

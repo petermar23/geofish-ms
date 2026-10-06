@@ -165,7 +165,7 @@ export function initPWAOffline() {
     showToast('GeoFish MS instalado com sucesso no seu aparelho!', 'info');
   });
 
-  // Catálogo oficial de camadas vetoriais fundamentais para navegação fluvial offline
+  // Catálogo de camadas vetoriais fundamentais para navegação fluvial offline
   const CAMADAS_PARA_OFFLINE = [
     { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: 'Regras de Pesca' },
     { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias Credenciados' },

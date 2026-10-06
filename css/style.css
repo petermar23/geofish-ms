@@ -195,7 +195,7 @@ body {
   border: none;
 }
 
-/* Alerta Oficial do Período de Defeso / Piracema */
+/* Alerta do Período de Defeso / Piracema */
 .banner-defeso {
   color: #ffffff;
   padding: 8px 16px;
@@ -3845,7 +3845,7 @@ body.sheet-open .fab-container {
   background-color: #065f46 !important;
 }
 
-/* 4. Rodapé Institucional do Portal */
+/* 4. Rodapé do Portal */
 .portal-footer {
   background: #072635;
   color: #cbd5e1;
@@ -4457,7 +4457,7 @@ body.sheet-open .fab-container {
 }
 
 /* ==========================================================================
-   CARTILHA OFICIAL DO PESCADOR (BPMA / PMA-MS)
+   GUIA DO PESCADOR (REGRAS DE PESCA EM MS)
    ========================================================================== */
 
 /* Banner de Download na Seção da Cartilha */
@@ -5386,7 +5386,7 @@ body.sheet-open .fab-container {
 }
 
 /* ========================================================
-   ARQUITETURA GEOPORTAL PROFISSIONAL (PADRÃO PIN-MS & DataGEO)
+   ARQUITETURA GEOPORTAL ABERTO
    ======================================================== */
 
 html, body {
@@ -5406,7 +5406,7 @@ html, body {
   background-color: #f1f5f9;
 }
 
-/* 1. Barra Superior Institucional (Header WebAppViewer / PIN-MS) - Estilo GeoLibre Glassmorphism */
+/* 1. Barra Superior do Geoportal - Estilo GeoLibre Glassmorphism */
 .geofish-top-bar {
   height: 56px;
   min-height: 56px;
@@ -5557,7 +5557,7 @@ html, body {
   height: calc(100vh - 56px);
 }
 
-/* 3. Painel Lateral Esquerdo (Padrão DataGEO / PIN-MS) */
+/* 3. Painel Lateral Esquerdo */
 .geofish-sidebar {
   width: 410px;
   min-width: 380px;
