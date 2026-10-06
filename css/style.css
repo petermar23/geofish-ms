@@ -1983,181 +1983,8 @@ body.sheet-open .btn-gps {
 
 
 /* ========================================================
-   BOTÃO FLUTUANTE DE EMERGÊNCIA S.O.S E MODAIS
+   MODAIS E UTILITÁRIOS GERAIS
    ======================================================== */
-/* Botão Flutuante de Emergência S.O.S (Área do Polegar) */
-.btn-sos {
-  position: absolute;
-  bottom: calc(72px + max(12px, env(safe-area-inset-bottom)));
-  left: max(16px, env(safe-area-inset-left));
-  z-index: 999;
-  background-color: #dc2626;
-  border: 2px solid #991b1b;
-  color: #ffffff;
-  font-weight: 800;
-  padding: 12px 18px;
-  border-radius: 28px;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  min-height: 48px;
-  min-width: 48px;
-  transition: transform var(--transition-fast), bottom var(--transition-fast), background-color var(--transition-fast);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-sos:hover {
-  background-color: #b91c1c;
-}
-
-.btn-sos:active {
-  transform: scale(0.94);
-  background-color: #991b1b;
-}
-
-body.sheet-open .btn-sos {
-  bottom: calc(50dvh + 16px);
-}
-
-/* Modal Central de Emergência & S.O.S Fluvial */
-.sos-modal-header {
-  background: #fef2f2;
-  border-bottom: 1px solid #fee2e2;
-}
-
-.sos-modal-header h2 {
-  color: #991b1b !important;
-}
-
-.sos-legal-disclaimer {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.82rem;
-  color: #92400e;
-  line-height: 1.4;
-  margin-bottom: 14px;
-}
-
-.sos-coords-card {
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.sos-coords-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.sos-coords-icon {
-  font-size: 1.5rem;
-}
-
-.sos-coords-text {
-  font-family: monospace, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0b4f6c;
-  margin-top: 2px;
-}
-
-.sos-coords-actions {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-@media (min-width: 480px) {
-  .sos-coords-actions {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.btn-sos-action {
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.84rem;
-  border: none;
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: transform var(--transition-fast), background-color var(--transition-fast);
-}
-
-.btn-copy-action {
-  background: #0284c7;
-  color: #ffffff;
-}
-
-.btn-copy-action:hover, .btn-copy-action:active {
-  background: #0369a1;
-}
-
-.btn-wpp-action {
-  background: #16a34a;
-  color: #ffffff;
-}
-
-.btn-wpp-action:hover, .btn-wpp-action:active {
-  background: #15803d;
-}
-
-.sos-buttons-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sos-call-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-  min-height: 54px;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.sos-call-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.sos-btn-badge {
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-weight: 800;
-  font-size: 0.88rem;
-  color: #ffffff;
-  flex-shrink: 0;
-  min-width: 66px;
-  text-align: center;
-}
-
-.btn-marinha .sos-btn-badge { background: #0369a1; }
-.btn-pma .sos-btn-badge { background: #15803d; }
-.btn-bombeiros .sos-btn-badge { background: #dc2626; }
-.btn-samu .sos-btn-badge { background: #d97706; }
 
 /* Diálogo de Confirmação Anti-Toque Acidental */
 .modal-dialog-sm {
@@ -2261,16 +2088,7 @@ body.sheet-open .btn-sos {
     overflow-y: auto;
   }
 
-  /* 4. Ajuste Inteligente do Botão S.O.S */
-  .btn-sos {
-    left: 24px;
-    bottom: 30px;
-  }
-  
-  body.sheet-open .btn-sos {
-    bottom: 30px;
-    left: 440px;
-  }
+
 
   /* 5. Modais Centralizados Maiores */
   .modal-dialog {
@@ -2684,13 +2502,7 @@ body.sheet-open .fab-container {
   background: rgba(255, 255, 255, 0.18);
 }
 
-.quick-sos {
-  background: #991b1b;
-}
 
-.quick-sos:hover {
-  background: #b91c1c;
-}
 
 /* 5. Nova Identidade Editorial & Hero Territorial */
 .btn-header-webgis {
@@ -3564,9 +3376,7 @@ body.sheet-open .fab-container {
 
 .card-onde-pescar { grid-column: span 7; }
 .card-medidas { grid-column: span 5; }
-.card-nautica { grid-column: span 5; }
 .card-regras-salobra { grid-column: span 7; }
-.card-sos { grid-column: span 6; }
 .card-webgis-highlight {
   grid-column: span 6;
   background: linear-gradient(135deg, #062a1c 0%, #0d442e 100%);
@@ -3882,7 +3692,6 @@ body.sheet-open .fab-container {
   .card-medidas,
   .card-nautica,
   .card-regras-salobra,
-  .card-sos,
   .card-webgis-highlight {
     grid-column: span 1;
   }
@@ -4355,82 +4164,10 @@ body.sheet-open .fab-container {
   color: inherit;
 }
 
-.nav-sos-trigger {
-  color: #dc2626 !important;
-}
+
 
 /* ========================================================
-   IDENTIFICAÇÃO VISUAL COM GOOGLE LENS (SEM CHAVES)
-   ======================================================== */
-.lens-id-section {
-  background: linear-gradient(180deg, #f0fdf4 0%, #e0f2fe 100%);
-  border: 1px solid #bae6fd;
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  margin-bottom: 14px;
-}
 
-.lens-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-lens-action {
-  flex: 1.2;
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 0.84rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
-  transition: all var(--transition-fast);
-}
-
-.btn-lens-action:hover {
-  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-  transform: translateY(-1px);
-}
-
-.btn-lens-secondary {
-  flex: 1;
-  background: #ffffff;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-lens-secondary:hover {
-  background: #f0f9ff;
-  border-color: #0284c7;
-}
-
-.lens-dica-box {
-  margin-top: 10px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 0.74rem;
-  color: #475569;
-  line-height: 1.4;
-}
 
 /* ========================================================
    BANNER DE SERVIÇOS & CENTRAL DE PARCERIAS INTERATIVA

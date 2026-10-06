@@ -70,7 +70,7 @@ export const geoFishImages = {
       src: 'images/rio/estrada_parque_miranda.jpg',
       alt: 'Rio Miranda cruzando a Estrada Parque Pantanal MS-184',
       title: 'Estrada Parque Pantanal',
-      localUso: 'Bloco Editorial: Rotas e S.O.S Fluvial',
+      localUso: 'Bloco Editorial: Rotas e Apoio Náutico',
       autor: 'Kaliewhite',
       fonte: 'Wikimedia Commons',
       urlOriginal: 'https://commons.wikimedia.org/wiki/File:Rio_Miranda_Estrada-Parque.jpg',

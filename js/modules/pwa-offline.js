@@ -169,7 +169,7 @@ export function initPWAOffline() {
   const CAMADAS_PARA_OFFLINE = [
     { key: 'trechos_pesca', url: 'data/processed/trechos_pesca.geojson', nome: 'Regras de Pesca' },
     { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias Credenciados' },
-    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Apoio e Emergência' },
+    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Rampas e Apoio Náutico' },
     { key: 'areas_restritas', url: 'data/processed/areas_restritas.geojson', nome: 'Áreas Restritas (UCs)' },
     { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: 'Rios Principais' },
     { key: 'bacias_uepgrh', url: 'data/processed/bacias_uepgrh.geojson', nome: 'Bacias Hidrográficas' },
