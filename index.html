@@ -63,9 +63,9 @@
 
     <!-- Ações Rápidas no Topo -->
     <div class="top-bar-actions">
-      <button id="btn-sos-top" class="btn-top-action btn-sos-top" title="Acionar socorro imediato e coordenadas náuticas">
-        <span aria-hidden="true">🚨</span>
-        <span>SOS Fluvial</span>
+      <button id="btn-telefones-top" class="btn-top-action" title="Telefones úteis: Bombeiros, PMA, SAMU e Hospitais">
+        <span aria-hidden="true">📞</span>
+        <span class="btn-label-desktop">Telefones Úteis</span>
       </button>
       <button id="btn-satelite-top" class="btn-top-action" title="Alternar entre imagem de satélite de alta resolução e mapa topográfico">
         <span aria-hidden="true">🛰️</span>
@@ -718,41 +718,89 @@
     </div>
   </template>
 
-  <!-- Template Modal SOS Fluvial -->
-  <template id="template-modal-sos">
-    <div id="modal-sos" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sos-title">
-      <div class="modal-dialog">
-        <div class="modal-header" style="background: #dc2626; color: #ffffff;">
-          <h2 id="sos-title" style="color: #ffffff;">
-            <span aria-hidden="true">🚨</span>
-            <span>SOS Fluvial &bull; Emergência no Rio</span>
+  <!-- Template Modal Telefones Úteis & Apoio Oficial -->
+  <template id="template-modal-telefones">
+    <div id="modal-telefones" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="telefones-title">
+      <div class="modal-dialog modal-dialog-md" style="max-width: 520px;">
+        <div class="modal-header" style="background: #0b4f6c; color: #ffffff;">
+          <h2 id="telefones-title" style="color: #ffffff; display: flex; align-items: center; gap: 8px;">
+            <span aria-hidden="true">📞</span>
+            <span>Telefones Úteis &amp; Apoio Oficial</span>
           </h2>
-          <button id="btn-fechar-sos" class="modal-close-btn" style="color: #ffffff;" aria-label="Fechar emergência">&times;</button>
+          <button id="btn-fechar-telefones" class="modal-close-btn" style="color: #ffffff;" aria-label="Fechar contatos">&times;</button>
         </div>
-        <div class="modal-body">
-          <p style="font-size: 0.9rem; color: #991b1b; font-weight: 700; margin-bottom: 12px;">
-            Em caso de naufrágio, pane motora, acidente ou socorro imediato nas águas pantaneiras:
-          </p>
-          <div id="sos-coordenadas-box" style="background: #f8fafc; border: 2px dashed #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 14px; font-family: monospace; font-size: 0.95rem; text-align: center;">
-            Obtendo coordenadas do GPS náutico...
+        <div class="modal-body" style="padding: 16px;">
+          <!-- Aviso Legal e Limitação de Responsabilidade -->
+          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid #0b4f6c; border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 0.8rem; color: #334155; line-height: 1.45;">
+            ℹ️ <strong>Aviso Informativo:</strong> O GeoFish MS é uma ferramenta independente de consulta cartográfica e turismo sustentável. <strong>Não prestamos serviços de resgate, socorro ou despacho de emergência.</strong> Em qualquer ocorrência de segurança ou saúde no rio e nas estradas, ligue diretamente para os órgãos públicos oficiais.
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <a href="tel:6732424344" class="btn-cta" style="background: #b91c1c; text-align: center; text-decoration: none;">
-              📞 Pelotão PMA Miranda: (67) 3242-4344
-            </a>
-            <a href="tel:190" class="btn-cta" style="background: #0b4f6c; text-align: center; text-decoration: none;">
-              📞 Polícia Militar: 190
-            </a>
-            <a href="tel:193" class="btn-cta" style="background: #ea580c; text-align: center; text-decoration: none;">
-              📞 Bombeiros (Resgate): 193
-            </a>
-            <a href="tel:185" class="btn-cta" style="background: #0284c7; text-align: center; text-decoration: none;">
-              ⚓ Marinha do Brasil (Emergência Fluvial): 185
-            </a>
-            <button type="button" id="btn-compartilhar-sos-whatsapp" class="btn-cta" style="background: #16a34a; border: none; cursor: pointer;">
-              💬 Enviar Minhas Coordenadas no WhatsApp
-            </button>
+
+          <div style="font-weight: 700; font-size: 0.82rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            🚨 Emergências Gerais (Ligação Gratuita 24h)
           </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <a href="tel:193" class="btn-cta" style="background: #dc2626; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🚒 <strong>Corpo de Bombeiros Militar (Resgate)</strong></span>
+              <span style="font-family: monospace; font-weight: 800; font-size: 1rem;">193</span>
+            </a>
+            <a href="tel:190" class="btn-cta" style="background: #1e293b; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>👮 <strong>Polícia Militar</strong></span>
+              <span style="font-family: monospace; font-weight: 800; font-size: 1rem;">190</span>
+            </a>
+            <a href="tel:192" class="btn-cta" style="background: #d97706; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🚑 <strong>SAMU (Urgência Médica)</strong></span>
+              <span style="font-family: monospace; font-weight: 800; font-size: 1rem;">192</span>
+            </a>
+            <a href="tel:185" class="btn-cta" style="background: #0284c7; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>⚓ <strong>Marinha do Brasil (Capitania Fluvial)</strong></span>
+              <span style="font-family: monospace; font-weight: 800; font-size: 1rem;">185</span>
+            </a>
+          </div>
+
+          <div style="font-weight: 700; font-size: 0.82rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            🛡️ Polícia Militar Ambiental (PMA)
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <a href="tel:6732424344" class="btn-cta" style="background: #15803d; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🌿 <strong>Pelotão PMA &bull; Miranda</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3242-4344</span>
+            </a>
+            <a href="tel:6732412020" class="btn-cta" style="background: #15803d; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🌿 <strong>Pelotão PMA &bull; Aquidauana</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3241-2020</span>
+            </a>
+            <a href="tel:6733571500" class="btn-cta" style="background: #166534; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🌿 <strong>BPMA MS &bull; Plantão Campo Grande</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3357-1500</span>
+            </a>
+          </div>
+
+          <div style="font-weight: 700; font-size: 0.82rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+            🏥 Saúde e Hospitais da Região
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <a href="tel:6732421222" class="btn-cta" style="background: #475569; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🏥 <strong>Hospital Municipal de Miranda</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3242-1222</span>
+            </a>
+            <a href="tel:6732412677" class="btn-cta" style="background: #475569; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🏥 <strong>Pronto-Socorro de Aquidauana</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3241-2677</span>
+            </a>
+            <a href="tel:6732551500" class="btn-cta" style="background: #475569; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+              <span>🏥 <strong>Hospital Regional de Bonito</strong></span>
+              <span style="font-family: monospace; font-weight: 700;">(67) 3255-1500</span>
+            </a>
+          </div>
+
+          <!-- Orientação de Localização -->
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #1e40af; line-height: 1.45;">
+            📍 <strong>Como se orientar para passar sua localização:</strong><br>
+            Toque no botão <strong>"📍 Onde estou"</strong> sobre o mapa para ver sua posição geográfica exata. Ao ligar para os serviços públicos, informe o nome do rio, referências conhecidas (curvas, pontes, fazendas) e suas coordenadas de latitude e longitude.
+          </div>
+        </div>
+        <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+          <button type="button" class="btn-cta" id="btn-fechar-telefones-rodape" style="background: #64748b;">Fechar</button>
         </div>
       </div>
     </div>

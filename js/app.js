@@ -48,13 +48,9 @@ import {
 } from './modules/species-checker.js';
 
 import {
-  gerarTextoResgate,
-  abrirModalSos,
-  fecharModalSos,
-  abrirConfirmacaoSos,
-  fecharConfirmacaoSos,
-  initSosEmergency
-} from './modules/sos-emergency.js';
+  abrirModalTelefones,
+  fecharModalTelefones
+} from './modules/telefones-apoio.js';
 
 import {
   atualizarStatusRede,
@@ -1831,20 +1827,14 @@ function inicializarSidebarDataGeo() {
   });
 
   // Botões do Header do Geoportal
-  const btnSosTop = document.getElementById('btn-sos-top');
-  if (btnSosTop) btnSosTop.addEventListener('click', () => {
-    vibrar(35);
-    if (typeof abrirModalSos === 'function') abrirModalSos();
+  const btnTelefonesTop = document.getElementById('btn-telefones-top');
+  if (btnTelefonesTop) btnTelefonesTop.addEventListener('click', () => {
+    vibrar(20);
+    abrirModalTelefones();
   });
 
   const btnSateliteTop = document.getElementById('btn-satelite-top');
   if (btnSateliteTop) btnSateliteTop.addEventListener('click', alternarMapaBase);
-
-  const btnGpsTop = document.getElementById('btn-gps-top');
-  if (btnGpsTop) btnGpsTop.addEventListener('click', () => {
-    vibrar(30);
-    obterLocalizacao();
-  });
 
   const btnOfflineTop = document.getElementById('btn-offline-top');
   if (btnOfflineTop) btnOfflineTop.addEventListener('click', () => {
@@ -1871,7 +1861,6 @@ function inicializarSidebarDataGeo() {
 // Inicialização do aplicativo: carrega camadas, módulos auxiliares, defeso e busca
 window.addEventListener('DOMContentLoaded', () => {
   initSpeciesChecker();
-  initSosEmergency();
   initPWAOffline();
   verificarPeriodoDefeso();
   inicializarSidebarDataGeo();
@@ -2323,7 +2312,7 @@ function inicializarBuscaLocal() {
 }
 
 
-// 16. Central de Emergência & S.O.S Fluvial delegada para js/modules/sos-emergency.js
+// 16. Módulo de Telefones Úteis e Apoio Oficial delegado para js/modules/telefones-apoio.js
 
 
 // ========================================================
@@ -2957,10 +2946,10 @@ if (footerBtnReplicar) {
 window.obterPosicaoRio = obterLocalizacao;
 window.obterLocalizacao = obterLocalizacao;
 window.mostrarToast = showToast;
-window.abrirModalSos = abrirModalSos;
+window.abrirModalTelefones = abrirModalTelefones;
+window.fecharModalTelefones = fecharModalTelefones;
 window.abrirModalEspecies = abrirModalEspecies;
 window.abrirModalSobre = abrirModalSobre;
-window.abrirConfirmacaoSos = abrirConfirmacaoSos;
 window.abrirModalParceiros = abrirModalParceiros;
 window.abrirModalPix = abrirModalPix;
 window.abrirModalCartilha = abrirModalCartilha;
@@ -2972,24 +2961,6 @@ if (btnPortalOpenSpecies) {
   btnPortalOpenSpecies.addEventListener('click', () => {
     vibrar(25);
     abrirModalEspecies();
-  });
-}
-
-// Botão de SOS na barra de polegar móvel
-const navBtnSosTrigger = document.getElementById('nav-btn-sos-trigger');
-if (navBtnSosTrigger) {
-  navBtnSosTrigger.addEventListener('click', () => {
-    vibrar(35);
-    abrirModalSos();
-  });
-}
-
-// Ação rápida do SOS na barra de utilitários
-const btnQuickSos = document.getElementById('btn-quick-sos');
-if (btnQuickSos) {
-  btnQuickSos.addEventListener('click', () => {
-    vibrar(35);
-    abrirModalSos();
   });
 }
 
@@ -3075,20 +3046,15 @@ document.addEventListener('click', (e) => {
       vibrar(25);
       abrirModalSobre();
       break;
-    case 'abrir-sos':
+    case 'abrir-telefones':
       e.preventDefault();
-      vibrar(35);
-      abrirModalSos();
+      vibrar(20);
+      abrirModalTelefones();
       break;
     case 'scroll-top':
       e.preventDefault();
       vibrar(20);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      break;
-    case 'sos-call-marinha':
-      e.preventDefault();
-      vibrar(35);
-      abrirConfirmacaoSos({ tipo: 'call', numero: '185', servico: 'Marinha do Brasil (Capitania Fluvial)' });
       break;
     default:
       break;

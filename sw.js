@@ -1,5 +1,5 @@
 // GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v53';
+const CACHE_VERSION = 'geofish-shell-v54';
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -28,7 +28,7 @@ const SHELL_ASSETS = [
   './js/modules/modal-manager.js',
   './js/modules/cartilha-modal.js',
   './js/modules/species-checker.js',
-  './js/modules/sos-emergency.js',
+  './js/modules/telefones-apoio.js',
   './js/modules/pwa-offline.js',
   './manifest.json',
   './lib/leaflet/leaflet.css',

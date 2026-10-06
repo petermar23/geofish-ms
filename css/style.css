@@ -5728,16 +5728,6 @@ html, body {
   background: rgba(255, 255, 255, 0.22);
 }
 
-.btn-top-action.btn-sos-top {
-  background: #dc2626;
-  color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
-}
-
-.btn-top-action.btn-sos-top:hover {
-  background: #b91c1c;
-}
 
 /* 2. Área de Trabalho Principal (Sidebar + Mapa) */
 .geofish-workspace {
