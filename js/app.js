@@ -118,6 +118,21 @@ const relevoEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/serv
   crossOrigin: true
 });
 
+let usandoSatelite = true;
+export function alternarMapaBase() {
+  if (usandoSatelite) {
+    if (map.hasLayer(sateliteEsri)) map.removeLayer(sateliteEsri);
+    if (!map.hasLayer(relevoEsri)) relevoEsri.addTo(map);
+    usandoSatelite = false;
+    showToast('🗺️ Mapa Base: Relevo Topográfico (Esri Topo)');
+  } else {
+    if (map.hasLayer(relevoEsri)) map.removeLayer(relevoEsri);
+    if (!map.hasLayer(sateliteEsri)) sateliteEsri.addTo(map);
+    usandoSatelite = true;
+    showToast('🛰️ Mapa Base: Imagens de Satélite (Esri Imagery)');
+  }
+}
+
 // Atribuição de governança cartográfica e autoria cidadã
 map.attributionControl.addAttribution('Iniciativa Cidadã: Peterson Martins da Costa | Cartografia Base: Fontes Públicas (SEMADESC / IMASUL)');
 
@@ -265,6 +280,24 @@ function verificarPeriodoDefeso() {
   const bannerText = document.getElementById('banner-defeso-text');
   const bannerIcon = document.getElementById('banner-defeso-icon');
   const btnFechar = document.getElementById('btn-fechar-banner-defeso');
+
+  const badgeTop = document.getElementById('badge-defeso-top');
+  const badgeTopIcon = document.getElementById('badge-defeso-icon');
+  const badgeTopText = document.getElementById('badge-defeso-text');
+
+  if (badgeTop) {
+    if (emDefeso) {
+      badgeTop.classList.remove('temporada-aberta');
+      badgeTop.classList.add('defeso-ativo');
+      if (badgeTopIcon) badgeTopIcon.textContent = '⚠️';
+      if (badgeTopText) badgeTopText.textContent = 'Piracema em Vigor (Nov a Fev)';
+    } else {
+      badgeTop.classList.remove('defeso-ativo');
+      badgeTop.classList.add('temporada-aberta');
+      if (badgeTopIcon) badgeTopIcon.textContent = '🎣';
+      if (badgeTopText) badgeTopText.textContent = 'Temporada Aberta (Cota 1+5)';
+    }
+  }
 
   if (banner && bannerText) {
     if (btnFechar && !btnFechar.dataset.listenerAttached) {
@@ -1483,13 +1516,338 @@ if (navBtnPousadas) {
   });
 }
 
+// ========================================================
+// CONTROLE DA SIDEBAR E ABAS NO MODELO DATAGEO / PIN-MS
+// ========================================================
+
+function renderizarSidebarGuias(filtroRegiao = 'todas') {
+  const container = document.getElementById('sidebar-guias-list');
+  if (!container) return;
+
+  const dados = dadosCarregados['guias_credenciados'];
+  if (!dados || !dados.features || dados.features.length === 0) {
+    container.innerHTML = '<div style="color: #64748b; padding: 14px; text-align: center;">Nenhum guia carregado no momento.</div>';
+    return;
+  }
+
+  let features = dados.features;
+  if (filtroRegiao === 'z1') {
+    features = features.filter(f => {
+      const col = (f.properties?.colonia || '').toLowerCase();
+      const porto = (f.properties?.porto_base || '').toLowerCase();
+      return col.includes('z-1') || col.includes('miranda') || porto.includes('miranda') || porto.includes('lontra');
+    });
+  } else if (filtroRegiao === 'z7') {
+    features = features.filter(f => {
+      const col = (f.properties?.colonia || '').toLowerCase();
+      const porto = (f.properties?.porto_base || '').toLowerCase();
+      return col.includes('z-7') || col.includes('aquidauana') || porto.includes('aquidauana') || porto.includes('anastácio');
+    });
+  } else if (filtroRegiao === 'z11') {
+    features = features.filter(f => {
+      const col = (f.properties?.colonia || '').toLowerCase();
+      const porto = (f.properties?.porto_base || '').toLowerCase();
+      return col.includes('z-11') || col.includes('bonito') || porto.includes('bonito') || porto.includes('águas do miranda');
+    });
+  }
+
+  if (features.length === 0) {
+    container.innerHTML = `
+      <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; color: #64748b; font-size: 0.85rem;">
+        <div style="font-size: 1.5rem; margin-bottom: 6px;">🎣</div>
+        <strong>Nenhum piloteiro cadastrado neste polo ainda.</strong>
+        <p style="font-size: 0.78rem; margin-top: 6px; line-height: 1.4;">
+          Conhece um condutor tradicional desta região? O cadastro com a Colônia é 100% gratuito.
+        </p>
+        <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Gostaria%20de%20indicar%20um%20piloteiro%20para%20o%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="margin-top: 8px; justify-content: center;">
+          <span>📲 Indicar via WhatsApp</span>
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = features.map(feat => {
+    const p = feat.properties || {};
+    const coords = feat.geometry ? feat.geometry.coordinates : null;
+    const lat = coords ? coords[1] : null;
+    const lng = coords ? coords[0] : null;
+    const waUrl = normalizeWhatsApp(p.contato_wa);
+
+    return `
+      <article class="sidebar-guia-card">
+        <div class="sidebar-guia-card-header">
+          <div>
+            <div class="sidebar-guia-card-title">${escapeHTML(p.nome_operacional || 'Guia de Pesca')}</div>
+            <div class="sidebar-guia-card-meta">
+              📍 <strong>Colônia:</strong> ${escapeHTML(p.colonia || 'Z-1')} &bull; <strong>Base:</strong> ${escapeHTML(p.porto_base || 'Miranda')}
+            </div>
+            <div class="sidebar-guia-card-meta" style="color: #64748b;">
+              ⛵ <strong>Embarcação:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
+            </div>
+          </div>
+          <span class="badge-tag" style="background: #0b4f6c; font-size: 0.68rem; margin: 0; white-space: nowrap;">Homologado</span>
+        </div>
+        <div class="sidebar-guia-card-actions">
+          ${waUrl ? `
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" title="Conversar no WhatsApp">
+              <span>💬 WhatsApp</span>
+            </a>
+          ` : ''}
+          ${(lat && lng) ? `
+            <button type="button" class="btn-guia-focar" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome_operacional || '')}" title="Ver no Mapa">
+              <span>🗺️ Ver no Mapa</span>
+            </button>
+          ` : ''}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.btn-guia-focar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lat = parseFloat(btn.getAttribute('data-lat'));
+      const lng = parseFloat(btn.getAttribute('data-lng'));
+      const nome = btn.getAttribute('data-nome');
+      map.flyTo([lat, lng], 14, { duration: 1.2 });
+      showToast(`Localizando: ${nome}`);
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('geofish-sidebar');
+        if (sidebar) sidebar.classList.add('collapsed');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (backdrop) backdrop.classList.remove('active');
+        map.invalidateSize();
+      }
+    });
+  });
+}
+
+function renderizarSidebarPousadas() {
+  const container = document.getElementById('sidebar-pousadas-list');
+  if (!container) return;
+
+  const dados = dadosCarregados['pontos_emergencia'];
+  if (!dados || !dados.features) {
+    container.innerHTML = '<div style="color: #64748b; padding: 14px; text-align: center;">Carregando apoios náuticos...</div>';
+    return;
+  }
+
+  const rampas = dados.features.filter(f => {
+    const t = (f.properties?.tipo || '').toLowerCase();
+    return t.includes('rampa') || t.includes('porto') || t.includes('apoio') || t.includes('marina') || t.includes('pousada');
+  });
+
+  container.innerHTML = rampas.map(feat => {
+    const p = feat.properties || {};
+    const coords = feat.geometry ? feat.geometry.coordinates : null;
+    const lat = coords ? coords[1] : null;
+    const lng = coords ? coords[0] : null;
+    const tel = p.telefone_emergencia ? sanitizeTel(p.telefone_emergencia) : '';
+
+    return `
+      <article class="sidebar-guia-card">
+        <div class="sidebar-guia-card-header">
+          <div>
+            <div class="sidebar-guia-card-title">${escapeHTML(p.nome || 'Ponto de Apoio')}</div>
+            <div class="sidebar-guia-card-meta">
+              ⚓ <strong>Tipo:</strong> ${escapeHTML(p.tipo || 'Rampa Náutica')}
+            </div>
+            ${p.endereco ? `
+              <div class="sidebar-guia-card-meta" style="color: #64748b;">
+                📍 ${escapeHTML(p.endereco)}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+        <div class="sidebar-guia-card-actions">
+          ${tel ? `
+            <a href="${tel}" class="btn-guia-wa" style="background: #0284c7;" title="Ligar">
+              <span>📞 Ligar</span>
+            </a>
+          ` : ''}
+          ${(lat && lng) ? `
+            <button type="button" class="btn-guia-focar" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome || '')}">
+              <span>🗺️ Ver no Mapa</span>
+            </button>
+          ` : ''}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.btn-guia-focar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lat = parseFloat(btn.getAttribute('data-lat'));
+      const lng = parseFloat(btn.getAttribute('data-lng'));
+      const nome = btn.getAttribute('data-nome');
+      map.flyTo([lat, lng], 14, { duration: 1.2 });
+      showToast(`Localizando: ${nome}`);
+      if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('geofish-sidebar');
+        if (sidebar) sidebar.classList.add('collapsed');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (backdrop) backdrop.classList.remove('active');
+        map.invalidateSize();
+      }
+    });
+  });
+}
+
+function inicializarSidebarDataGeo() {
+  const sidebar = document.getElementById('geofish-sidebar');
+  const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+  const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+  const btnOpenSidebarFloat = document.getElementById('btn-open-sidebar-float');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+  function abrirSidebar() {
+    if (sidebar) {
+      sidebar.classList.remove('collapsed');
+      if (sidebarBackdrop && window.innerWidth <= 768) sidebarBackdrop.classList.add('active');
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  }
+
+  function fecharSidebar() {
+    if (sidebar) {
+      sidebar.classList.add('collapsed');
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+      setTimeout(() => map.invalidateSize(), 300);
+    }
+  }
+
+  function alternarSidebar() {
+    if (sidebar) {
+      if (sidebar.classList.contains('collapsed')) {
+        abrirSidebar();
+      } else {
+        fecharSidebar();
+      }
+    }
+  }
+
+  if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', alternarSidebar);
+  if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', fecharSidebar);
+  if (btnOpenSidebarFloat) btnOpenSidebarFloat.addEventListener('click', abrirSidebar);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', fecharSidebar);
+
+  // Alternância de Abas da Sidebar
+  document.querySelectorAll('.sidebar-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabTarget = btn.getAttribute('data-tab');
+      document.querySelectorAll('.sidebar-tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.sidebar-pane').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      const pane = document.getElementById(`pane-${tabTarget}`);
+      if (pane) pane.classList.add('active');
+    });
+  });
+
+  // Filtros Regionais da Sidebar (Sincronização Real: Mapa + Lista + Estado)
+  document.querySelectorAll('.sidebar-region-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-region-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+
+      const regiao = btn.getAttribute('data-regiao');
+      renderizarSidebarGuias(regiao);
+
+      if (camadasInstanciadas['guias_credenciados'] && !map.hasLayer(camadasInstanciadas['guias_credenciados'])) {
+        map.addLayer(camadasInstanciadas['guias_credenciados']);
+      }
+
+      if (regiao === 'z1') {
+        map.flyTo([-20.35, -56.65], 11, { duration: 1.2 });
+        showToast('Filtro: Piloteiros de Miranda & Passo do Lontra (Colônia Z-1)');
+      } else if (regiao === 'z7') {
+        map.flyTo([-20.48, -55.79], 12, { duration: 1.2 });
+        showToast('Filtro: Piloteiros de Aquidauana & Anastácio (Colônia Z-7)');
+      } else if (regiao === 'z11') {
+        map.flyTo([-20.89, -56.12], 12, { duration: 1.2 });
+        showToast('Filtro: Piloteiros de Bonito & Águas do Miranda (Colônia Z-11)');
+      } else {
+        map.fitBounds(BOUNDS_BACIA, { padding: [20, 20] });
+        showToast('Filtro: Todas as Regiões da Bacia');
+      }
+    });
+  });
+
+  // Sincronização dos Checkboxes de Camadas (Padrão DataGEO)
+  document.querySelectorAll('input[data-camada-key]').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const key = chk.getAttribute('data-camada-key');
+      const camada = camadasInstanciadas[key];
+      if (!camada) return;
+      if (chk.checked) {
+        if (!map.hasLayer(camada)) map.addLayer(camada);
+        showToast(`Camada ativada: ${chk.closest('label').textContent.trim()}`);
+      } else {
+        if (map.hasLayer(camada)) map.removeLayer(camada);
+        showToast(`Camada desativada: ${chk.closest('label').textContent.trim()}`);
+      }
+    });
+  });
+
+  // Botões do Header do Geoportal
+  const btnSosTop = document.getElementById('btn-sos-top');
+  if (btnSosTop) btnSosTop.addEventListener('click', () => {
+    vibrar(35);
+    if (typeof abrirModalSos === 'function') abrirModalSos();
+  });
+
+  const btnSateliteTop = document.getElementById('btn-satelite-top');
+  if (btnSateliteTop) btnSateliteTop.addEventListener('click', alternarMapaBase);
+
+  const btnGpsTop = document.getElementById('btn-gps-top');
+  if (btnGpsTop) btnGpsTop.addEventListener('click', () => {
+    vibrar(30);
+    obterLocalizacao();
+  });
+
+  const btnOfflineTop = document.getElementById('btn-offline-top');
+  if (btnOfflineTop) btnOfflineTop.addEventListener('click', () => {
+    vibrar(25);
+    const btnOfflineOrig = document.getElementById('btn-offline');
+    if (btnOfflineOrig) btnOfflineOrig.click();
+    else showToast('Camadas GeoJSON e regras salvas offline no IndexedDB.');
+  });
+
+  const btnSobreTop = document.getElementById('btn-sobre-top');
+  if (btnSobreTop) btnSobreTop.addEventListener('click', () => {
+    abrirSidebar();
+    const tabSobre = document.getElementById('tab-sobre');
+    if (tabSobre) tabSobre.click();
+  });
+
+  const badgeDefesoTop = document.getElementById('badge-defeso-top');
+  if (badgeDefesoTop) badgeDefesoTop.addEventListener('click', () => {
+    abrirSidebar();
+    const tabRegras = document.getElementById('tab-regras');
+    if (tabRegras) tabRegras.click();
+  });
+}
+
 // Inicialização do aplicativo: carrega camadas, módulos auxiliares, defeso e busca
 window.addEventListener('DOMContentLoaded', () => {
   initSpeciesChecker();
   initSosEmergency();
   initPWAOffline();
   verificarPeriodoDefeso();
+  inicializarSidebarDataGeo();
+
   carregarTodasCamadas().then(() => {
+    renderizarSidebarGuias('todas');
+    renderizarSidebarPousadas();
+
     // Processamento de atalhos rápidos do Android (URL shortcuts do manifest)
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
@@ -1501,6 +1859,7 @@ window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => aplicarFiltroRapido('apoio'), 500);
     }
   });
+
   inicializarBuscaLocal();
 });
 

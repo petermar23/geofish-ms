@@ -5504,3 +5504,571 @@ body.sheet-open .fab-container {
   line-height: 1.5;
   margin: 0;
 }
+
+/* ========================================================
+   ARQUITETURA GEOPORTAL PROFISSIONAL (PADRÃO PIN-MS & DataGEO)
+   ======================================================== */
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Fim da rolagem infinita: layout 100% aplicação */
+}
+
+.geofish-geoportal-app {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background-color: #f1f5f9;
+}
+
+/* 1. Barra Superior Institucional (Header WebAppViewer / PIN-MS) */
+.geofish-top-bar {
+  height: 56px;
+  min-height: 56px;
+  background: linear-gradient(90deg, #0b4f6c 0%, #1b4d3e 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  gap: 12px;
+}
+
+.top-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.top-bar-logo {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4ade80;
+}
+
+.top-bar-titles {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.top-bar-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.top-bar-title strong {
+  color: #4ade80;
+}
+
+.top-bar-sub {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.top-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 520px;
+  justify-content: center;
+}
+
+.badge-defeso-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge-defeso-top.defeso-ativo {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.badge-defeso-top.temporada-aberta {
+  background: #059669;
+  color: #ffffff;
+}
+
+.badge-defeso-top:hover {
+  opacity: 0.9;
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-top-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transition: background 0.2s, transform 0.1s;
+  min-height: 38px;
+  text-decoration: none;
+}
+
+.btn-top-action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.btn-top-action.btn-sos-top {
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+}
+
+.btn-top-action.btn-sos-top:hover {
+  background: #b91c1c;
+}
+
+/* 2. Área de Trabalho Principal (Sidebar + Mapa) */
+.geofish-workspace {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: calc(100vh - 56px);
+}
+
+/* 3. Painel Lateral Esquerdo (Padrão DataGEO / PIN-MS) */
+.geofish-sidebar {
+  width: 410px;
+  min-width: 380px;
+  max-width: 440px;
+  height: 100%;
+  background: #ffffff;
+  border-right: 1px solid #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  z-index: 1020;
+  box-shadow: 3px 0 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), margin-left 0.28s ease;
+  position: relative;
+}
+
+.geofish-sidebar.collapsed {
+  margin-left: -410px;
+}
+
+.sidebar-header {
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-header-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-close-sidebar {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.btn-close-sidebar:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Abas de Navegação da Sidebar (Padrão DataGEO) */
+.sidebar-tabs {
+  display: flex;
+  background: #0b4f6c;
+  border-bottom: 2px solid #0284c7;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sidebar-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar-tab-btn {
+  flex: 1;
+  min-width: 72px;
+  min-height: 48px; /* Touch target acessível */
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.sidebar-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-tab-btn.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-bottom: 3px solid #38bdf8;
+}
+
+.sidebar-tab-btn span.tab-icon {
+  font-size: 1.15rem;
+}
+
+/* Conteúdo da Sidebar com Scroll Independente */
+.sidebar-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar-pane {
+  display: none;
+}
+
+.sidebar-pane.active {
+  display: block;
+  animation: fadeInPane 0.2s ease;
+}
+
+@keyframes fadeInPane {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar-section-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-section-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+/* Filtros Regionais da Sidebar (Miranda, Aquidauana, Bonito) */
+.sidebar-region-filters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sidebar-region-btn {
+  min-height: 44px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.sidebar-region-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.sidebar-region-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+}
+
+/* Cards de Piloteiros na Sidebar */
+.sidebar-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-guia-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sidebar-guia-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.sidebar-guia-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sidebar-guia-card-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0b4f6c;
+}
+
+.sidebar-guia-card-meta {
+  font-size: 0.78rem;
+  color: #475569;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.sidebar-guia-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.btn-guia-wa {
+  flex: 1;
+  min-height: 40px;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-guia-wa:hover {
+  background: #15803d;
+}
+
+.btn-guia-focar {
+  min-height: 40px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-guia-focar:hover {
+  background: #f1f5f9;
+}
+
+/* Painel de Camadas (Estilo DataGEO) */
+.layer-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.layer-checkbox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.layer-checkbox-item:hover {
+  background: #f1f5f9;
+}
+
+.layer-checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #0284c7;
+  cursor: pointer;
+}
+
+/* 4. Viewport do Mapa em Tela Cheia */
+.geofish-map-viewport {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.geofish-map-viewport #map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Botão Flutuante para Reabrir a Sidebar */
+.btn-open-sidebar-float {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  background: #0b4f6c;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-open-sidebar-float:hover {
+  background: #07384d;
+  transform: translateY(-1px);
+}
+
+.geofish-sidebar.collapsed ~ .geofish-map-viewport .btn-open-sidebar-float {
+  display: flex;
+}
+
+/* Overlay para Mobile */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1015;
+}
+
+/* 5. Responsividade Mobile */
+@media (max-width: 768px) {
+  .geofish-top-bar {
+    padding: 0 10px;
+  }
+  
+  .top-bar-sub, .top-bar-center {
+    display: none;
+  }
+
+  .geofish-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 88%;
+    max-width: 360px;
+    z-index: 1030;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .geofish-sidebar.collapsed {
+    transform: translateX(-100%);
+    margin-left: 0;
+  }
+
+  .sidebar-backdrop.active {
+    display: block;
+  }
+
+  .btn-open-sidebar-float {
+    display: flex !important;
+  }
+}
