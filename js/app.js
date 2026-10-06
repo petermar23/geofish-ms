@@ -324,7 +324,7 @@ function avaliarConformidadePosicao(userLat, userLng) {
   let trechoMaisProximo = null;
   let menorDistanciaTrecho = Infinity;
 
-  const dadosTrechos = dadosCarregados['trechos_pesca'];
+  const dadosTrechos = dadosCarregados['hidrografia'] || dadosCarregados['rios_principais'];
   if (dadosTrechos && dadosTrechos.features) {
     for (const feat of dadosTrechos.features) {
       const geom = feat.geometry;
