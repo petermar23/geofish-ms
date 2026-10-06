@@ -83,6 +83,15 @@ const map = L.map('map', {
 
 // Reposiciona o controle de zoom para o canto superior direito
 L.control.zoom({ position: 'topright' }).addTo(map);
+window.geofishMap = map;
+window.focarNoPortoGuia = function(lat, lng, nome) {
+  if (window.geofishMap) {
+    window.geofishMap.flyTo([lat, lng], 14, { duration: 1.2 });
+    fecharPainel();
+    showToast('🚤 Porto Base: ' + nome);
+  }
+};
+
 
 // 1. Camada Base Principal: Imagens de Satélite de Alta Resolução (Esri World Imagery)
 const sateliteEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -476,32 +485,166 @@ async function carregarTodasCamadas() {
                 L.DomEvent.stopPropagation(e);
                 const p = feature.properties;
                 const cor = obterCorPorRegra(p.regra);
+                const isPesqueSolte = (p.regra || '').toLowerCase().includes('solte');
+
+                // 1. Filtrar Piloteiros Credenciados Vinculados ao Trecho
+                const dadosGuias = dadosCarregados['guias_credenciados'];
+                let guiasDoTrecho = [];
+                if (dadosGuias && dadosGuias.features) {
+                  guiasDoTrecho = dadosGuias.features.filter(f => {
+                    const gp = f.properties || {};
+                    if (gp.trecho_ids && Array.isArray(gp.trecho_ids) && gp.trecho_ids.includes(p.id_trecho)) return true;
+                    if (gp.rios_atendidos && Array.isArray(gp.rios_atendidos)) {
+                      return gp.rios_atendidos.some(r => (p.rio || '').toLowerCase().includes(r.toLowerCase()) || r.toLowerCase().includes((p.rio || '').toLowerCase()));
+                    }
+                    const porto = (gp.porto_base || '').toLowerCase();
+                    const rio = (p.rio || '').toLowerCase();
+                    if (rio.includes('miranda') && (porto.includes('miranda') || porto.includes('porto geral') || porto.includes('lontra'))) return true;
+                    if (rio.includes('salobra') && (porto.includes('salobra') || porto.includes('bodoquena') || porto.includes('bonito'))) return true;
+                    if (rio.includes('aquidauana') && (porto.includes('aquidauana') || porto.includes('camis') || porto.includes('piraputanga'))) return true;
+                    if (rio.includes('vermelho') && (porto.includes('vermelho') || porto.includes('lontra'))) return true;
+                    if (rio.includes('negro') && (porto.includes('negro') || porto.includes('lajeado'))) return true;
+                    return false;
+                  });
+                }
+
+                // 2. Renderizar Cards dos Piloteiros Locais
+                let guiasHtml = '';
+                if (guiasDoTrecho.length > 0) {
+                  guiasHtml = guiasDoTrecho.map(f => {
+                    const g = f.properties;
+                    const coords = f.geometry ? f.geometry.coordinates : null;
+                    const waNum = g.contato_wa || WHATSAPP_CONTATO_OFICIAL;
+                    const waMsg = encodeURIComponent(`Olá ${g.nome_operacional || 'Piloteiro'}! Vi seu contato credenciado no GeoFish MS para o trecho do ${p.rio}. Gostaria de consultar diária de pesca e saída no porto ${g.porto_base}.`);
+                    const waUrl = `https://wa.me/${waNum}?text=${waMsg}`;
+                    const btnFocar = coords ? `<button type="button" class="btn-geo-focar" onclick="window.focarNoPortoGuia(${coords[1]}, ${coords[0]}, '${escapeHTML(g.porto_base)}')" style="background:#0284c7; color:#fff; border:none; padding:7px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-top:6px;">📍 Ver Porto no Mapa</button>` : '';
+
+                    return `
+                      <div class="card-piloteiro-trecho" style="background:#0f172a; border:1px solid #1e293b; border-left:4px solid #10b981; border-radius:8px; padding:12px; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                          <div>
+                            <span style="font-size:11px; background:#065f46; color:#a7f3d0; padding:2px 8px; border-radius:12px; font-weight:bold;">🚤 Guia Credenciado</span>
+                            <h4 style="margin:4px 0 2px; color:#f8fafc; font-size:15px; font-weight:700;">${escapeHTML(g.nome_operacional || g.nome_completo)}</h4>
+                            <div style="font-size:12px; color:#94a3b8;">${escapeHTML(g.colonia || 'Colônia de Pescadores')} • <strong>Porto:</strong> ${escapeHTML(g.porto_base)}</div>
+                          </div>
+                        </div>
+                        <div style="font-size:12px; color:#cbd5e1; margin:6px 0; background:#1e293b; padding:6px 8px; border-radius:4px;">
+                          <div>🚤 <strong>Embarcação:</strong> ${escapeHTML(g.tipo_barco || 'Bote Pantaneiro')}</div>
+                          ${g.especialidade ? `<div style="margin-top:2px;">🎯 <strong>Foco:</strong> ${escapeHTML(g.especialidade)}</div>` : ''}
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="background:#16a34a; color:#ffffff; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(22,163,74,0.4);">
+                            💬 Falar no WhatsApp
+                          </a>
+                          ${btnFocar}
+                        </div>
+                      </div>
+                    `;
+                  }).join('');
+                } else {
+                  guiasHtml = `
+                    <div style="background:#0f172a; border:1px dashed #334155; border-radius:8px; padding:12px; text-align:center; color:#94a3b8; font-size:12px; margin-bottom:10px;">
+                      🚤 Nenhum piloteiro individual cadastrado para este trecho específico no momento.
+                      <div style="margin-top:6px;">
+                        <a href="https://wa.me/${WHATSAPP_CONTATO_OFICIAL}?text=Ol%C3%A1!%20Sou%20piloteiro/pescador%20e%20quero%20me%20cadastrar%20no%20GeoFish%20MS" target="_blank" style="color:#38bdf8; font-weight:600; text-decoration:underline;">
+                          É piloteiro da região? Clique aqui para credenciar-se gratuitamente na plataforma
+                        </a>
+                      </div>
+                    </div>
+                  `;
+                }
+
+                // 3. Renderizar Limites Legais das Espécies (Régua Digital IMASUL)
+                const especiesHtml = isPesqueSolte ? `
+                  <div style="background:#78350f; border:1px solid #b45309; border-radius:8px; padding:10px 12px; margin-bottom:12px; color:#fef3c7; font-size:12px;">
+                    <div style="font-weight:bold; font-size:13px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                      🚫 100% PESQUE E SOLTE OBRIGATÓRIO (Decreto 15.166/19)
+                    </div>
+                    É expressamente proibido o abate, retenção e transporte de qualquer espécime nativo ou exótico neste trecho. Todos os peixes devem ser soltos imediatamente no mesmo ponto de captura com anzol sem farpa. Motores: exclusivamente 4 tempos até 15HP ou motor elétrico silencioso.
+                  </div>
+                ` : `
+                  <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:10px; margin-bottom:12px;">
+                    <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                      <span>⚖️ Limites Legais da Bacia (IMASUL / PMA)</span>
+                      <span style="font-size:11px; background:#1e293b; color:#94a3b8; padding:2px 6px; border-radius:4px;">Cota: 1 Peixe + 5 Piranhas</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11px;">
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #ef4444;">
+                        <span style="font-weight:bold; color:#fca5a5;">Dourado:</span> COTA ZERO (100% Pesque-Solte)
+                      </div>
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #10b981;">
+                        <span style="font-weight:bold; color:#86efac;">Pintado / Surubim:</span> 85 a 125 cm
+                      </div>
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #10b981;">
+                        <span style="font-weight:bold; color:#86efac;">Pacu:</span> 45 a 65 cm
+                      </div>
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #10b981;">
+                        <span style="font-weight:bold; color:#86efac;">Cachara:</span> 80 a 120 cm
+                      </div>
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #10b981;">
+                        <span style="font-weight:bold; color:#86efac;">Jaú:</span> 95 a 130 cm
+                      </div>
+                      <div style="background:#1e293b; padding:6px 8px; border-radius:4px; border-left:3px solid #10b981;">
+                        <span style="font-weight:bold; color:#86efac;">Piraputanga / Curimbatá:</span> Mín. 30 / 38 cm
+                      </div>
+                    </div>
+                    <div style="margin-top:8px; font-size:11px; color:#cbd5e1; background:#022c22; padding:6px 8px; border-radius:4px;">
+                      🧊 <strong>Regra de Transporte:</strong> 1 peixe nativo inteiro no gelo c/ cabeça e vísceras. Emita a Guia de Controle de Pescado (GCP) no posto da PMA antes da rodovia.
+                    </div>
+                  </div>
+                `;
+
                 abrirPainel(`
-                  <span class="badge-tag" style="background-color: ${cor};">Regra: ${escapeHTML(p.regra)}</span>
-                  <h2 class="sheet-title">${escapeHTML(p.rio)}</h2>
-                  <div class="data-group">
+                  <div style="margin-bottom:8px;">
+                    <span class="badge-tag" style="background-color: ${cor}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px;">Regra: ${escapeHTML(p.regra)}</span>
+                    <span style="font-size:11px; color:#94a3b8; margin-left:6px;">Bacia do Rio Miranda (BHRM)</span>
+                  </div>
+                  <h2 class="sheet-title" style="margin-bottom:10px;">${escapeHTML(p.rio)}</h2>
+
+                  <!-- Bloco de Limites Legais das Espécies -->
+                  ${especiesHtml}
+
+                  <!-- Bloco de Piloteiros Conectados ao Trecho -->
+                  <div style="margin-top:14px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <h3 style="font-size:13px; font-weight:700; color:#f8fafc; margin:0; display:flex; align-items:center; gap:6px;">
+                        🚤 Piloteiros Credenciados no Trecho (${guiasDoTrecho.length})
+                      </h3>
+                      <span style="font-size:11px; color:#10b981; font-weight:600;">Sem Intermediários</span>
+                    </div>
+                    ${guiasHtml}
+                  </div>
+
+                  <!-- Detalhes do Trecho e Normativa -->
+                  <div class="data-group" style="margin-top:10px;">
                     <div class="data-item">
-                      <div class="data-label">Cota Permitida</div>
+                      <div class="data-label">Cota Permitida no Trecho</div>
                       <div class="data-value">${escapeHTML(p.cota)}</div>
                     </div>
                     <div class="data-item">
-                      <div class="data-label">Petrechos Autorizados</div>
-                      <div class="data-value">${escapeHTML(p.petrechos)}</div>
+                      <div class="data-label">Petrechos e Navegação</div>
+                      <div class="data-value">${escapeHTML(p.petrechos || p.obs || 'Vara ou linha de mão. Proibido rede e espinhel.')}</div>
                     </div>
                     <div class="data-item">
                       <div class="data-label">Norma de Referência</div>
-                      <div class="data-value">${escapeHTML(p.norma_ref)}</div>
+                      <div class="data-value">${escapeHTML(p.norma_ref || 'Decreto Estadual nº 15.166/19 e Resolução SEMADESC / IMASUL')}</div>
                     </div>
                   </div>
-                  <div class="legal-note-box">
-                    <strong>Atenção:</strong> As regras apresentadas são orientativas e baseadas nas normativas do IMASUL/SEMADESC. Consulte sempre a legislação vigente antes da pescaria.
+
+                  <!-- Botões de Ação Rápida -->
+                  <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                    <button type="button" onclick="window.abrirModalEspecies && window.abrirModalEspecies(); fecharPainel();" style="flex:1; min-width:140px; background:#0284c7; color:#fff; border:none; padding:9px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">
+                      📏 Abrir Simulador de Régua
+                    </button>
+                    <a href="tel:190" style="background:#b91c1c; color:#fff; text-decoration:none; padding:9px 14px; border-radius:6px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                      🚨 PMA 190
+                    </a>
                   </div>
                 `);
               });
             }
           });
           break;
-
         case 'guias_credenciados':
           camadaLeaflet = L.geoJSON(dados, {
             pane: 'guiasPane',
