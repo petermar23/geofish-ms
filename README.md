@@ -5,7 +5,7 @@
 
 [![Licença MIT](https://img.shields.io/badge/licença-MIT-green.svg)](LICENSE)
 [![PWA Ready](https://img.shields.io/badge/PWA-Offline--First-0284c7.svg)](manifest.json)
-[![Cartografia](https://img.shields.io/badge/CRS-SIRGAS%202000%20%2F%20UTM%2021S-0b4f6c.svg)](data/processed)
+[![Cartografia](https://img.shields.io/badge/CRS-WGS84%20%2F%20EPSG%3A4326-0b4f6c.svg)](data/processed)
 [![Pantanal MS](https://img.shields.io/badge/Regi%C3%A3o-Pantanal%20Sul--Mato--Grossense-15803d.svg)](https://github.com/petermar23/geofish-ms)
 [![Iniciativa Independente](https://img.shields.io/badge/Iniciativa-100%25%20Independente-amber.svg)](https://github.com/petermar23/geofish-ms)
 
@@ -27,16 +27,16 @@ Com mais de **44.740 km²** de área de drenagem e 490 km de curso fluvial princ
 
 ### 🗺️ 1. WebGIS Náutico com Dados Abertos
 * Mapas base alternáveis entre **Esri World Imagery (Satélite de Alta Resolução)** e **Esri World Topo (Relevo e Topografia)**.
-* Projeção cartográfica de referência em **SIRGAS 2000 / UTM 21S**.
-* Visualização interativa de **8 camadas GeoJSON públicas**:
-  * 🚤 **Piloteiros & Guias Ribeirinhos:** Localização de embarque e contato direto via WhatsApp.
-  * ⚓ **Rampas Náuticas & Atracadouros:** Pontos de descida de barcos e marinas.
-  * 📞 **Pontos de Apoio & Telefones Úteis:** Pelotões da PMA, bombeiros e unidades de saúde.
-  * 🎣 **Trechos de Pesca:** Indicação didática das regras vigentes (Pesque e Solte, Cota Zero, etc.).
-  * ⚠️ **Áreas de Proteção Ambiental:** Parques e Unidades de Conservação de uso restrito.
-  * 🌊 **Hidrografia Detalhada:** Rios Miranda, Aquidauana, Salobra, Vermelho e afluentes pantaneiros.
-  * 🏘️ **Aglomerados Rurais:** Comunidades, portos e vilas ribeirinhas.
-  * 🗺️ **Zoneamento de Bacias (UEPGRH):** Delimitação hidrográfica regional baseada em dados públicos do IMASUL.
+* Projeção cartográfica nativa em **WGS 84 (EPSG:4326)** em coordenadas geográficas decimais.
+* Visualização interativa de **8 camadas GeoJSON públicas otimizadas**:
+  * 💧 **Rede Hidrográfica & Regras Fluviais (`hidrografia.geojson`):** 561 cursos d'água contínuos com regras categorizadas (Proibida, Pesque e Solte, Permitida com Cota).
+  * 🌊 **Rios Principais (`rios_principais.geojson`):** Eixos troncais da bacia (Miranda, Aquidauana, Taquari, Negro e Paraguai).
+  * 🚤 **Piloteiros & Guias Ribeirinhos (`guias_credenciados.geojson`):** Diretório de condutores locais para contato direto sem taxas.
+  * ⚓ **Rampas Náuticas & Atracadouros (`pontos_emergencia.geojson`):** Pontos de descida de barcos, portos e apoio náutico.
+  * ⚠️ **Unidades de Conservação (`uc_ms.geojson`):** Áreas protegidas com zoneamento e restrições legais.
+  * 🗺️ **Delimitação da Bacia (`bacia_miranda.geojson`):** Polígono territorial da bacia hidrográfica do Miranda.
+  * 🛡️ **Bacias dos Rios Cênicos (`bacias_especiais.geojson`):** Bacias de manejo especial (Salobra, Formoso, Prata, Betione).
+  * 🏘️ **Aglomerados Rurais (`aglomerados_rurais.geojson`):** Vilas, comunidades tradicionais e portos ribeirinhos.
 
 ### 🚤 2. Conexão Direta com Profissionais Locais
 * **Sem Intermediação ou Comissões:** O visitante localiza o profissional no mapa e conversa diretamente por WhatsApp ou chamada telefônica.
@@ -86,16 +86,17 @@ geofish-ms/
 ├── css/
 │   └── style.css                 # Design system WebGIS moderno e responsivo
 ├── data/
-│   └── processed/                # Camadas vetoriais GeoJSON abertas (SIRGAS 2000)
+│   └── processed/                # Camadas vetoriais GeoJSON (WGS 84 / EPSG:4326)
 │       ├── aglomerados_rurais.geojson
-│       ├── areas_restritas.geojson
 │       ├── bacias_especiais.geojson
-│       ├── bacias_uepgrh.geojson
+│       ├── bacia_miranda.geojson
 │       ├── guias_credenciados.geojson
+│       ├── hidrografia.geojson
 │       ├── pontos_emergencia.geojson
 │       ├── rios_principais.geojson
-│       └── trechos_pesca.geojson
-├── docs/                         # Documentos informativos de legislação de pesca
+│       └── uc_ms.geojson
+├── docs/                         # Guias técnicos para PWA e Play Store
+├── LICENSE                       # Licença MIT de código aberto
 ├── icons/                        # Ícones e favicons para PWA
 ├── images/                       # Fotografias da Bacia do Miranda e Pantanal
 ├── js/

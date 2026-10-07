@@ -16,7 +16,7 @@
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
@@ -40,9 +40,9 @@
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Medidas Oficiais de Peixes",
+      "name": "Régua de Espécies Pantaneiras",
       "short_name": "Peixes MS",
-      "description": "Tabela de medidas mínimas e máximas do IMASUL MS",
+      "description": "Tabela de medidas permitidas para a pesca esportiva no MS",
       "url": "./index.html?action=especies",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },

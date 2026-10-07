@@ -860,8 +860,18 @@ function obterPesoPorStatusPesca(status) {
   }
 }
 
-// Registro global de feições para interação direta com botões de Popups Leaflet
+// Registro global de feições para interação direta com botões de Popups Leaflet com chave estável
 const featuresRegistradas = {};
+function obterIdEstavelFeature(feature, prefix = 'feat') {
+  if (!feature) return `${prefix}_${Math.random().toString(36).substr(2, 6)}`;
+  const p = feature.properties || {};
+  const ident = p.id || p.id_trecho || p.id_guia || p.titulo || p.nome || p.rio || '';
+  if (ident) {
+    const slug = String(ident).replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().substr(0, 30);
+    return `${prefix}_${slug}`;
+  }
+  return `${prefix}_${Math.random().toString(36).substr(2, 6)}`;
+}
 
 // Gerador de Popup Especializado para a Hidrografia Contínua (561 cursos d'água da bacia)
 function gerarPopupHidrografia(feature) {
@@ -874,7 +884,7 @@ function gerarPopupHidrografia(feature) {
   const comprimento = p.comprimento_km ? `${p.comprimento_km} km` : 'Calha contínua mapeada';
   const baseLegal = p.base_legal || 'Cartilha do Pescador SEMADESC / IMASUL / PMA';
 
-  const featureId = `hidro_${Math.random().toString(36).substr(2, 9)}`;
+  const featureId = obterIdEstavelFeature(feature, 'hidro');
   featuresRegistradas[featureId] = feature;
 
   if (status === 'Proibida') {
@@ -998,10 +1008,10 @@ function gerarPopupHidrografia(feature) {
 // Gerador de Popup para Guias e Piloteiros
 function gerarPopupGuia(feature) {
   const g = feature.properties || {};
-  const isDemonstrativo = Boolean(g.demonstrativo);
+  const isDemonstrativo = Boolean(g.demonstrativo === true || g.homologado === false || !g.credenciado);
   const waUrl = normalizeWhatsApp(g.contato_wa);
   const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
-  const featureId = `guia_${Math.random().toString(36).substr(2, 9)}`;
+  const featureId = obterIdEstavelFeature(feature, 'guia');
   featuresRegistradas[featureId] = feature;
 
   if (isDemonstrativo) {
@@ -1080,7 +1090,7 @@ function gerarPopupPontoApoio(feature) {
   const a = feature.properties || {};
   const isRampa = Boolean(a.tipo && a.tipo.toLowerCase().includes('rampa'));
   const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
-  const featureId = `apoio_${Math.random().toString(36).substr(2, 9)}`;
+  const featureId = obterIdEstavelFeature(feature, 'apoio');
   featuresRegistradas[featureId] = feature;
 
   return `
@@ -1127,7 +1137,7 @@ function gerarPopupAreaRestrita(feature) {
   const uNome = u.titulo || u.nome || 'Unidade de Conservação';
   const uCat = u.subtitulo || u.categoria || u.grupo || 'Área Protegida';
   const uRegras = u.regras_pesca || 'Unidade de conservação com zoneamento ambiental específico e normas restritivas de pesca.';
-  const featureId = `restrita_${Math.random().toString(36).substr(2, 9)}`;
+  const featureId = obterIdEstavelFeature(feature, 'uc');
   featuresRegistradas[featureId] = feature;
 
   return `
@@ -1165,7 +1175,7 @@ function gerarPopupRioPrincipal(feature) {
   const r = feature.properties || {};
   const nomeRio = r.titulo || r.rio || 'Rio Principal do MS';
   const ext = r.comprimento_km ? `${r.comprimento_km} km` : (r.extensao_km ? `${r.extensao_km} km` : 'Calha Principal');
-  const featureId = `rio_${Math.random().toString(36).substr(2, 9)}`;
+  const featureId = obterIdEstavelFeature(feature, 'rio');
   featuresRegistradas[featureId] = feature;
 
   return `
@@ -2177,7 +2187,7 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
     const coords = feat.geometry ? feat.geometry.coordinates : null;
     const lat = coords ? coords[1] : null;
     const lng = coords ? coords[0] : null;
-    const isConfirmado = Boolean(p.credenciado && p.contato_wa);
+    const isConfirmado = Boolean(p.homologado === true && p.credenciado && p.contato_wa);
     const waUrl = isConfirmado ? normalizeWhatsApp(p.contato_wa) : '';
 
     return `
@@ -2193,7 +2203,7 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
             </div>
           </div>
           <span class="badge-tag" style="background: ${isConfirmado ? '#15803d' : '#f1f5f9'}; color: ${isConfirmado ? '#ffffff' : '#475569'}; border: ${isConfirmado ? 'none' : '1px solid #cbd5e1'}; font-size: 0.68rem; margin: 0; white-space: nowrap;">
-            ${isConfirmado ? '✓ Confirmado' : 'Demonstrativo'}
+            ${isConfirmado ? '✓ Homologado' : 'Vaga Demonstrativa'}
           </span>
         </div>
         <div class="sidebar-guia-card-actions">

@@ -6,30 +6,29 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -56.523412,
-          -20.512345
+          -57.0142,
+          -19.5823
         ]
       },
       "properties": {
         "id_guia": 1,
-        "nome_operacional": "Mestre Zé do Lontra",
-        "nome_completo": "José Ribamar dos Santos",
-        "colonia": "Colônia Z-1 (Miranda)",
+        "nome_operacional": "[Demonstrativo] Piloteiro Passo do Lontra",
+        "nome_completo": "Vaga Comunitária Aberta - Condutor Local",
+        "colonia": "Colônia Z-1 (Miranda / Corumbá)",
         "porto_base": "Passo do Lontra & Foz do Rio Vermelho",
         "municipio": "Corumbá / Miranda",
         "contato_wa": null,
-        "status_homologacao": "Perfil Demonstrativo (Em Homologação)",
-        "tipo_barco": "Bote de Alumínio 6m / 25HP Yamaha",
-        "especialidade": "Pesque e Solte de Dourado e rodada de peixe de couro no Rio Vermelho",
-        "trecho_ids": [
-          101,
-          104
-        ],
+        "demonstrativo": true,
+        "homologado": false,
+        "status_homologacao": "Vaga Aberta (Cadastro Comunitário)",
+        "tipo_barco": "Bote de Alumínio 6m / Motor 25HP",
+        "especialidade": "Pesca esportiva com devolução no Rio Vermelho e calha do Rio Miranda",
+        "trecho_ids": [101, 104],
         "rios_atendidos": [
           "Rio Miranda (Calha Principal)",
           "Rio Vermelho (Passo do Lontra)"
         ],
-        "status": 1,
+        "status": 0,
         "credenciado": false
       }
     },
@@ -38,28 +37,28 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -56.505,
-          -20.505
+          -56.3768,
+          -20.2392
         ]
       },
       "properties": {
         "id_guia": 2,
-        "nome_operacional": "Ditão Pantaneiro",
-        "nome_completo": "Benedito Alves da Silva",
+        "nome_operacional": "[Demonstrativo] Piloteiro Miranda Porto Geral",
+        "nome_completo": "Vaga Comunitária Aberta - Condutor Local",
         "colonia": "Colônia Z-1 (Miranda)",
         "porto_base": "Miranda - Porto Geral",
         "municipio": "Miranda",
         "contato_wa": null,
-        "status_homologacao": "Perfil Demonstrativo (Em Homologação)",
-        "tipo_barco": "Barco Pantaneiro 6m / 30HP",
+        "demonstrativo": true,
+        "homologado": false,
+        "status_homologacao": "Vaga Aberta (Cadastro Comunitário)",
+        "tipo_barco": "Barco Pantaneiro 6m / Motor 30HP",
         "especialidade": "Pesca na batida de Pacu e poitas tradicionais do Rio Miranda",
-        "trecho_ids": [
-          101
-        ],
+        "trecho_ids": [101],
         "rios_atendidos": [
           "Rio Miranda (Calha Principal)"
         ],
-        "status": 1,
+        "status": 0,
         "credenciado": false
       }
     },
@@ -68,30 +67,29 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -56.1245,
-          -20.8932
+          -56.0945,
+          -20.7321
         ]
       },
       "properties": {
         "id_guia": 3,
-        "nome_operacional": "Mestre Tião do Salobra",
-        "nome_completo": "Sebastião da Costa Filho",
-        "colonia": "Colônia Z-11 (Bonito)",
+        "nome_operacional": "[Demonstrativo] Piloteiro Águas do Miranda",
+        "nome_completo": "Vaga Comunitária Aberta - Condutor Local",
+        "colonia": "Colônia Z-11 (Bonito / Bodoquena)",
         "porto_base": "Distrito de Águas do Miranda / Rio Salobra",
         "municipio": "Bonito / Bodoquena",
         "contato_wa": null,
-        "status_homologacao": "Perfil Demonstrativo (Em Homologação)",
-        "tipo_barco": "Bote Alumínio 6m / Motor 4T 15HP + Elétrico",
-        "especialidade": "Especialista em Pesque e Solte no Rio Salobra (águas cristalinas e fly)",
-        "trecho_ids": [
-          101,
-          102
-        ],
+        "demonstrativo": true,
+        "homologado": false,
+        "status_homologacao": "Vaga Aberta (Cadastro Comunitário)",
+        "tipo_barco": "Bote de Alumínio 6m / Motor 15HP + Elétrico",
+        "especialidade": "Pesque e Solte em águas cristalinas e ecoturismo de observação",
+        "trecho_ids": [101, 102],
         "rios_atendidos": [
           "Rio Miranda (Calha Principal)",
-          "Rio Salobra e Córrego Azul"
+          "Rio Salobra"
         ],
-        "status": 1,
+        "status": 0,
         "credenciado": false
       }
     },
@@ -100,28 +98,28 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -55.789,
-          -20.471
+          -55.6312,
+          -20.4851
         ]
       },
       "properties": {
         "id_guia": 4,
-        "nome_operacional": "Capitão Camisão",
-        "nome_completo": "Carlos Eduardo Miranda",
+        "nome_operacional": "[Demonstrativo] Piloteiro Camisão & Piraputanga",
+        "nome_completo": "Vaga Comunitária Aberta - Condutor Local",
         "colonia": "Colônia Z-7 (Aquidauana)",
         "porto_base": "Porto de Camisão & Piraputanga",
         "municipio": "Aquidauana",
         "contato_wa": null,
-        "status_homologacao": "Perfil Demonstrativo (Em Homologação)",
-        "tipo_barco": "Chata Pantaneira 6m / 25HP",
-        "especialidade": "Pintado na rodada e leitura de pedrais no Rio Aquidauana",
-        "trecho_ids": [
-          103
-        ],
+        "demonstrativo": true,
+        "homologado": false,
+        "status_homologacao": "Vaga Aberta (Cadastro Comunitário)",
+        "tipo_barco": "Chata Pantaneira 6m / Motor 25HP",
+        "especialidade": "Rodada de peixe de couro e navegação nos pedrais do Rio Aquidauana",
+        "trecho_ids": [103],
         "rios_atendidos": [
           "Rio Aquidauana"
         ],
-        "status": 1,
+        "status": 0,
         "credenciado": false
       }
     },
@@ -130,28 +128,29 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -55.6,
-          -19.45
+          -56.2415,
+          -19.5528
         ]
       },
       "properties": {
         "id_guia": 5,
-        "nome_operacional": "Chico Pantaneiro do Rio Negro",
-        "nome_completo": "Francisco Mendes Leite",
+        "nome_operacional": "[Demonstrativo] Piloteiro Rio Negro Pantaneiro",
+        "nome_completo": "Vaga Comunitária Aberta - Condutor Local",
         "colonia": "Colônia Z-1 (Miranda / Rio Negro)",
-        "porto_base": "Foz do Lajeado / Fazenda Fazendinha",
+        "porto_base": "Foz do Rio Negro & Rio Miranda",
         "municipio": "Aquidauana / Corumbá",
         "contato_wa": null,
-        "status_homologacao": "Perfil Demonstrativo (Em Homologação)",
-        "tipo_barco": "Bote de Alumínio c/ Motor 4T 15HP Silencioso",
+        "demonstrativo": true,
+        "homologado": false,
+        "status_homologacao": "Vaga Aberta (Cadastro Comunitário)",
+        "tipo_barco": "Bote de Alumínio c/ Motor 15HP 4T Silencioso",
         "especialidade": "Pesque e Solte esportivo em meandros preservados do Rio Negro",
-        "trecho_ids": [
-          105
-        ],
+        "trecho_ids": [105],
         "rios_atendidos": [
-          "Rio Negro (Pantanal)"
+          "Rio Negro (Pantanal)",
+          "Rio Miranda"
         ],
-        "status": 1,
+        "status": 0,
         "credenciado": false
       }
     }
