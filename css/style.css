@@ -584,6 +584,34 @@ body {
   filter: brightness(1.08);
 }
 
+/* Estilos Especializados para Popups de Rios e Preservação */
+.popup-proibida {
+  border-left: 4px solid #dc2626 !important;
+}
+
+.popup-proibida .btn-popup-ver-painel {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3) !important;
+}
+
+.popup-pesque-solte {
+  border-left: 4px solid #d97706 !important;
+}
+
+.popup-pesque-solte .btn-popup-ver-painel {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+  box-shadow: 0 3px 10px rgba(217, 119, 6, 0.3) !important;
+}
+
+.rio-popup {
+  border-left: 4px solid #0284c7 !important;
+}
+
+.rio-popup .btn-popup-ver-painel {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.3) !important;
+}
+
 .btn-popup-medir {
   width: 100%;
   background: #f1f5f9;
