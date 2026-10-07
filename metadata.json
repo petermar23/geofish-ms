@@ -1,6 +1,0 @@
-{
-  "name": "GeoFish MS - Bacia do Rio Miranda",
-  "description": "Plataforma WebGIS e PWA para governança territorial, turismo sustentável e conformidade da pesca esportiva na Bacia do Rio Miranda (MS).",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

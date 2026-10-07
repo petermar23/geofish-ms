@@ -1,5 +1,5 @@
-// GeoFish MS - Service Worker PWA (Offline & Cache Governance)
-const CACHE_VERSION = 'geofish-shell-v60';
+const CACHE_VERSION = 'geofish-shell-__CACHE_VERSION__';
+const PRECACHE_LIST = ['__PRECACHE_LIST__'];
 const TILES_CACHE_NAME = 'geofish-tiles-v1';
 const GEOJSON_CACHE_NAME = 'geofish-geojson-v2';
 const MAX_TILES = 1500;
@@ -16,45 +16,6 @@ const TRANSPARENT_PNG = new Uint8Array([
   0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
   0x42, 0x60, 0x82
 ]);
-
-const SHELL_ASSETS = [
-  './',
-  './index.html',
-  './css/style.css',
-  './js/app.js',
-  './js/db.js',
-  './js/geoFishImages.js',
-  './js/modules/utils.js',
-  './js/modules/modal-manager.js',
-  './js/modules/cartilha-modal.js',
-  './js/modules/species-checker.js',
-  './js/modules/telefones-apoio.js',
-  './js/modules/pwa-offline.js',
-  './manifest.json',
-  './LICENSE',
-  './lib/leaflet/leaflet.css',
-  './lib/leaflet/leaflet.js',
-  './lib/leaflet/images/marker-icon.png',
-  './lib/leaflet/images/marker-icon-2x.png',
-  './lib/leaflet/images/marker-shadow.png',
-  './lib/leaflet/images/layers.png',
-  './lib/leaflet/images/layers-2x.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/favicon-32.png',
-  './images/hero/rio_miranda_panorama.jpg',
-  './images/pesca/barco_rio_miranda.jpg',
-  './images/navegacao/passo_lontra_foz.jpg',
-  './images/natureza/rio_salobra_cristalino.jpg',
-  './images/natureza/arara_azul_miranda.jpg',
-  './images/rio/estrada_parque_miranda.jpg',
-  './images/pantanal/tuiuiu_pantanal.jpg',
-  './images/pantanal/pantanal_crepusculo.jpg',
-  './images/comunidade/rio_miranda_floresta.jpg',
-  './data/processed/pontos_emergencia.geojson'
-];
 
 // Helper to trim cache size (FIFO LRU)
 async function trimCache(cacheName, maxItems) {
@@ -76,8 +37,8 @@ async function trimCache(cacheName, maxItems) {
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then(async (cache) => {
-      // Add each asset with cache reload
-      const promises = SHELL_ASSETS.map((asset) => {
+      // Add each asset with cache reload and individual fault tolerance
+      const promises = PRECACHE_LIST.map((asset) => {
         return fetch(asset, { cache: 'reload' })
           .then((res) => {
             if (res.ok) {
@@ -270,7 +231,7 @@ self.addEventListener('message', (event) => {
     caches.open(CACHE_VERSION).then((cache) => {
       cache.match('./index.html').then((resp) => {
         if (!resp) {
-          cache.addAll(SHELL_ASSETS).catch((e) => console.warn('[SW] Falha ao pre-cachear:', e));
+          cache.addAll(PRECACHE_LIST).catch((e) => console.warn('[SW] Falha ao pre-cachear:', e));
         }
       });
     });

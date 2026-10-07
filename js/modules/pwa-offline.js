@@ -22,6 +22,9 @@ export function atualizarStatusRede() {
 }
 
 export function registrarServiceWorker() {
+  if (!import.meta.env.PROD) {
+    return;
+  }
   if ('serviceWorker' in navigator) {
     const hadController = Boolean(navigator.serviceWorker.controller);
 
@@ -29,6 +32,16 @@ export function registrarServiceWorker() {
       navigator.serviceWorker.register('./sw.js')
         .then((reg) => {
           reg.update();
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showToast('Nova versão disponível — recarregar', 'info');
+                }
+              });
+            }
+          });
         })
         .catch((err) => {
           console.warn('Erro ao registrar Service Worker do PWA:', err);
@@ -36,12 +49,10 @@ export function registrarServiceWorker() {
     });
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // Primeira instalação: assume controle em segundo plano sem recarregar a tela
       if (!hadController) {
         return;
       }
-      // Atualização com formulário em preenchimento: notifica o usuário sem recarregar destrutivamente
-      showToast('O GeoFish MS foi atualizado em segundo plano.', 'info');
+      showToast('Nova versão disponível — recarregar', 'info');
     });
   }
 }
