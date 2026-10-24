@@ -159,7 +159,6 @@ for feat in lyr_upg:
             })
 
 save_geojson("bacias_ms.geojson", bacias_features)
-save_geojson("bacia_miranda.geojson", bacias_features)
 
 
 def identificar_bacia_ponto(lon, lat):

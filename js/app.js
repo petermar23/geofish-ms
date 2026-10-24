@@ -1,6 +1,6 @@
 /**
- * GeoFish MS - Bacia do Rio Miranda (Mato Grosso do Sul)
- * Aplicação WebGIS PWA para Governança Territorial e Pesca Sustentável
+ * GeoFish MS - Estado de Mato Grosso do Sul (79 Municípios)
+ * WebGIS Desktop Comercial e Comunitário da Pesca Esportiva
  * Orquestrador Principal Modularizado (ES6)
  */
 
@@ -18,8 +18,6 @@ import {
   setPosicaoUsuario,
   getPosicaoUsuario
 } from './modules/utils.js';
-
-import GeoFishDB from './db.js';
 
 // Canal de suporte comunitário do projeto
 export const WHATSAPP_CONTATO_SUPORTE = null;
@@ -51,14 +49,6 @@ import {
   abrirModalTelefones,
   fecharModalTelefones
 } from './modules/telefones-apoio.js';
-
-import {
-  atualizarStatusRede,
-  registrarServiceWorker,
-  abrirModalInstall,
-  fecharModalInstall,
-  initPWAOffline
-} from './modules/pwa-offline.js';
 
 // Limites geográficos de todo o Estado de Mato Grosso do Sul (79 municípios: Bacias do Paraguai e Paraná)
 const BOUNDS_BACIA = L.latLngBounds(
@@ -401,79 +391,26 @@ function avaliarConformidadePosicao(userLat, userLng) {
 }
 
 /**
- * Carrega a camada GeoJSON com estratégia Rede Primeiro e fallback IndexedDB com timeout de 5s
+ * Carrega a camada GeoJSON diretamente via HTTP/Vite
  */
 async function carregarCamada(layerKey, url) {
-  const cached = window.GeoFishDB ? await window.GeoFishDB.obterCamada(layerKey) : null;
   let dados = null;
-  let origem = 'offline';
-  let dataAtualizacao = cached ? cached.atualizado_em : null;
-
-  const controller = new AbortController();
-  let timeoutId = null;
-
-  // Se já temos cache, dá até 5 segundos para a rede responder antes de recorrer ao cache
-  if (cached) {
-    timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 5000);
-  }
+  let origem = 'indisponivel';
+  let dataAtualizacao = null;
 
   try {
-    const fetchHeaders = {};
-    if (cached && (cached.etag || cached.versao)) {
-      fetchHeaders['If-None-Match'] = cached.etag || cached.versao;
-    }
-
-    const response = await fetch(url, {
-      headers: fetchHeaders,
-      cache: 'no-cache',
-      signal: controller.signal
-    });
-
-    if (timeoutId) clearTimeout(timeoutId);
-
-    if (response.status === 304 && cached && cached.data) {
-      // 304 Not Modified: reutiliza os dados em cache sem reescrever no IndexedDB
-      dados = cached.data;
-      origem = 'cache_validado';
-      dataAtualizacao = cached.atualizado_em;
-    } else if (response.ok) {
-      const jsonRecebido = await response.json();
-      const temFeicoesReais = Boolean(jsonRecebido?.features?.length > 0);
-      const cacheTinhaFeicoes = Boolean(cached?.data?.features?.length > 0);
-
-      // Previne substituição acidental de dados locais válidos por respostas vazias
-      if (!temFeicoesReais && cacheTinhaFeicoes) {
-        console.warn(`[GeoFish] Resposta vazia recebida para [${layerKey}]. Preservando dados válidos do IndexedDB.`);
-        dados = cached.data;
-        origem = 'offline';
-        dataAtualizacao = cached.atualizado_em;
-      } else {
-        dados = jsonRecebido;
-        origem = 'rede';
-        dataAtualizacao = new Date().toISOString();
-        const novoEtag = response.headers.get('ETag') || '1.0';
-
-        // Salva no IndexedDB apenas se contiver feições reais
-        if (window.GeoFishDB && temFeicoesReais) {
-          await window.GeoFishDB.salvarCamada(layerKey, dados, novoEtag, novoEtag);
-        }
-      }
+    const response = await fetch(url, { cache: 'no-cache' });
+    if (response.ok) {
+      dados = await response.json();
+      origem = 'rede';
+      dataAtualizacao = new Date().toISOString();
     } else {
       throw new Error(`HTTP ${response.status}`);
     }
   } catch (err) {
-    if (timeoutId) clearTimeout(timeoutId);
-    if (cached && cached.data) {
-      dados = cached.data;
-      origem = 'offline';
-      dataAtualizacao = cached.atualizado_em;
-    } else {
-      console.warn(`Falha ao obter dados da camada [${layerKey}]:`, err);
-      dados = null;
-      origem = 'indisponivel';
-    }
+    console.warn(`Falha ao obter dados da camada [${layerKey}]:`, err);
+    dados = null;
+    origem = 'indisponivel';
   }
 
   statusCamadas[layerKey] = {
@@ -2320,46 +2257,6 @@ const btnAbrirSobre = document.getElementById('btn-sobre');
 if (btnAbrirSobre) {
   btnAbrirSobre.addEventListener('click', abrirModalSobre);
 }
-// 10, 11, 12. Gestão PWA & Offline delegada para o submódulo js/modules/pwa-offline.js
-// Gestão de Histórico e Popstate unificada em js/modules/modal-manager.js
-
-// Barra de Navegação Inferior de Polegar para Android
-const navBtnGuias = document.getElementById('nav-btn-guias');
-const navBtnEspecies = document.getElementById('nav-btn-especies');
-const navBtnRampas = document.getElementById('nav-btn-rampas');
-const navBtnPousadas = document.getElementById('nav-btn-pousadas');
-
-if (navBtnGuias) {
-  navBtnGuias.addEventListener('click', () => {
-    vibrar(30);
-    if (typeof abrirModalParceriasTab === 'function') {
-      abrirModalParceriasTab('piloteiros');
-    }
-  });
-}
-
-if (navBtnEspecies) {
-  navBtnEspecies.addEventListener('click', () => {
-    vibrar(25);
-    abrirModalEspecies();
-  });
-}
-
-if (navBtnRampas) {
-  navBtnRampas.addEventListener('click', () => {
-    vibrar(25);
-    aplicarFiltroRapido('apoio');
-  });
-}
-
-if (navBtnPousadas) {
-  navBtnPousadas.addEventListener('click', () => {
-    vibrar(25);
-    if (typeof abrirModalParceriasTab === 'function') {
-      abrirModalParceriasTab('pousadas');
-    }
-  });
-}
 
 // ========================================================
 // CONTROLE DA SIDEBAR E ABAS DO WEBGIS ESTADUAL (MS)
@@ -2721,14 +2618,6 @@ function inicializarSidebarDataGeo() {
   const btnSateliteTop = document.getElementById('btn-satelite-top');
   if (btnSateliteTop) btnSateliteTop.addEventListener('click', alternarMapaBase);
 
-  const btnOfflineTop = document.getElementById('btn-offline-top');
-  if (btnOfflineTop) btnOfflineTop.addEventListener('click', () => {
-    vibrar(25);
-    const btnOfflineOrig = document.getElementById('btn-offline');
-    if (btnOfflineOrig) btnOfflineOrig.click();
-    else showToast('Camadas GeoJSON e regras salvas offline no IndexedDB.');
-  });
-
   const btnSobreTop = document.getElementById('btn-sobre-top');
   if (btnSobreTop) btnSobreTop.addEventListener('click', () => {
     vibrar(20);
@@ -2743,28 +2632,15 @@ function inicializarSidebarDataGeo() {
   });
 }
 
-// Inicialização do aplicativo: carrega camadas, módulos auxiliares, defeso e busca
+// Inicialização do aplicativo Desktop WebGIS: carrega camadas, módulos auxiliares, defeso e busca
 window.addEventListener('DOMContentLoaded', () => {
   initSpeciesChecker();
-  initPWAOffline();
   verificarPeriodoDefeso();
   inicializarSidebarDataGeo();
 
   carregarTodasCamadas().then(() => {
     renderizarSidebarGuias('todas');
     renderizarSidebarPousadas();
-
-    // Processamento de atalhos rápidos do Android (URL shortcuts do manifest)
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get('action');
-    if (action === 'pousadas') {
-      const tabPousadas = document.getElementById('tab-pousadas');
-      if (tabPousadas) tabPousadas.click();
-    } else if (action === 'especies') {
-      setTimeout(abrirModalEspecies, 500);
-    } else if (action === 'apoio') {
-      setTimeout(() => aplicarFiltroRapido('apoio'), 500);
-    }
   });
 
   inicializarBuscaLocal();

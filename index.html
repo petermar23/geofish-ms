@@ -13,18 +13,8 @@
   <meta property="og:description" content="Mapa interativo completo de Mato Grosso do Sul: rios navegáveis, pousadas, piloteiros, hospitais, polícia, rodovias e regras da pesca esportiva.">
   <meta property="og:type" content="website">
 
-  <!-- PWA & Android / iOS Meta Tags -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b4f6c">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="GeoFish MS">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="GeoFish MS">
-
-  <!-- Favicons -->
+  <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Folhas de Estilo -->
   <link rel="stylesheet" href="lib/leaflet/leaflet.css">
@@ -70,10 +60,6 @@
       <button id="btn-satelite-top" class="btn-top-action" title="Alternar entre imagem de satélite de alta resolução e mapa topográfico">
         <span aria-hidden="true">🛰️</span>
         <span class="btn-label-desktop">Satélite</span>
-      </button>
-      <button id="btn-offline-top" class="btn-top-action" title="Salvar mapa e camadas no celular para navegar sem 4G">
-        <span aria-hidden="true">💾</span>
-        <span class="btn-label-desktop">Salvar Offline</span>
       </button>
       <button id="btn-sobre-top" class="btn-top-action" title="Conhecer a iniciativa cidadã e dados">
         <span aria-hidden="true">ℹ️</span>
@@ -355,9 +341,9 @@
               🧭 A Jornada do Turista Pescador
             </div>
             <ul style="font-size: 0.76rem; color: #166534; line-height: 1.45; padding-left: 16px; margin: 0;">
-              <li><strong>Antes (em casa):</strong> WebGIS, licença IMASUL e contato direto com o guia via WhatsApp.</li>
-              <li><strong>Durante (no barco offline):</strong> GPS náutico, zonas restritas (ex: Salobra Dec. 15.166) e régua de espécies.</li>
-              <li><strong>Depois (na rodovia):</strong> Posto PMA da BR-262/MS-184 para lacre e Guia GCP.</li>
+              <li><strong>Antes (planejamento no Desktop):</strong> Consulta no WebGIS, emissão da licença IMASUL e reserva com pousada/piloteiro via WhatsApp.</li>
+              <li><strong>No rio:</strong> Respeito às zonas restritas (ex: Rios Cênicos e UCs) e conferência de medidas das espécies.</li>
+              <li><strong>Na rodovia (BR/MS):</strong> Passagem no posto da PMA para medição, lacre e emissão da Guia GCP.</li>
             </ul>
           </div>
 
@@ -896,59 +882,11 @@
     </div>
   </template>
 
-  <!-- Template Modal Como Instalar PWA -->
-  <template id="template-modal-install">
-    <div id="modal-install" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="Como instalar no celular">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <h2>
-            <span aria-hidden="true">📲</span>
-            <span>Instalar o App no Celular</span>
-          </h2>
-          <button id="btn-fechar-install" class="modal-close-btn" aria-label="Fechar instruções">&times;</button>
-        </div>
-        <div class="modal-body" style="padding: 16px;">
-          <p style="font-size: 0.88rem; color: #334155; margin-bottom: 14px; line-height: 1.45;">
-            Instale o <strong>GeoFish MS</strong> no seu celular para abrir como aplicativo nativo e <strong>navegar no rio mesmo sem sinal de internet</strong>:
-          </p>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
-            <div style="font-weight: 700; color: #15803d; font-size: 0.85rem; margin-bottom: 8px;">
-              🤖 Celulares Android (Chrome / Samsung Internet)
-            </div>
-            <ol style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #334155; line-height: 1.5;">
-              <li>Toque no menu de <strong>3 pontinhos (⋮)</strong> no topo do navegador.</li>
-              <li>Selecione <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
-              <li>Confirme em <strong>"Instalar"</strong>. O ícone aparecerá com seus outros aplicativos!</li>
-            </ol>
-          </div>
-
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;">
-            <div style="font-weight: 700; color: #0284c7; font-size: 0.85rem; margin-bottom: 8px;">
-              🍎 iPhone / iPad (Safari)
-            </div>
-            <ol style="margin: 0; padding-left: 18px; font-size: 0.82rem; color: #334155; line-height: 1.5;">
-              <li>No Safari, toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima).</li>
-              <li>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
-              <li>Toque em <strong>"Adicionar"</strong> no canto superior direito.</li>
-            </ol>
-          </div>
-        </div>
-        <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid #e2e8f0; text-align: right;">
-          <button type="button" class="btn-cta" id="btn-fechar-install-rodape" style="background: #64748b;">Entendi</button>
-        </div>
-      </div>
-    </div>
-  </template>
-
-
-
   <!-- Contêiner de Mensagens Toast -->
   <div id="toast-container" aria-live="polite"></div>
 
   <!-- Scripts da Aplicação -->
   <script src="lib/leaflet/leaflet.js"></script>
-  <script type="module" src="js/geoFishImages.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
