@@ -60,20 +60,20 @@ import {
   initPWAOffline
 } from './modules/pwa-offline.js';
 
-// Limites geográficos estritos da Bacia Hidrográfica do Rio Miranda (Pantanal MS)
+// Limites geográficos de todo o Estado de Mato Grosso do Sul (79 municípios: Bacias do Paraguai e Paraná)
 const BOUNDS_BACIA = L.latLngBounds(
-  L.latLng(-21.80, -57.90), // Sudoeste (Porto Murtinho / Foz no Rio Paraguai)
-  L.latLng(-19.30, -54.70)  // Nordeste (Cabeceiras de Aquidauana / Corguinho)
+  L.latLng(-24.30, -58.50), // Extremo Sudoeste (Mundo Novo / Porto Murtinho / Fronteira PY-BO)
+  L.latLng(-17.00, -50.50)  // Extremo Nordeste (Sonora / Chapadão do Sul / Três Lagoas / Rio Paraná)
 );
 
-// 3. Inicialização do Mapa Leaflet com Esri Satélite
+// 3. Inicialização do Mapa Leaflet com Esri Satélite cobrindo Mato Grosso do Sul
 const map = L.map('map', {
-  center: [-20.24, -56.38], // Centroide na região de Miranda - MS
-  zoom: 9,
-  minZoom: 7,
+  center: [-20.50, -54.80], // Centroide geográfico do Estado de Mato Grosso do Sul
+  zoom: 7,
+  minZoom: 6,
   maxZoom: 18,
   maxBounds: BOUNDS_BACIA,
-  maxBoundsViscosity: 0.8,
+  maxBoundsViscosity: 0.75,
   zoomControl: false, // Ocultado para posicionar no canto superior direito
   preferCanvas: true,
   renderer: L.canvas({ tolerance: 14 })
@@ -132,17 +132,20 @@ export function alternarMapaBase() {
 }
 
 // Atribuição de governança cartográfica e autoria cidadã
-map.attributionControl.addAttribution('Iniciativa Cidadã: Peterson Martins da Costa | Cartografia Base: Fontes Públicas (SEMADESC / IMASUL)');
+map.attributionControl.addAttribution('GeoFish MS | Fontes Oficiais: IBGE, ANA, IMASUL, FUNAI, AGESUL/DNIT & OpenStreetMap');
 
-// 4. Criação dos Panes do Leaflet com zIndex estrito (Regras de Empilhamento)
+// 4. Criação dos Panes do Leaflet com zIndex estrito (Regras de Empilhamento Estadual)
 const PANES = [
+  { name: 'municipiosPane', zIndex: 405 },
   { name: 'baciasPane', zIndex: 410 },
   { name: 'especiaisPane', zIndex: 420 },
   { name: 'restritasPane', zIndex: 430 },
   { name: 'hidrografiaBasePane', zIndex: 440 },
+  { name: 'rodoviasPane', zIndex: 445 },
   { name: 'riosPane', zIndex: 450 },
   { name: 'aglomeradosPane', zIndex: 455 },
   { name: 'apoioPane', zIndex: 460 },
+  { name: 'anunciantesPane', zIndex: 462 },
   { name: 'guiasPane', zIndex: 465 },
   { name: 'posicaoPane', zIndex: 470 }
 ];
@@ -1005,58 +1008,44 @@ function gerarPopupHidrografia(feature) {
   `;
 }
 
+// Utilitário para construir URL gratuita do Google Maps para coordenadas ou usar rota_gmaps
+function obterUrlRotaGoogleMaps(feature) {
+  if (!feature) return '';
+  const p = feature.properties || {};
+  if (p.rota_gmaps && String(p.rota_gmaps).startsWith('https://')) {
+    return String(p.rota_gmaps);
+  }
+  const coords = feature.geometry?.coordinates;
+  if (Array.isArray(coords) && coords.length >= 2 && typeof coords[0] === 'number') {
+    return `https://www.google.com/maps/dir/?api=1&destination=${coords[1].toFixed(6)},${coords[0].toFixed(6)}`;
+  }
+  return '';
+}
+
 // Gerador de Popup para Guias e Piloteiros
 function gerarPopupGuia(feature) {
   const g = feature.properties || {};
-  const isDemonstrativo = Boolean(g.demonstrativo === true || g.homologado === false || !g.credenciado);
   const waUrl = normalizeWhatsApp(g.contato_wa);
   const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
+  const rotaUrl = obterUrlRotaGoogleMaps(feature);
   const featureId = obterIdEstavelFeature(feature, 'guia');
   featuresRegistradas[featureId] = feature;
-
-  if (isDemonstrativo) {
-    return `
-      <div class="geofish-map-popup guia-popup">
-        <div class="geofish-map-popup-header">
-          <span class="geofish-map-popup-badge" style="background-color: #d97706;">
-            🚤 Vaga Aberta &bull; Piloteiro
-          </span>
-        </div>
-        <h3 class="geofish-map-popup-title">${escapeHTML(g.nome_operacional || 'Piloteiro Credenciado')}</h3>
-        <div class="geofish-map-popup-body">
-          <div class="geofish-popup-item">
-            <span class="geofish-popup-label">Porto / Base:</span>
-            <span class="geofish-popup-val">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</span>
-          </div>
-          <div class="geofish-popup-item">
-            <span class="geofish-popup-label">Colônia:</span>
-            <span class="geofish-popup-val">${escapeHTML(g.colonia || 'Z-1 / Z-7 / Z-11')}</span>
-          </div>
-        </div>
-        <div class="geofish-map-popup-actions">
-          <button type="button" class="btn-popup-cadastrar-guia">
-            ✍️ Cadastrar Barco Gratuitamente
-          </button>
-        </div>
-      </div>
-    `;
-  }
 
   return `
     <div class="geofish-map-popup guia-popup">
       <div class="geofish-map-popup-header">
         <span class="geofish-map-popup-badge" style="background-color: #0284c7;">
-          🚤 Piloteiro Comunitário
+          🚤 Piloteiro / Guia de Pesca
         </span>
       </div>
       <h3 class="geofish-map-popup-title">${escapeHTML(g.nome_operacional || g.nome_completo || 'Piloteiro Local')}</h3>
       <div class="geofish-map-popup-body">
         <div class="geofish-popup-item">
           <span class="geofish-popup-label">Porto Base:</span>
-          <span class="geofish-popup-val">${escapeHTML(g.porto_base || 'Pantanal')}</span>
+          <span class="geofish-popup-val">${escapeHTML(g.porto_base || 'Mato Grosso do Sul')}</span>
         </div>
         <div class="geofish-popup-item">
-          <span class="geofish-popup-label">Colônia:</span>
+          <span class="geofish-popup-label">Colônia / Polo:</span>
           <span class="geofish-popup-val">${escapeHTML(g.colonia || 'Tradicional')}</span>
         </div>
         ${g.tipo_barco ? `
@@ -1077,6 +1066,11 @@ function gerarPopupGuia(feature) {
             📞 Ligar
           </a>
         ` : ''}
+        ${rotaUrl ? `
+          <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-popup-action-tel" style="background: #0f766e;">
+            📍 Rota Google Maps
+          </a>
+        ` : ''}
         <button type="button" class="btn-popup-ver-guia-painel" data-feature-id="${escapeHTML(featureId)}">
           📋 Ficha Completa
         </button>
@@ -1085,42 +1079,117 @@ function gerarPopupGuia(feature) {
   `;
 }
 
-// Gerador de Popup para Apoio Náutico e Rampas
+// Gerador de Popup para Pousadas, Hotéis, Ranchos e Empresas Anunciantes (anunciantes_ms.geojson)
+function gerarPopupAnunciante(feature) {
+  const a = feature.properties || {};
+  const isOuro = a.plano === 'ouro' || a.destaque === true;
+  const waUrl = normalizeWhatsApp(a.whatsapp);
+  const rotaUrl = obterUrlRotaGoogleMaps(feature);
+  const featureId = obterIdEstavelFeature(feature, 'anunciante');
+  featuresRegistradas[featureId] = feature;
+
+  return `
+    <div class="geofish-map-popup anunciante-popup">
+      <div class="geofish-map-popup-header">
+        <span class="geofish-map-popup-badge" style="background-color: ${isOuro ? '#b45309' : '#0369a1'};">
+          ${isOuro ? '⭐ Destaque Oficial &bull; ' : '🏨 '}${escapeHTML(a.categoria || 'Hospedagem e Pesca')}
+        </span>
+      </div>
+      <h3 class="geofish-map-popup-title">${escapeHTML(a.nome || 'Estabelecimento')}</h3>
+      <div class="geofish-map-popup-body">
+        <div class="geofish-popup-item">
+          <span class="geofish-popup-label">Município:</span>
+          <span class="geofish-popup-val"><strong>${escapeHTML(a.municipio || 'Mato Grosso do Sul')}</strong></span>
+        </div>
+        ${a.comodidades ? `
+          <div class="geofish-popup-item">
+            <span class="geofish-popup-label">Estrutura:</span>
+            <span class="geofish-popup-val">${escapeHTML(a.comodidades)}</span>
+          </div>
+        ` : ''}
+        ${a.descricao ? `
+          <div class="geofish-popup-item" style="font-size: 0.76rem; color: #475569; margin-top: 4px;">
+            <span>${escapeHTML(a.descricao)}</span>
+          </div>
+        ` : ''}
+      </div>
+      <div class="geofish-map-popup-actions">
+        ${waUrl ? `
+          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-popup-action-wa">
+            💬 WhatsApp Direto
+          </a>
+        ` : ''}
+        ${rotaUrl ? `
+          <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-popup-action-tel" style="background: #0284c7;">
+            📍 Abrir Rota no Google Maps
+          </a>
+        ` : ''}
+        <button type="button" class="btn-popup-ver-anunciante-painel" data-feature-id="${escapeHTML(featureId)}">
+          📋 Ver Ficha
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Gerador de Popup para Apoio Náutico, Rampas, Hospitais, Polícia e Bombeiros (pontos_emergencia.geojson)
 function gerarPopupPontoApoio(feature) {
   const a = feature.properties || {};
-  const isRampa = Boolean(a.tipo && a.tipo.toLowerCase().includes('rampa'));
+  const cat = (a.categoria_icone || '').toLowerCase();
+  const isRampa = Boolean(cat === 'rampa' || cat === 'marina' || (a.tipo && a.tipo.toLowerCase().includes('rampa')));
+  const isHospital = cat === 'hospital';
+  const isPolicia = cat === 'policia' || cat === 'bombeiro';
   const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
+  const rotaUrl = obterUrlRotaGoogleMaps(feature);
   const featureId = obterIdEstavelFeature(feature, 'apoio');
   featuresRegistradas[featureId] = feature;
+
+  let corBadge = '#ef4444';
+  let textoBadge = '🚨 Apoio e Emergência';
+  if (isRampa) {
+    corBadge = '#0d9488';
+    textoBadge = '⚓ Rampa & Acesso Náutico';
+  } else if (isHospital) {
+    corBadge = '#dc2626';
+    textoBadge = '🏥 Hospital / Pronto Atendimento';
+  } else if (isPolicia) {
+    corBadge = '#1e3a8a';
+    textoBadge = '🚓 Segurança Pública & Resgate';
+  }
 
   return `
     <div class="geofish-map-popup apoio-popup">
       <div class="geofish-map-popup-header">
-        <span class="geofish-map-popup-badge" style="background-color: ${isRampa ? '#0d9488' : '#ef4444'};">
-          ${isRampa ? '⚓ Rampa e Apoio Náutico' : '🚨 Apoio e Emergência'}
+        <span class="geofish-map-popup-badge" style="background-color: ${corBadge};">
+          ${textoBadge}
         </span>
       </div>
       <h3 class="geofish-map-popup-title">${escapeHTML(a.nome || 'Ponto de Apoio')}</h3>
       <div class="geofish-map-popup-body">
         <div class="geofish-popup-item">
-          <span class="geofish-popup-label">Tipo:</span>
+          <span class="geofish-popup-label">Categoria:</span>
           <span class="geofish-popup-val">${escapeHTML(a.tipo || 'Apoio')}</span>
         </div>
         <div class="geofish-popup-item">
-          <span class="geofish-popup-label">Rampa de Barco:</span>
-          <span class="geofish-popup-val">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</span>
+          <span class="geofish-popup-label">Município:</span>
+          <span class="geofish-popup-val"><strong>${escapeHTML(a.municipio || a.endereco || 'Mato Grosso do Sul')}</strong></span>
         </div>
-        ${a.endereco ? `
+        ${isRampa ? `
           <div class="geofish-popup-item">
-            <span class="geofish-popup-label">Localização:</span>
-            <span class="geofish-popup-val">${escapeHTML(a.endereco)}</span>
+            <span class="geofish-popup-label">Acesso Náutico:</span>
+            <span class="geofish-popup-val">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</span>
           </div>
         ` : ''}
       </div>
       <div class="geofish-map-popup-actions">
         ${telUrl ? `
           <a href="${telUrl}" class="btn-popup-action-tel" style="background: #ef4444;">
-            📞 Ligar Emergência
+            📞 Ligar (${escapeHTML(a.telefone_emergencia)})
+          </a>
+        ` : ''}
+        ${rotaUrl ? `
+          <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-popup-action-tel" style="background: #0284c7;">
+            📍 Abrir Rota no Google Maps
           </a>
         ` : ''}
         <button type="button" class="btn-popup-ver-apoio-painel" data-feature-id="${escapeHTML(featureId)}">
@@ -1216,26 +1285,26 @@ function gerarPopupRioPrincipal(feature) {
   `;
 }
 
-// Gerador de Popup para Bacia do Miranda
+// Gerador de Popup para Bacias Hidrográficas de MS (UPGs)
 function gerarPopupBacia(feature) {
   const b = feature.properties || {};
-  const bNome = b.titulo || b.nome_bacia || 'Bacia do Rio Miranda';
+  const bNome = b.titulo || b.nome_bacia || 'Bacia Hidrográfica';
   return `
     <div class="geofish-map-popup bacia-popup">
       <div class="geofish-map-popup-header">
         <span class="geofish-map-popup-badge" style="background-color: #0284c7;">
-          🗺️ Delimitação Hidrográfica
+          🗺️ Unidade de Planejamento e Gerenciamento (UPG)
         </span>
       </div>
       <h3 class="geofish-map-popup-title">${escapeHTML(bNome)}</h3>
       <div class="geofish-map-popup-body">
         <div class="geofish-popup-item">
-          <span class="geofish-popup-label">Região:</span>
-          <span class="geofish-popup-val">${escapeHTML(b.subtitulo || 'Região Hidrográfica do Paraguai')}</span>
+          <span class="geofish-popup-label">Região Hidrográfica:</span>
+          <span class="geofish-popup-val">${escapeHTML(b.subtitulo || 'Mato Grosso do Sul')}</span>
         </div>
         <div class="geofish-popup-item">
           <span class="geofish-popup-label">Área da Bacia:</span>
-          <span class="geofish-popup-val">${b.area_km2 ? Number(b.area_km2).toLocaleString('pt-BR') + ' km²' : '43.008 km²'}</span>
+          <span class="geofish-popup-val">${b.area_km2 ? Number(b.area_km2).toLocaleString('pt-BR') + ' km²' : 'Mapeada (IMASUL)'}</span>
         </div>
       </div>
     </div>
@@ -1289,6 +1358,59 @@ map.on('popupopen', (e) => {
     });
   });
 
+  // Botão Ficha do Anunciante (Pousada / Hotel / Rancho)
+  popupEl.querySelectorAll('.btn-popup-ver-anunciante-painel').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      registrarCliqueFeicao();
+      const fid = btn.getAttribute('data-feature-id');
+      const feat = featuresRegistradas[fid];
+      if (feat && feat.properties) {
+        const a = feat.properties;
+        const isOuro = a.plano === 'ouro' || a.destaque === true;
+        const waUrl = normalizeWhatsApp(a.whatsapp);
+        const rotaUrl = obterUrlRotaGoogleMaps(feat);
+        abrirPainel(`
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span class="badge-tag" style="background-color: ${isOuro ? '#b45309' : '#0369a1'}; margin: 0;">
+              ${isOuro ? '⭐ Destaque Oficial &bull; ' : '🏨 '}${escapeHTML(a.categoria || 'Hospedagem e Pesca')}
+            </span>
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">${escapeHTML(a.fonte_dados || 'OpenStreetMap')}</span>
+          </div>
+          <h2 class="sheet-title" style="margin-top: 4px;">${escapeHTML(a.nome || 'Estabelecimento')}</h2>
+          <div class="data-group">
+            <div class="data-item">
+              <div class="data-label">Município</div>
+              <div class="data-value">${escapeHTML(a.municipio || 'Mato Grosso do Sul')}</div>
+            </div>
+            <div class="data-item">
+              <div class="data-label">Categoria / Estrutura</div>
+              <div class="data-value">${escapeHTML(a.comodidades || a.categoria || 'Hospedagem')}</div>
+            </div>
+            ${a.descricao ? `
+              <div class="data-item">
+                <div class="data-label">Informações</div>
+                <div class="data-value">${escapeHTML(a.descricao)}</div>
+              </div>
+            ` : ''}
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+            ${waUrl ? `
+              <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
+                💬 WhatsApp Direto
+              </a>
+            ` : ''}
+            ${rotaUrl ? `
+              <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-cta" style="flex: 1; background: #0284c7; margin: 0; text-align: center; text-decoration: none;">
+                📍 Abrir Rota no Google Maps
+              </a>
+            ` : ''}
+          </div>
+        `);
+      }
+    });
+  });
+
   // Botão Ficha do Guia
   popupEl.querySelectorAll('.btn-popup-ver-guia-painel').forEach((btn) => {
     btn.addEventListener('click', (ev) => {
@@ -1300,6 +1422,7 @@ map.on('popupopen', (e) => {
         const g = feat.properties;
         const waUrl = normalizeWhatsApp(g.contato_wa);
         const telUrl = sanitizeTel(g.contato_tel || g.contato_wa);
+        const rotaUrl = obterUrlRotaGoogleMaps(feat);
         abrirPainel(`
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span class="badge-tag" style="background-color: #0b4f6c; margin: 0;">Piloteiro Local &bull; Cadastro Comunitário</span>
@@ -1313,7 +1436,7 @@ map.on('popupopen', (e) => {
             </div>
             <div class="data-item">
               <div class="data-label">Porto / Base de Saída</div>
-              <div class="data-value">${escapeHTML(g.porto_base || 'Bacia do Miranda')}</div>
+              <div class="data-value">${escapeHTML(g.porto_base || 'Mato Grosso do Sul')}</div>
             </div>
             <div class="data-item">
               <div class="data-label">Embarcação / Motor</div>
@@ -1323,7 +1446,7 @@ map.on('popupopen', (e) => {
           <div style="margin: 12px 0; padding: 10px 12px; background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 4px; font-size: 0.8rem; color: #166534; line-height: 1.45;">
             🤝 <strong>Contato Direto:</strong> Combine disponibilidade, roteiro e valores diretamente com o profissional.
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             ${waUrl ? `
               <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-cta btn-whatsapp" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
                 💬 WhatsApp
@@ -1334,13 +1457,18 @@ map.on('popupopen', (e) => {
                 📞 Ligar
               </a>
             ` : ''}
+            ${rotaUrl ? `
+              <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-cta" style="flex: 1; background: #0f766e; margin: 0; text-align: center; text-decoration: none;">
+                📍 Rota Google Maps
+              </a>
+            ` : ''}
           </div>
         `);
       }
     });
   });
 
-  // Botão Ficha de Apoio / Rampa
+  // Botão Ficha de Apoio / Rampa / Hospital / Polícia
   popupEl.querySelectorAll('.btn-popup-ver-apoio-painel').forEach((btn) => {
     btn.addEventListener('click', (ev) => {
       ev.stopPropagation();
@@ -1349,10 +1477,12 @@ map.on('popupopen', (e) => {
       const feat = featuresRegistradas[fid];
       if (feat && feat.properties) {
         const a = feat.properties;
-        const isRampa = a.tipo && a.tipo.toLowerCase().includes('rampa');
+        const cat = (a.categoria_icone || '').toLowerCase();
+        const isRampa = Boolean(cat === 'rampa' || cat === 'marina' || (a.tipo && a.tipo.toLowerCase().includes('rampa')));
         const telUrl = (!isRampa && a.telefone_emergencia) ? sanitizeTel(a.telefone_emergencia) : '';
+        const rotaUrl = obterUrlRotaGoogleMaps(feat);
         abrirPainel(`
-          <span class="badge-tag" style="background-color: ${isRampa ? '#0284c7' : '#d32f2f'};">${isRampa ? 'Apoio Náutico &bull; Rampa' : 'Apoio e Emergência'}</span>
+          <span class="badge-tag" style="background-color: ${isRampa ? '#0284c7' : '#d32f2f'};">${isRampa ? 'Apoio Náutico &bull; Rampa' : 'Apoio, Saúde e Emergência'}</span>
           <h2 class="sheet-title">${escapeHTML(a.nome)}</h2>
           <div class="data-group">
             <div class="data-item">
@@ -1360,27 +1490,34 @@ map.on('popupopen', (e) => {
               <div class="data-value">${escapeHTML(a.tipo)}</div>
             </div>
             <div class="data-item">
-              <div class="data-label">Rampa de Barco</div>
-              <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
+              <div class="data-label">Município</div>
+              <div class="data-value">${escapeHTML(a.municipio || a.endereco || 'Mato Grosso do Sul')}</div>
             </div>
+            ${isRampa ? `
+              <div class="data-item">
+                <div class="data-label">Rampa de Barco</div>
+                <div class="data-value">${escapeHTML(formatPossuiRampa(a.possui_rampa))}</div>
+              </div>
+            ` : ''}
             ${(!isRampa && a.telefone_emergencia) ? `
               <div class="data-item">
                 <div class="data-label">Telefone de Emergência</div>
                 <div class="data-value">${escapeHTML(a.telefone_emergencia)}</div>
               </div>
             ` : ''}
-            ${a.endereco ? `
-              <div class="data-item">
-                <div class="data-label">Localização</div>
-                <div class="data-value">${escapeHTML(a.endereco)}</div>
-              </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+            ${telUrl ? `
+              <a href="${telUrl}" class="btn-cta btn-emergency" style="flex: 1; margin: 0; text-align: center; text-decoration: none;">
+                📞 Ligar (${escapeHTML(a.telefone_emergencia)})
+              </a>
+            ` : ''}
+            ${rotaUrl ? `
+              <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-cta" style="flex: 1; background: #0284c7; margin: 0; text-align: center; text-decoration: none;">
+                📍 Abrir Rota no Google Maps
+              </a>
             ` : ''}
           </div>
-          ${telUrl ? `
-            <a href="${telUrl}" class="btn-cta btn-emergency">
-              📞 Ligar para Emergência
-            </a>
-          ` : ''}
         `);
       }
     });
@@ -1463,20 +1600,23 @@ map.on('popupopen', (e) => {
   });
 });
 
-// 8. Inicialização de Todas as Camadas Vetoriais Otimizadas
+// 8. Inicialização de Todas as Camadas Vetoriais Otimizadas (Escala Estadual MS)
 async function carregarTodasCamadas() {
   const loadingIndicator = document.getElementById('loading-indicator');
   const loadingText = document.getElementById('loading-text');
 
   const definicoesCamadas = [
     { key: 'hidrografia', url: 'data/processed/hidrografia.geojson', nome: '💧 Rede Hidrográfica e Regras de Pesca', ativa: true },
-    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: '🌊 Rios Principais', ativa: true },
-    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias Credenciados', ativa: true },
-    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: '⚓ Rampas e Apoio Náutico', ativa: true },
-    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: '⚠️ Unidades de Conservação (UCs)', ativa: true },
-    { key: 'bacias_uepgrh', url: 'data/processed/bacia_miranda.geojson', nome: '🗺️ Delimitação da Bacia do Miranda', ativa: false },
+    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: '🌊 Rios Principais Navegáveis', ativa: true },
+    { key: 'rodovias_ms', url: 'data/processed/rodovias_ms.geojson', nome: '🛣️ Rodovias Federais e Estaduais (MS)', ativa: true },
+    { key: 'anunciantes_ms', url: 'data/processed/anunciantes_ms.geojson', nome: '🏨 Pousadas, Hotéis e Ranchos (MS)', ativa: true },
+    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: '🚤 Guias e Piloteiros', ativa: true },
+    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: '🚨 Hospitais, Polícia e Rampas', ativa: true },
+    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: '⚠️ Unidades de Conservação e TIs', ativa: true },
+    { key: 'bacias_uepgrh', url: 'data/processed/bacias_ms.geojson', nome: '🗺️ Bacias Hidrográficas de MS (15 UPGs)', ativa: false },
+    { key: 'municipios_ms', url: 'data/processed/municipios_ms.geojson', nome: '🏛️ Limites dos 79 Municípios de MS', ativa: false },
     { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: '🛡️ Bacias dos Rios Cênicos (Manejo)', ativa: false },
-    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: '🏘️ Aglomerados Rurais', ativa: false }
+    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: '🏘️ Comunidades Tradicionais', ativa: false }
   ];
 
   let carregadas = 0;
@@ -1612,41 +1752,130 @@ async function carregarTodasCamadas() {
           });
           break;
 
-        case 'pontos_emergencia':
+        case 'anunciantes_ms':
           camadaLeaflet = L.geoJSON(dados, {
-            pane: 'apoioPane',
+            pane: 'anunciantesPane',
             pointToLayer: (feature, latlng) => {
-              const isRampa = feature.properties && feature.properties.tipo && feature.properties.tipo.toLowerCase().includes('rampa');
-              const iconePonto = L.divIcon({
-                className: isRampa ? 'custom-rampa-marker' : 'custom-sos-marker',
+              const p = feature.properties || {};
+              const isOuro = p.plano === 'ouro' || p.destaque === true;
+              const bg = isOuro
+                ? 'linear-gradient(135deg, #f59e0b 0%, #b45309 100%)'
+                : 'linear-gradient(135deg, #0369a1 0%, #075985 100%)';
+              const emoji = isOuro ? '⭐' : '🏨';
+              const size = isOuro ? 34 : 28;
+              const iconeAnunciante = L.divIcon({
+                className: isOuro ? 'custom-anunciante-ouro-marker' : 'custom-anunciante-marker',
                 html: `
                   <div style="
-                    background: ${isRampa ? 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'};
+                    background: ${bg};
                     color: #ffffff;
-                    width: 30px;
-                    height: 30px;
+                    width: ${size}px;
+                    height: ${size}px;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 14px;
-                    box-shadow: 0 4px 12px ${isRampa ? 'rgba(13, 148, 136, 0.35)' : 'rgba(239, 68, 68, 0.35)'};
+                    font-size: ${isOuro ? '16px' : '13px'};
+                    box-shadow: 0 4px 12px ${isOuro ? 'rgba(245, 158, 11, 0.55)' : 'rgba(3, 105, 161, 0.35)'};
                     border: 2.5px solid #ffffff;
                     cursor: pointer;
                     transition: transform 0.2s ease;
-                  ">${isRampa ? '⚓' : '🚨'}</div>
+                  ">${emoji}</div>
                 `,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2]
+              });
+              return L.marker(latlng, { icon: iconeAnunciante, pane: 'anunciantesPane' });
+            },
+            onEachFeature: (feature, layer) => {
+              const p = feature.properties || {};
+              const aNome = p.nome || 'Pousada / Rancho';
+              const mun = p.municipio ? ` (${p.municipio})` : '';
+              layer.bindTooltip(`<strong>${escapeHTML(aNome)}</strong>${escapeHTML(mun)}`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -15]
+              });
+
+              layer.bindPopup(() => gerarPopupAnunciante(feature), {
+                className: 'geofish-leaflet-popup',
+                maxWidth: 330,
+                autoPan: true
+              });
+
+              layer.on('click', (e) => {
+                if (e && e.originalEvent) {
+                  L.DomEvent.stopPropagation(e.originalEvent);
+                }
+                registrarCliqueFeicao();
+              });
+            }
+          });
+          break;
+
+        case 'pontos_emergencia':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'apoioPane',
+            pointToLayer: (feature, latlng) => {
+              const p = feature.properties || {};
+              const cat = (p.categoria_icone || '').toLowerCase();
+              const isRampa = cat === 'rampa' || (p.tipo && p.tipo.toLowerCase().includes('rampa'));
+              const isMarina = cat === 'marina';
+              const isHospital = cat === 'hospital';
+              const isPolicia = cat === 'policia';
+              const isBombeiro = cat === 'bombeiro';
+
+              let bg = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+              let emoji = '🚨';
+              if (isRampa) {
+                bg = 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)';
+                emoji = '⚓';
+              } else if (isMarina) {
+                bg = 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+                emoji = '⛵';
+              } else if (isHospital) {
+                bg = 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)';
+                emoji = '🏥';
+              } else if (isPolicia) {
+                bg = 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)';
+                emoji = '🚓';
+              } else if (isBombeiro) {
+                bg = 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)';
+                emoji = '🚒';
+              }
+
+              const iconePonto = L.divIcon({
+                className: isRampa ? 'custom-rampa-marker' : 'custom-sos-marker',
+                html: `
+                  <div style="
+                    background: ${bg};
+                    color: #ffffff;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 13px;
+                    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.35);
+                    border: 2px solid #ffffff;
+                    cursor: pointer;
+                    transition: transform 0.2s ease;
+                  ">${emoji}</div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
               });
               return L.marker(latlng, { icon: iconePonto, pane: 'apoioPane' });
             },
             onEachFeature: (feature, layer) => {
-              const aNome = feature.properties?.nome || 'Ponto de Apoio';
-              layer.bindTooltip(escapeHTML(aNome), {
+              const p = feature.properties || {};
+              const aNome = p.nome || 'Ponto de Apoio';
+              const mun = p.municipio ? ` &bull; ${p.municipio}` : '';
+              layer.bindTooltip(`<strong>${escapeHTML(aNome)}</strong>${mun}`, {
                 className: 'geofish-modern-tooltip',
                 direction: 'top',
-                offset: [0, -15]
+                offset: [0, -14]
               });
 
               layer.bindPopup(() => gerarPopupPontoApoio(feature), {
@@ -1661,6 +1890,92 @@ async function carregarTodasCamadas() {
                 }
                 registrarCliqueFeicao();
               });
+            }
+          });
+          break;
+
+        case 'rodovias_ms':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'rodoviasPane',
+            style: (feature) => {
+              const jur = (feature.properties?.jurisdicao || '').toLowerCase();
+              const isFederal = jur.includes('federal') || String(feature.properties?.sigla || '').startsWith('BR-');
+              return {
+                color: isFederal ? '#b45309' : '#64748b',
+                weight: isFederal ? 2.6 : 1.6,
+                opacity: isFederal ? 0.85 : 0.7,
+                dashArray: isFederal ? null : '4, 3',
+                lineCap: 'round',
+                lineJoin: 'round'
+              };
+            },
+            onEachFeature: (feature, layer) => {
+              const p = feature.properties || {};
+              const sigla = p.sigla || p.titulo || 'Rodovia';
+              layer.bindTooltip(`🛣️ <strong>${escapeHTML(sigla)}</strong> (${escapeHTML(p.jurisdicao || 'MS')})`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'top',
+                offset: [0, -4],
+                sticky: true
+              });
+              layer.bindPopup(`
+                <div class="geofish-map-popup">
+                  <div class="geofish-map-popup-header">
+                    <span class="geofish-map-popup-badge" style="background-color: #b45309;">🛣️ Malha Rodoviária de MS</span>
+                  </div>
+                  <h3 class="geofish-map-popup-title">${escapeHTML(sigla)}</h3>
+                  <div class="geofish-map-popup-body">
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Jurisdição:</span>
+                      <span class="geofish-popup-val">${escapeHTML(p.jurisdicao || 'Estadual/Federal')}</span>
+                    </div>
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Pavimentação:</span>
+                      <span class="geofish-popup-val">${escapeHTML(p.revestimento || 'Mapeada (AGESUL/DNIT)')}</span>
+                    </div>
+                  </div>
+                </div>
+              `, { className: 'geofish-leaflet-popup', maxWidth: 280 });
+            }
+          });
+          break;
+
+        case 'municipios_ms':
+          camadaLeaflet = L.geoJSON(dados, {
+            pane: 'municipiosPane',
+            style: {
+              color: '#94a3b8',
+              fillColor: '#f8fafc',
+              weight: 1.2,
+              fillOpacity: 0.04,
+              dashArray: '3, 3'
+            },
+            onEachFeature: (feature, layer) => {
+              const m = feature.properties || {};
+              const mNome = m.nome || m.titulo || 'Município';
+              layer.bindTooltip(`🏛️ <strong>${escapeHTML(mNome)}</strong> (MS)`, {
+                className: 'geofish-modern-tooltip',
+                direction: 'center',
+                sticky: true
+              });
+              layer.bindPopup(`
+                <div class="geofish-map-popup">
+                  <div class="geofish-map-popup-header">
+                    <span class="geofish-map-popup-badge" style="background-color: #475569;">🏛️ Município de MS (IBGE)</span>
+                  </div>
+                  <h3 class="geofish-map-popup-title">${escapeHTML(mNome)}</h3>
+                  <div class="geofish-map-popup-body">
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Código IBGE:</span>
+                      <span class="geofish-popup-val">${escapeHTML(m.cd_mun || '50')}</span>
+                    </div>
+                    <div class="geofish-popup-item">
+                      <span class="geofish-popup-label">Área Territorial:</span>
+                      <span class="geofish-popup-val">${m.area_km2 ? Number(m.area_km2).toLocaleString('pt-BR') + ' km²' : 'Mapeada'}</span>
+                    </div>
+                  </div>
+                </div>
+              `, { className: 'geofish-leaflet-popup', maxWidth: 280 });
             }
           });
           break;
@@ -1913,99 +2228,11 @@ async function carregarTodasCamadas() {
   }
 }
 
-// 8. Navegação Territorial do WebGIS & GPS sob demanda (leitura única e eficiente)
-let marcadorPosicao = null;
-let circuloPrecisao = null;
-let ultimaPosicaoUsuario = null;
-
+// 8. Navegação Territorial do WebGIS (Sem rastreamento ativo de GPS — Rotas via Google Maps)
 export function obterLocalizacao() {
-  if (!('geolocation' in navigator)) {
-    showToast('Geolocalização não suportada neste dispositivo.');
-    return;
-  }
-  showToast('Obtendo sua posição no rio...');
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      const acc = pos.coords.accuracy;
-      const ts = Date.now();
-      ultimaPosicaoUsuario = { lat, lng, precisao: acc, timestamp: ts };
-      setPosicaoUsuario(ultimaPosicaoUsuario);
-
-      if (map) {
-        if (marcadorPosicao) {
-          marcadorPosicao.setLatLng([lat, lng]);
-        } else {
-          marcadorPosicao = L.circleMarker([lat, lng], {
-            radius: 8,
-            fillColor: '#22c55e',
-            color: '#ffffff',
-            weight: 2,
-            fillOpacity: 0.95
-          }).addTo(map);
-        }
-
-        if (circuloPrecisao) {
-          circuloPrecisao.setLatLng([lat, lng]).setRadius(acc);
-        } else {
-          circuloPrecisao = L.circle([lat, lng], {
-            radius: acc,
-            color: '#22c55e',
-            fillColor: '#86efac',
-            fillOpacity: 0.15,
-            weight: 1
-          }).addTo(map);
-        }
-
-        const radar = avaliarConformidadePosicao(lat, lng);
-        let infoPopup = `<strong>📍 Sua Posição no Rio</strong><br><span style="font-size:0.75rem; color:#64748b;">Precisão: ±${acc.toFixed(0)}m</span>`;
-
-        if (radar.emDefeso) {
-          infoPopup += `<br><span style="color:#dc2626; font-weight:700;">⚠️ Defeso da Piracema em Vigor!</span>`;
-        }
-
-        if (radar.noTrecho && radar.trecho) {
-          infoPopup += `<br><strong>Trecho:</strong> ${escapeHTML(radar.trecho.rio || 'Rio')}<br><strong>Regra:</strong> ${escapeHTML(radar.trecho.regra || '')}`;
-        } else if (radar.distanciaTrechoKm < 10) {
-          infoPopup += `<br><span style="font-size:0.8rem; color:#475569;">Aprox. ${radar.distanciaTrechoKm.toFixed(1)}km do Rio</span>`;
-        }
-
-        if (radar.ucs && radar.ucs.length > 0) {
-          infoPopup += `<br><span style="color:#b45309; font-weight:700;">⚠️ Área Restrita:</span> ${escapeHTML(radar.ucs.map(u => u.nome).join(', '))}`;
-        }
-
-        if (radar.apoio) {
-          infoPopup += `<br><span style="font-size:0.75rem; color:#0369a1;">Apoio próximo: ${escapeHTML(radar.apoio.nome)} (${radar.apoio.distanciaKm.toFixed(1)} km)</span>`;
-        }
-
-        marcadorPosicao.bindPopup(infoPopup).openPopup();
-        map.setView([lat, lng], Math.max(map.getZoom(), 14));
-      }
-      showToast(`Posição obtida com sucesso (±${acc.toFixed(0)}m)`);
-    },
-    (err) => {
-      console.warn('[GPS] Erro ao obter posição:', err.message);
-      showToast('Não foi possível obter a posição GPS. Verifique se o GPS está ativo.');
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-  );
-}
-
-function atualizarLocalizacaoOculta() {
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const acc = pos.coords.accuracy;
-        const ts = Date.now();
-        ultimaPosicaoUsuario = { lat, lng, precisao: acc, timestamp: ts };
-        setPosicaoUsuario(ultimaPosicaoUsuario);
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
-    );
+  if (map) {
+    map.fitBounds(BOUNDS_BACIA, { padding: [20, 20] });
+    showToast('🗺️ Visualizando todo o Estado de Mato Grosso do Sul');
   }
 }
 
@@ -2036,14 +2263,17 @@ function abrirModalSobre() {
       if (layerStatusList) {
         layerStatusList.innerHTML = '';
         const nomes = {
-          hidrografia: 'Rede Hidrográfica e Regras Fluviais',
-          rios_principais: 'Rios Principais do Estado',
-          guias_credenciados: 'Guias de Pesca Credenciados',
-          pontos_emergencia: 'Rampas Náuticas e Apoio',
-          areas_restritas: 'Unidades de Conservação (UCs)',
-          bacias_uepgrh: 'Delimitação da Bacia do Miranda',
-          bacias_especiais: 'Bacias dos Rios Cênicos',
-          aglomerados_rurais: 'Comunidades Pantaneiras'
+          hidrografia: 'Rede Hidrográfica e Regras Fluviais (ANA/IMASUL)',
+          rios_principais: 'Rios Principais Navegáveis (ANA)',
+          rodovias_ms: 'Rodovias Federais e Estaduais (AGESUL/DNIT)',
+          anunciantes_ms: 'Pousadas, Hotéis e Ranchos (OpenStreetMap/GeoFish)',
+          guias_credenciados: 'Guias e Piloteiros Cadastrados',
+          pontos_emergencia: 'Hospitais, Polícia, Bombeiros e Rampas (OSM)',
+          areas_restritas: 'Unidades de Conservação e Terras Indígenas',
+          bacias_uepgrh: 'Bacias Hidrográficas de MS (15 UPGs)',
+          municipios_ms: 'Limites dos 79 Municípios de MS (IBGE)',
+          bacias_especiais: 'Bacias dos Rios Cênicos (IMASUL)',
+          aglomerados_rurais: 'Comunidades Tradicionais (AGRAER/INCRA)'
         };
 
         for (const [key, nome] of Object.entries(nomes)) {
@@ -2132,7 +2362,7 @@ if (navBtnPousadas) {
 }
 
 // ========================================================
-// CONTROLE DA SIDEBAR E ABAS DO WEBGIS
+// CONTROLE DA SIDEBAR E ABAS DO WEBGIS ESTADUAL (MS)
 // ========================================================
 
 function renderizarSidebarGuias(filtroRegiao = 'todas') {
@@ -2140,43 +2370,51 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
   if (!container) return;
 
   const dados = dadosCarregados['guias_credenciados'];
-  if (!dados || !dados.features || dados.features.length === 0) {
-    container.innerHTML = '<div style="color: #64748b; padding: 14px; text-align: center;">Nenhum guia carregado no momento.</div>';
-    return;
-  }
+  let features = (dados && Array.isArray(dados.features)) ? dados.features : [];
 
-  let features = dados.features;
-  if (filtroRegiao === 'z1') {
+  if (filtroRegiao === 'pantanal') {
     features = features.filter(f => {
-      const col = (f.properties?.colonia || '').toLowerCase();
-      const porto = (f.properties?.porto_base || '').toLowerCase();
-      return col.includes('z-1') || col.includes('miranda') || porto.includes('miranda') || porto.includes('lontra');
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('corumb') || txt.includes('murtinho') || txt.includes('ladário') || txt.includes('paraguai');
     });
-  } else if (filtroRegiao === 'z7') {
+  } else if (filtroRegiao === 'z1' || filtroRegiao === 'z7') {
     features = features.filter(f => {
-      const col = (f.properties?.colonia || '').toLowerCase();
-      const porto = (f.properties?.porto_base || '').toLowerCase();
-      return col.includes('z-7') || col.includes('aquidauana') || porto.includes('aquidauana') || porto.includes('anastácio');
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('miranda') || txt.includes('aquidauana') || txt.includes('lontra') || txt.includes('z-1') || txt.includes('z-7');
+    });
+  } else if (filtroRegiao === 'coxim') {
+    features = features.filter(f => {
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('coxim') || txt.includes('taquari') || txt.includes('sonora') || txt.includes('rio verde');
+    });
+  } else if (filtroRegiao === 'parana') {
+    features = features.filter(f => {
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('lagoas') || txt.includes('bataguassu') || txt.includes('aparecida') || txt.includes('paraná') || txt.includes('panorama');
+    });
+  } else if (filtroRegiao === 'sul') {
+    features = features.filter(f => {
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('ivinhema') || txt.includes('navira') || txt.includes('dourados') || txt.includes('mundo novo');
     });
   } else if (filtroRegiao === 'z11') {
     features = features.filter(f => {
-      const col = (f.properties?.colonia || '').toLowerCase();
-      const porto = (f.properties?.porto_base || '').toLowerCase();
-      return col.includes('z-11') || col.includes('bonito') || porto.includes('bonito') || porto.includes('águas do miranda');
+      const txt = `${f.properties?.colonia || ''} ${f.properties?.porto_base || ''}`.toLowerCase();
+      return txt.includes('bonito') || txt.includes('bodoquena') || txt.includes('jardim') || txt.includes('z-11');
     });
   }
 
   if (features.length === 0) {
     container.innerHTML = `
       <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; color: #64748b; font-size: 0.85rem;">
-        <div style="font-size: 1.5rem; margin-bottom: 6px;">🎣</div>
-        <strong>Nenhum piloteiro cadastrado neste polo ainda.</strong>
+        <div style="font-size: 1.5rem; margin-bottom: 6px;">🚤</div>
+        <strong>Diretório Aberto para Piloteiros e Guias de MS</strong>
         <p style="font-size: 0.78rem; margin-top: 6px; line-height: 1.4;">
-          Conhece um condutor tradicional desta região? O cadastro com a Colônia é 100% gratuito.
+          Exibimos exclusivamente profissionais reais verificados. O cadastro para piloteiros e condutores de pesca é 100% gratuito.
         </p>
-        <a href="https://wa.me/5516992667526?text=Ol%C3%A1!%20Gostaria%20de%20indicar%20um%20piloteiro%20para%20o%20GeoFish%20MS." target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="margin-top: 8px; justify-content: center;">
-          <span>📲 Indicar via WhatsApp</span>
-        </a>
+        <button type="button" class="btn-guia-wa" style="margin-top: 8px; justify-content: center; width: 100%; background: #15803d;" data-action="abrir-parcerias-piloteiros">
+          <span>📲 Cadastrar Piloteiro / Embarcação</span>
+        </button>
       </div>
     `;
     return;
@@ -2187,8 +2425,8 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
     const coords = feat.geometry ? feat.geometry.coordinates : null;
     const lat = coords ? coords[1] : null;
     const lng = coords ? coords[0] : null;
-    const isConfirmado = Boolean(p.homologado === true && p.credenciado && p.contato_wa);
-    const waUrl = isConfirmado ? normalizeWhatsApp(p.contato_wa) : '';
+    const waUrl = p.contato_wa ? normalizeWhatsApp(p.contato_wa) : '';
+    const rotaUrl = obterUrlRotaGoogleMaps(feat);
 
     return `
       <article class="sidebar-guia-card">
@@ -2196,14 +2434,14 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
           <div>
             <div class="sidebar-guia-card-title">${escapeHTML(p.nome_operacional || 'Guia de Pesca')}</div>
             <div class="sidebar-guia-card-meta">
-              📍 <strong>Colônia:</strong> ${escapeHTML(p.colonia || 'Z-1')} &bull; <strong>Base:</strong> ${escapeHTML(p.porto_base || 'Miranda')}
+              📍 <strong>Polo:</strong> ${escapeHTML(p.colonia || 'MS')} &bull; <strong>Base:</strong> ${escapeHTML(p.porto_base || 'MS')}
             </div>
             <div class="sidebar-guia-card-meta" style="color: #64748b;">
-              ⛵ <strong>Embarcação:</strong> ${escapeHTML(p.tipo_barco || 'Voadeira pantaneira')}
+              ⛵ <strong>Embarcação:</strong> ${escapeHTML(p.tipo_barco || 'Barco de pesca')}
             </div>
           </div>
-          <span class="badge-tag" style="background: ${isConfirmado ? '#15803d' : '#f1f5f9'}; color: ${isConfirmado ? '#ffffff' : '#475569'}; border: ${isConfirmado ? 'none' : '1px solid #cbd5e1'}; font-size: 0.68rem; margin: 0; white-space: nowrap;">
-            ${isConfirmado ? '✓ Homologado' : 'Vaga Demonstrativa'}
+          <span class="badge-tag" style="background: #15803d; color: #ffffff; border: none; font-size: 0.68rem; margin: 0; white-space: nowrap;">
+            ✓ Verificado
           </span>
         </div>
         <div class="sidebar-guia-card-actions">
@@ -2211,11 +2449,12 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
             <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" title="Conversar no WhatsApp">
               <span>💬 WhatsApp</span>
             </a>
-          ` : `
-            <span style="font-size: 0.72rem; color: #64748b; font-style: italic; align-self: center;">
-              Homologação em andamento
-            </span>
-          `}
+          ` : ''}
+          ${rotaUrl ? `
+            <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="background: #0284c7;" title="Abrir Rota no Google Maps">
+              <span>📍 Rota Maps</span>
+            </a>
+          ` : ''}
           ${(lat && lng) ? `
             <button type="button" class="btn-guia-focar" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome_operacional || '')}" title="Ver no Mapa">
               <span>🗺️ Ver no Mapa</span>
@@ -2244,58 +2483,77 @@ function renderizarSidebarGuias(filtroRegiao = 'todas') {
   });
 }
 
-function renderizarSidebarPousadas() {
+function renderizarSidebarPousadas(filtroMunicipio = '') {
   const container = document.getElementById('sidebar-pousadas-list');
   if (!container) return;
 
-  const dados = dadosCarregados['pontos_emergencia'];
-  if (!dados || !dados.features) {
-    container.innerHTML = '<div style="color: #64748b; padding: 14px; text-align: center;">Carregando apoios náuticos...</div>';
+  const dadosAnunciantes = dadosCarregados['anunciantes_ms'];
+  const dadosApoio = dadosCarregados['pontos_emergencia'];
+
+  if ((!dadosAnunciantes || !dadosAnunciantes.features) && (!dadosApoio || !dadosApoio.features)) {
+    container.innerHTML = '<div style="color: #64748b; padding: 14px; text-align: center;">Carregando pousadas e apoios náuticos de MS...</div>';
     return;
   }
 
-  const rampas = dados.features.filter(f => {
-    const t = (f.properties?.tipo || '').toLowerCase();
-    return t.includes('rampa') || t.includes('porto') || t.includes('apoio') || t.includes('marina') || t.includes('pousada');
+  let listaPousadas = (dadosAnunciantes && Array.isArray(dadosAnunciantes.features)) ? [...dadosAnunciantes.features] : [];
+  if (filtroMunicipio) {
+    const fNorm = filtroMunicipio.toLowerCase();
+    listaPousadas = listaPousadas.filter(f => (f.properties?.municipio || '').toLowerCase().includes(fNorm));
+  }
+
+  // Ordena para que anunciantes Ouro / Destaque fiquem sempre no topo
+  listaPousadas.sort((a, b) => {
+    const aOuro = (a.properties?.plano === 'ouro' || a.properties?.destaque === true) ? 1 : 0;
+    const bOuro = (b.properties?.plano === 'ouro' || b.properties?.destaque === true) ? 1 : 0;
+    if (bOuro !== aOuro) return bOuro - aOuro;
+    return String(a.properties?.nome || '').localeCompare(String(b.properties?.nome || ''));
   });
 
-  const htmlRampas = rampas.map(feat => {
+  const exibidas = listaPousadas.slice(0, 60);
+
+  const htmlPousadas = exibidas.map(feat => {
     const p = feat.properties || {};
     const coords = feat.geometry ? feat.geometry.coordinates : null;
     const lat = coords ? coords[1] : null;
     const lng = coords ? coords[0] : null;
-    const temTelefoneValido = p.telefone_emergencia && !p.telefone_emergencia.includes('190') && p.contato_status !== 'sem_telefone';
-    const tel = temTelefoneValido ? sanitizeTel(p.telefone_emergencia) : '';
+    const isOuro = p.plano === 'ouro' || p.destaque === true;
+    const waUrl = p.whatsapp ? normalizeWhatsApp(p.whatsapp) : '';
+    const rotaUrl = obterUrlRotaGoogleMaps(feat);
 
     return `
-      <article class="sidebar-guia-card">
+      <article class="sidebar-guia-card" style="${isOuro ? 'border: 2px solid #f59e0b; background: #fffbeb;' : ''}">
         <div class="sidebar-guia-card-header">
           <div>
-            <div class="sidebar-guia-card-title">${escapeHTML(p.nome || 'Ponto de Apoio')}</div>
+            <div class="sidebar-guia-card-title">${isOuro ? '⭐ ' : '🏨 '}${escapeHTML(p.nome || 'Estabelecimento')}</div>
             <div class="sidebar-guia-card-meta">
-              ⚓ <strong>Tipo:</strong> ${escapeHTML(p.tipo || 'Rampa Náutica')}
+              📍 <strong>Município:</strong> ${escapeHTML(p.municipio || 'MS')} &bull; ${escapeHTML(p.categoria || 'Hospedagem')}
             </div>
-            ${p.endereco ? `
+            ${p.comodidades ? `
               <div class="sidebar-guia-card-meta" style="color: #64748b;">
-                📍 ${escapeHTML(p.endereco)}
-              </div>
-            ` : ''}
-            ${!temTelefoneValido ? `
-              <div class="sidebar-guia-card-meta" style="color: #64748b; font-style: italic;">
-                📞 Sem telefone cadastrado (Acesso público local)
+                🛎️ ${escapeHTML(p.comodidades)}
               </div>
             ` : ''}
           </div>
+          ${isOuro ? `
+            <span class="badge-tag" style="background: #b45309; color: #ffffff; font-size: 0.65rem; margin: 0; white-space: nowrap;">
+              Destaque Ouro
+            </span>
+          ` : ''}
         </div>
         <div class="sidebar-guia-card-actions">
-          ${tel ? `
-            <a href="${tel}" class="btn-guia-wa" style="background: #0284c7;" title="Ligar">
-              <span>📞 Ligar</span>
+          ${waUrl ? `
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" title="WhatsApp Reservas">
+              <span>💬 WhatsApp</span>
+            </a>
+          ` : ''}
+          ${rotaUrl ? `
+            <a href="${escapeHTML(rotaUrl)}" target="_blank" rel="noopener noreferrer" class="btn-guia-wa" style="background: #0284c7;" title="Abrir Rota no Google Maps">
+              <span>📍 Rota Maps</span>
             </a>
           ` : ''}
           ${(lat && lng) ? `
             <button type="button" class="btn-guia-focar" data-lat="${lat}" data-lng="${lng}" data-nome="${escapeHTML(p.nome || '')}">
-              <span>🗺️ Ver no Mapa</span>
+              <span>🗺️ Mapa</span>
             </button>
           ` : ''}
         </div>
@@ -2303,30 +2561,13 @@ function renderizarSidebarPousadas() {
     `;
   }).join('');
 
-  const htmlModeloPousada = `
-    <div style="margin-top: 14px; border-top: 1px dashed #cbd5e1; padding-top: 12px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-size: 0.8rem; font-weight: 800; color: #0f172a;">🏨 Estrutura de Pousadas &amp; Ranchos</span>
-        <span class="badge-tag" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 0.65rem; margin: 0;">Ficha Modelo</span>
-      </div>
-      <article class="sidebar-guia-card" style="border: 1px dashed #94a3b8; background: #f8fafc;">
-        <div class="sidebar-guia-card-header">
-          <div>
-            <div class="sidebar-guia-card-title">Rancho Pantaneiro (Modelo de Ficha)</div>
-            <div class="sidebar-guia-card-meta">📍 <strong>Região:</strong> Bacia do Rio Miranda</div>
-            <div class="sidebar-guia-card-meta">⚓ <strong>Atracadouro:</strong> Rampa de concreto e trapiche flutuante</div>
-            <div class="sidebar-guia-card-meta">🛎️ <strong>Comodidades:</strong> Barcos com motor, gelo, piloteiros e iscas</div>
-            <div class="sidebar-guia-card-meta" style="color: #64748b; font-style: italic;">📞 Aguardando homologação do proprietário</div>
-          </div>
-        </div>
-        <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; padding: 6px 8px; background: #ffffff; border-radius: 4px; border: 1px solid #e2e8f0;">
-          ℹ️ <strong>Proprietário:</strong> Anuncie sua pousada ou rancho gratuitamente para aparecer com status Verificado e receber turistas direto no seu contato.
-        </div>
-      </article>
+  const resumoTotal = `
+    <div style="font-size: 0.75rem; color: #475569; margin-bottom: 8px; padding: 6px 10px; background: #f1f5f9; border-radius: 6px;">
+      Exibindo <strong>${exibidas.length}</strong> de <strong>${listaPousadas.length}</strong> meios de hospedagem reais mapeados em MS. Use a busca no topo do mapa para filtrar por nome ou cidade.
     </div>
   `;
 
-  container.innerHTML = htmlRampas + htmlModeloPousada;
+  container.innerHTML = resumoTotal + htmlPousadas;
 
   container.querySelectorAll('.btn-guia-focar').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2413,7 +2654,7 @@ function inicializarSidebarDataGeo() {
     });
   });
 
-  // Filtros Regionais da Sidebar (Sincronização Real: Mapa + Lista + Estado)
+  // Filtros Regionais da Sidebar (Polos Pesqueiros de Mato Grosso do Sul)
   document.querySelectorAll('.sidebar-region-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sidebar-region-btn').forEach(b => {
@@ -2426,22 +2667,30 @@ function inicializarSidebarDataGeo() {
       const regiao = btn.getAttribute('data-regiao');
       renderizarSidebarGuias(regiao);
 
-      if (camadasInstanciadas['guias_credenciados'] && !map.hasLayer(camadasInstanciadas['guias_credenciados'])) {
-        map.addLayer(camadasInstanciadas['guias_credenciados']);
-      }
-
-      if (regiao === 'z1') {
-        map.flyTo([-20.35, -56.65], 11, { duration: 1.2 });
-        showToast('Filtro: Piloteiros de Miranda & Passo do Lontra (Colônia Z-1)');
+      if (regiao === 'pantanal') {
+        map.flyTo([-19.00, -57.65], 9, { duration: 1.2 });
+        showToast('Polo: Pantanal do Rio Paraguai (Corumbá, Ladário & Porto Murtinho)');
+      } else if (regiao === 'z1') {
+        map.flyTo([-20.35, -56.20], 10, { duration: 1.2 });
+        showToast('Polo: Miranda, Passo do Lontra & Aquidauana');
       } else if (regiao === 'z7') {
-        map.flyTo([-20.48, -55.79], 12, { duration: 1.2 });
-        showToast('Filtro: Piloteiros de Aquidauana & Anastácio (Colônia Z-7)');
+        map.flyTo([-20.48, -55.79], 11, { duration: 1.2 });
+        showToast('Polo: Aquidauana & Anastácio');
+      } else if (regiao === 'coxim') {
+        map.flyTo([-18.50, -54.76], 10, { duration: 1.2 });
+        showToast('Polo Norte: Coxim, Rio Taquari & Sonora');
+      } else if (regiao === 'parana') {
+        map.flyTo([-20.78, -51.70], 9, { duration: 1.2 });
+        showToast('Polo Leste: Calha do Rio Paraná (Três Lagoas, Aparecida do Taboado & Bataguassu)');
+      } else if (regiao === 'sul') {
+        map.flyTo([-22.65, -53.90], 9, { duration: 1.2 });
+        showToast('Polo Sul: Bacia do Ivinhema, Naviraí & Mundo Novo');
       } else if (regiao === 'z11') {
-        map.flyTo([-20.89, -56.12], 12, { duration: 1.2 });
-        showToast('Filtro: Piloteiros de Bonito & Águas do Miranda (Colônia Z-11)');
+        map.flyTo([-21.12, -56.48], 11, { duration: 1.2 });
+        showToast('Polo Serra da Bodoquena: Bonito, Jardim & Águas do Miranda');
       } else {
         map.fitBounds(BOUNDS_BACIA, { padding: [20, 20] });
-        showToast('Filtro: Todas as Regiões da Bacia');
+        showToast('Enquadramento Estadual: Todo o Mato Grosso do Sul');
       }
     });
   });
@@ -2508,8 +2757,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // Processamento de atalhos rápidos do Android (URL shortcuts do manifest)
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
-    if (action === 'gps') {
-      setTimeout(obterLocalizacao, 800);
+    if (action === 'pousadas') {
+      const tabPousadas = document.getElementById('tab-pousadas');
+      if (tabPousadas) tabPousadas.click();
     } else if (action === 'especies') {
       setTimeout(abrirModalEspecies, 500);
     } else if (action === 'apoio') {
@@ -2529,35 +2779,34 @@ function aplicarFiltroRapido(tipo) {
   if (tipo === 'all') {
     if (camadasInstanciadas['hidrografia']) map.addLayer(camadasInstanciadas['hidrografia']);
     if (camadasInstanciadas['rios_principais']) map.addLayer(camadasInstanciadas['rios_principais']);
+    if (camadasInstanciadas['rodovias_ms']) map.addLayer(camadasInstanciadas['rodovias_ms']);
+    if (camadasInstanciadas['anunciantes_ms']) map.addLayer(camadasInstanciadas['anunciantes_ms']);
     if (camadasInstanciadas['guias_credenciados']) map.addLayer(camadasInstanciadas['guias_credenciados']);
     if (camadasInstanciadas['pontos_emergencia']) map.addLayer(camadasInstanciadas['pontos_emergencia']);
     if (camadasInstanciadas['areas_restritas']) map.addLayer(camadasInstanciadas['areas_restritas']);
-    showToast('Exibindo todas as camadas ativas.');
+    showToast('Exibindo todas as camadas principais de Mato Grosso do Sul.');
   } else if (tipo === 'regras') {
     if (camadasInstanciadas['hidrografia']) map.addLayer(camadasInstanciadas['hidrografia']);
     if (camadasInstanciadas['rios_principais']) map.addLayer(camadasInstanciadas['rios_principais']);
-    showToast('Filtro: Regras de Pesca e Rede Fluvial.');
+    showToast('Filtro: Regras de Pesca e Rede Fluvial de MS.');
   } else if (tipo === 'guias') {
-    if (camadasInstanciadas['guias_credenciados']) {
-      map.addLayer(camadasInstanciadas['guias_credenciados']);
-      const bounds = camadasInstanciadas['guias_credenciados'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-    }
-    showToast('Filtro: Guias Credenciados Z-1, Z-7 e Z-11.');
+    if (camadasInstanciadas['anunciantes_ms']) map.addLayer(camadasInstanciadas['anunciantes_ms']);
+    if (camadasInstanciadas['guias_credenciados']) map.addLayer(camadasInstanciadas['guias_credenciados']);
+    showToast('Filtro: Pousadas, Ranchos e Guias de Pesca em MS.');
   } else if (tipo === 'apoio') {
     if (camadasInstanciadas['pontos_emergencia']) {
       map.addLayer(camadasInstanciadas['pontos_emergencia']);
       const bounds = camadasInstanciadas['pontos_emergencia'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
     }
-    showToast('Filtro: Pontos de Apoio, Rampas e Emergência.');
+    showToast('Filtro: Hospitais, Polícia, Bombeiros e Rampas em MS.');
   } else if (tipo === 'restritas') {
     if (camadasInstanciadas['areas_restritas']) {
       map.addLayer(camadasInstanciadas['areas_restritas']);
       const bounds = camadasInstanciadas['areas_restritas'].getBounds();
-      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
     }
-    showToast('Filtro: Unidades de Conservação e Áreas Restritas.');
+    showToast('Filtro: Unidades de Conservação e Terras Indígenas de MS.');
   }
 }
 
@@ -2587,19 +2836,15 @@ document.querySelectorAll('.btn-filter-chip').forEach(btn => {
     const secaoMapa = document.getElementById('secao-mapa');
     if (secaoMapa) secaoMapa.scrollIntoView({ behavior: 'smooth' });
 
-    if (camadasInstanciadas['guias_credenciados'] && !map.hasLayer(camadasInstanciadas['guias_credenciados'])) {
-      map.addLayer(camadasInstanciadas['guias_credenciados']);
-    }
-
     if (regiao === 'z1') {
       map.flyTo([-20.35, -56.65], 11, { duration: 1.2 });
-      showToast('Profissionais: Miranda & Passo do Lontra (Colônia Z-1)');
+      showToast('Polo: Miranda & Passo do Lontra');
     } else if (regiao === 'z7') {
       map.flyTo([-20.48, -55.79], 12, { duration: 1.2 });
-      showToast('Profissionais: Aquidauana & Anastácio (Colônia Z-7)');
+      showToast('Polo: Aquidauana & Anastácio');
     } else if (regiao === 'z11') {
       map.flyTo([-20.89, -56.12], 12, { duration: 1.2 });
-      showToast('Profissionais: Bonito & Águas do Miranda (Colônia Z-11)');
+      showToast('Polo: Bonito & Águas do Miranda');
     } else {
       aplicarFiltroRapido('guias');
     }
@@ -2620,14 +2865,9 @@ document.querySelectorAll('.quick-filters-bar button[data-camada-filtro]').forEa
   });
 });
 
-
-
 // 14. Gestão de Espécies & Medidas regulatórias delegada para js/modules/species-checker.js
 
-
-
-
-// 15. Busca Rápida de Feições Locais na Bacia do Rio Miranda (100% Offline e Instantânea)
+// 15. Busca Rápida de Feições em Todo o Mato Grosso do Sul (100% Offline e Instantânea)
 let marcadorBusca = null;
 
 function inicializarBuscaLocal() {
@@ -2670,7 +2910,29 @@ function inicializarBuscaLocal() {
     const termoNorm = formatarTermo(termo);
     const correspondencias = [];
 
-    // 1. Busca em Pontos de Apoio, Rampas e Emergência
+    // 1. Busca em Pousadas, Hotéis, Ranchos e Empresas Anunciantes (MS)
+    const dadosAnunc = dadosCarregados['anunciantes_ms'];
+    if (dadosAnunc && dadosAnunc.features) {
+      for (const feat of dadosAnunc.features) {
+        const p = feat.properties || {};
+        const nomeNorm = formatarTermo(p.nome);
+        const catNorm = formatarTermo(p.categoria);
+        const municNorm = formatarTermo(p.municipio);
+        if (nomeNorm.includes(termoNorm) || catNorm.includes(termoNorm) || municNorm.includes(termoNorm)) {
+          const isOuro = p.plano === 'ouro' || p.destaque === true;
+          correspondencias.push({
+            tipoIcone: isOuro ? '⭐' : '🏨',
+            titulo: p.nome,
+            subtitulo: `${p.categoria || 'Hospedagem'} • ${p.municipio || 'MS'}`,
+            categoria: isOuro ? 'Destaque Ouro' : 'Hospedagem',
+            coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
+            propriedades: p
+          });
+        }
+      }
+    }
+
+    // 2. Busca em Hospitais, Polícia, Bombeiros e Rampas Náuticas (MS)
     const dadosApoio = dadosCarregados['pontos_emergencia'];
     if (dadosApoio && dadosApoio.features) {
       for (const feat of dadosApoio.features) {
@@ -2679,11 +2941,13 @@ function inicializarBuscaLocal() {
         const tipoNorm = formatarTermo(p.tipo);
         const municNorm = formatarTermo(p.municipio);
         if (nomeNorm.includes(termoNorm) || tipoNorm.includes(termoNorm) || municNorm.includes(termoNorm)) {
+          const cat = (p.categoria_icone || '').toLowerCase();
+          const icone = cat === 'hospital' ? '🏥' : (cat === 'policia' ? '🚓' : (cat === 'bombeiro' ? '🚒' : '⚓'));
           correspondencias.push({
-            tipoIcone: '⚓',
+            tipoIcone: icone,
             titulo: p.nome,
-            subtitulo: `${p.tipo || 'Ponto de Apoio'} • ${p.municipio || 'Bacia do Miranda'}`,
-            categoria: 'Apoio / Rampa',
+            subtitulo: `${p.tipo || 'Ponto de Apoio'} • ${p.municipio || 'MS'}`,
+            categoria: 'Apoio / SOS',
             coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
             propriedades: p
           });
@@ -2691,7 +2955,25 @@ function inicializarBuscaLocal() {
       }
     }
 
-    // 2. Busca em Guias de Pesca Credenciados Z-1 e Z-7
+    // 3. Busca nos 79 Municípios de Mato Grosso do Sul
+    const dadosMun = dadosCarregados['municipios_ms'];
+    if (dadosMun && dadosMun.features) {
+      for (const feat of dadosMun.features) {
+        const p = feat.properties || {};
+        const nomeNorm = formatarTermo(p.nome || p.titulo);
+        if (nomeNorm.includes(termoNorm)) {
+          correspondencias.push({
+            tipoIcone: '🏛️',
+            titulo: `${p.nome || p.titulo} (MS)`,
+            subtitulo: `Município de MS • Área: ${p.area_km2 ? Number(p.area_km2).toLocaleString('pt-BR') + ' km²' : 'IBGE'}`,
+            categoria: 'Município',
+            feature: feat
+          });
+        }
+      }
+    }
+
+    // 4. Busca em Guias e Piloteiros Cadastrados
     const dadosGuias = dadosCarregados['guias_credenciados'];
     if (dadosGuias && dadosGuias.features) {
       for (const feat of dadosGuias.features) {
@@ -2703,8 +2985,8 @@ function inicializarBuscaLocal() {
           correspondencias.push({
             tipoIcone: '🚤',
             titulo: p.nome_operacional || p.nome_completo,
-            subtitulo: `${p.colonia || 'Guia de Pesca'} • Base: ${p.porto_base || 'Pantanal'}`,
-            categoria: 'Guia Credenciado',
+            subtitulo: `${p.colonia || 'Guia de Pesca'} • Base: ${p.porto_base || 'MS'}`,
+            categoria: 'Piloteiro',
             coords: [feat.geometry.coordinates[1], feat.geometry.coordinates[0]],
             propriedades: p
           });
@@ -2712,7 +2994,7 @@ function inicializarBuscaLocal() {
       }
     }
 
-    // 3. Busca em Rios Principais (Eixos Troncais do MS)
+    // 5. Busca em Rios Principais (Eixos Troncais do MS)
     const dadosRios = dadosCarregados['rios_principais'];
     if (dadosRios && dadosRios.features) {
       for (const feat of dadosRios.features) {
@@ -2743,7 +3025,25 @@ function inicializarBuscaLocal() {
       }
     }
 
-    // 4. Busca em Unidades de Conservação e Áreas Restritas
+    // 6. Busca em Rodovias (BR/MS)
+    const dadosRod = dadosCarregados['rodovias_ms'];
+    if (dadosRod && dadosRod.features) {
+      for (const feat of dadosRod.features) {
+        const p = feat.properties || {};
+        const siglaNorm = formatarTermo(p.sigla || p.titulo);
+        if (siglaNorm.includes(termoNorm)) {
+          correspondencias.push({
+            tipoIcone: '🛣️',
+            titulo: p.sigla || p.titulo,
+            subtitulo: `Rodovia ${p.jurisdicao || 'Estadual/Federal'} • ${p.revestimento || 'MS'}`,
+            categoria: 'Rodovia',
+            feature: feat
+          });
+        }
+      }
+    }
+
+    // 7. Busca em Unidades de Conservação e Terras Indígenas
     const dadosUcs = dadosCarregados['areas_restritas'];
     if (dadosUcs && dadosUcs.features) {
       for (const feat of dadosUcs.features) {
@@ -2756,14 +3056,14 @@ function inicializarBuscaLocal() {
             tipoIcone: '⚠️',
             titulo: p.titulo || p.nome || 'Unidade de Conservação',
             subtitulo: `${p.subtitulo || p.categoria || p.grupo || 'Área Protegida'} • ${p.municipio || 'MS'}`,
-            categoria: 'Unidade de Conservação',
+            categoria: 'Área Protegida',
             feature: feat
           });
         }
       }
     }
 
-    // 5. Busca na Rede Hidrográfica e Regras Fluviais (561 cursos d'água)
+    // 8. Busca na Rede Hidrográfica e Regras Fluviais
     const dadosHidro = dadosCarregados['hidrografia'];
     if (dadosHidro && dadosHidro.features) {
       for (const feat of dadosHidro.features) {
@@ -2800,13 +3100,13 @@ function inicializarBuscaLocal() {
     }
 
     if (correspondencias.length === 0) {
-      resultsContainer.innerHTML = '<div style="padding: 10px 14px; font-size: 0.85rem; color: #64748b;">Nenhum porto, rancho, rio ou guia encontrado.</div>';
+      resultsContainer.innerHTML = '<div style="padding: 10px 14px; font-size: 0.85rem; color: #64748b;">Nenhum rio, município, pousada, hospital ou apoio encontrado.</div>';
       resultsContainer.classList.remove('hidden');
       return;
     }
 
     resultsContainer.innerHTML = '';
-    correspondencias.slice(0, 7).forEach((itemData) => {
+    correspondencias.slice(0, 8).forEach((itemData) => {
       const itemEl = document.createElement('div');
       itemEl.className = 'local-search-result-item';
       itemEl.innerHTML = `
@@ -2835,7 +3135,7 @@ function inicializarBuscaLocal() {
           const tempLayer = L.geoJSON(itemData.feature);
           const bounds = tempLayer.getBounds();
           if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
             showToast(`Exibindo: ${itemData.titulo}`);
           }
         }
@@ -2855,23 +3155,20 @@ function inicializarBuscaLocal() {
   });
 }
 
-
 // 16. Módulo de Telefones Úteis e Emergência delegado para js/modules/telefones-apoio.js
 
-
 // ========================================================
-// 18. CONTROLES DO PORTAL COMUNITÁRIO & NAVEGAÇÃO DA BACIA
+// 18. CONTROLES DO PORTAL COMUNITÁRIO & NAVEGAÇÃO ESTADUAL
 // ========================================================
 
-// Botão para Centralizar e Enquadrar a Bacia do Rio Miranda
+// Botão para Centralizar e Enquadrar Todo o Estado de Mato Grosso do Sul
 const btnCentralizarBacia = document.getElementById('btn-centralizar-bacia');
 if (btnCentralizarBacia) {
   btnCentralizarBacia.addEventListener('click', () => {
     vibrar(25);
     if (map) {
-      // Enquadramento panorâmico de toda a Bacia Hidrográfica do Rio Miranda (MS)
-      map.flyTo([-20.35, -56.35], 9, { duration: 1.2 });
-      showToast('Visualização ajustada para a Bacia do Rio Miranda');
+      map.fitBounds(BOUNDS_BACIA, { padding: [20, 20] });
+      showToast('🗺️ Visualização ajustada para todo o Mato Grosso do Sul');
     }
   });
 }
@@ -3087,15 +3384,6 @@ if (btnHeroParceiros) {
   });
 }
 
-// Botão Flutuante de GPS no Mapa ("Onde estou")
-const btnGpsMapa = document.getElementById('btn-gps');
-if (btnGpsMapa) {
-  btnGpsMapa.addEventListener('click', () => {
-    vibrar(30);
-    obterLocalizacao();
-  });
-}
-
 // Delegador Global de Cliques para data-action (Zero inline handlers para conformidade estrita de CSP)
 document.addEventListener('click', (e) => {
   const actionEl = e.target.closest('[data-action]');
@@ -3114,7 +3402,7 @@ document.addEventListener('click', (e) => {
         if (backdrop) backdrop.classList.remove('active');
         map.invalidateSize();
       } else {
-        showToast('Mapa focado na Bacia do Rio Miranda');
+        showToast('Mapa enquadrado em todo o Mato Grosso do Sul');
       }
       break;
     case 'tarefa-consultar-regras':
@@ -3125,8 +3413,8 @@ document.addEventListener('click', (e) => {
     case 'tarefa-encontrar-servicos':
       e.preventDefault();
       vibrar(20);
-      const tabGuias = document.getElementById('tab-guias');
-      if (tabGuias) tabGuias.click();
+      const tabPousadas = document.getElementById('tab-pousadas');
+      if (tabPousadas) tabPousadas.click();
       break;
     case 'abrir-cartilha':
       e.preventDefault();

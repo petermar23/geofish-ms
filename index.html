@@ -6,11 +6,11 @@
   <meta name="color-scheme" content="light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com data: blob:; connect-src 'self' https://server.arcgisonline.com; font-src 'self';">
 
-  <title>GeoFish MS - Bacia do Rio Miranda (WebGIS Independente)</title>
-  <meta name="description" content="Plataforma WebGIS PWA aberta e independente para navegação náutica, turismo sustentável e orientação aos pescadores na Bacia do Rio Miranda (MS).">
+  <title>GeoFish MS - WebGIS Estadual da Pesca Esportiva (Mato Grosso do Sul)</title>
+  <meta name="description" content="Plataforma WebGIS Comercial e Comunitária para pesca esportiva, pousadas, ranchos, piloteiros, hidrografia, rodovias e apoio em todo o Mato Grosso do Sul.">
   
-  <meta property="og:title" content="GeoFish MS - Bacia do Rio Miranda">
-  <meta property="og:description" content="Navegação náutica e consulta às normas da pesca esportiva na Bacia do Rio Miranda (Mato Grosso do Sul).">
+  <meta property="og:title" content="GeoFish MS - WebGIS Estadual da Pesca Esportiva">
+  <meta property="og:description" content="Mapa interativo completo de Mato Grosso do Sul: rios navegáveis, pousadas, piloteiros, hospitais, polícia, rodovias e regras da pesca esportiva.">
   <meta property="og:type" content="website">
 
   <!-- PWA & Android / iOS Meta Tags -->
@@ -48,7 +48,7 @@
         </div>
         <div class="top-bar-titles">
           <span class="top-bar-title">GeoFish <strong>MS</strong></span>
-          <span class="top-bar-sub">Bacia do Rio Miranda &bull; Pantanal MS</span>
+          <span class="top-bar-sub">Mato Grosso do Sul &bull; Bacias do Paraguai &amp; Paraná</span>
         </div>
       </a>
     </div>
@@ -132,9 +132,9 @@
         <!-- ABA INICIAL: 3 CAMINHOS CLAROS DE ENTRADA -->
         <section id="pane-inicio" class="sidebar-pane active" role="tabpanel" aria-labelledby="tab-inicio">
           <div class="welcome-card" style="background: linear-gradient(135deg, #0b4f6c 0%, #0369a1 100%); color: #ffffff; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
-            <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;">🌿 WebGIS Bacia do Rio Miranda</div>
+            <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;">🌿 WebGIS Estadual &bull; Mato Grosso do Sul</div>
             <p style="font-size: 0.78rem; opacity: 0.95; line-height: 1.4; margin: 0;">
-              Plataforma cívica para navegação responsável, turismo de pesca e conformidade com as regras ambientais em MS.
+              79 municípios, Bacia do Paraguai e Bacia do Paraná: rios navegáveis, pousadas, ranchos, piloteiros, rodovias, hospitais, polícia e regras oficiais.
             </p>
           </div>
 
@@ -148,12 +148,12 @@
               <div style="display: flex; align-items: flex-start; gap: 10px;">
                 <span style="font-size: 1.4rem;" aria-hidden="true">🗺️</span>
                 <div style="flex: 1;">
-                  <div style="font-weight: 800; font-size: 0.88rem; color: #0b4f6c;">1. Explorar a Região no Mapa</div>
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #0b4f6c;">1. Explorar Todo o Estado no Mapa</div>
                   <p style="font-size: 0.76rem; color: #64748b; margin: 2px 0 6px 0; line-height: 1.35;">
-                    Visualizar rios navegáveis, trechos de pesca, áreas restritas e rampas da Bacia.
+                    Visualizar rios navegáveis, rodovias (BR/MS), bacias hidrográficas, UCs, hospitais, polícia e rampas de barco em MS.
                   </p>
                   <button type="button" class="btn-top-action" style="padding: 4px 10px; font-size: 0.75rem; background: #0b4f6c; color: #fff;">
-                    <span>Focar no Mapa</span>
+                    <span>Enquadrar Mato Grosso do Sul</span>
                   </button>
                 </div>
               </div>
@@ -178,17 +178,47 @@
             <!-- Tarefa 3: Encontrar Hospedagem e Piloteiros -->
             <div class="task-card" data-action="tarefa-encontrar-servicos" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease;">
               <div style="display: flex; align-items: flex-start; gap: 10px;">
-                <span style="font-size: 1.4rem;" aria-hidden="true">🚤</span>
+                <span style="font-size: 1.4rem;" aria-hidden="true">🏨</span>
                 <div style="flex: 1;">
-                  <div style="font-weight: 800; font-size: 0.88rem; color: #0369a1;">3. Hospedagem &amp; Piloteiros</div>
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #0369a1;">3. Pousadas, Ranchos &amp; Piloteiros</div>
                   <p style="font-size: 0.76rem; color: #64748b; margin: 2px 0 6px 0; line-height: 1.35;">
-                    Filtros por polo (Miranda, Aquidauana, Bonito) com rampas náuticas e condutores da região.
+                    Consulte pousadas, hotéis, ranchos, rampas náuticas e piloteiros com rota direta via Google Maps.
                   </p>
                   <button type="button" class="btn-top-action" style="padding: 4px 10px; font-size: 0.75rem; background: #0284c7; color: #fff;">
-                    <span>Ver por Polo Regional</span>
+                    <span>Ver Pousadas e Polos</span>
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Atalhos de Polos Regionais de Pesca de MS -->
+          <div style="margin-top: 14px;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.4px;">
+              🧭 Navegar por Polo Pesqueiro (MS):
+            </div>
+            <div class="sidebar-region-filters" role="toolbar" aria-label="Navegar pelos polos pesqueiros de MS">
+              <button type="button" class="sidebar-region-btn active" data-regiao="todas" aria-pressed="true">
+                <span>🗺️ Todo o MS</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="pantanal" aria-pressed="false">
+                <span>🐊 Corumbá &amp; Murtinho</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="z1" aria-pressed="false">
+                <span>🎣 Miranda &amp; Aquidauana</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="coxim" aria-pressed="false">
+                <span>🚤 Coxim &amp; Taquari</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="parana" aria-pressed="false">
+                <span>🌊 Rio Paraná (Leste)</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="sul" aria-pressed="false">
+                <span>🌿 Ivinhema &amp; Sul</span>
+              </button>
+              <button type="button" class="sidebar-region-btn" data-regiao="z11" aria-pressed="false">
+                <span>💎 Bonito &amp; Serra</span>
+              </button>
             </div>
           </div>
 
@@ -204,22 +234,25 @@
             <span>🚤</span> <span>Piloteiros &amp; Guias Tradicionais</span>
           </h2>
           <p class="sidebar-section-desc">
-            Condutores ribeirinhos da Bacia do Rio Miranda. Negociação direta e comunitária, sem intermediários.
+            Condutores ribeirinhos e piloteiros de pesca esportiva em Mato Grosso do Sul. Negociação direta e comunitária, sem intermediários.
           </p>
 
           <!-- Filtros Rápidos de Região (Ergonomia ao Toque 44px+) -->
-          <div class="sidebar-region-filters" role="toolbar" aria-label="Filtrar por Colônia e Município">
+          <div class="sidebar-region-filters" role="toolbar" aria-label="Filtrar por Polo Pesqueiro">
             <button type="button" class="sidebar-region-btn active" data-regiao="todas" aria-pressed="true">
-              <span>🗺️ Todas as Regiões</span>
+              <span>🗺️ Todo o MS</span>
+            </button>
+            <button type="button" class="sidebar-region-btn" data-regiao="pantanal" aria-pressed="false">
+              <span>📍 Corumbá / Murtinho</span>
             </button>
             <button type="button" class="sidebar-region-btn" data-regiao="z1" aria-pressed="false">
-              <span>📍 Miranda &bull; Z-1</span>
+              <span>📍 Miranda / Aquidauana</span>
             </button>
-            <button type="button" class="sidebar-region-btn" data-regiao="z7" aria-pressed="false">
-              <span>📍 Aquidauana &bull; Z-7</span>
+            <button type="button" class="sidebar-region-btn" data-regiao="coxim" aria-pressed="false">
+              <span>📍 Coxim / Norte</span>
             </button>
-            <button type="button" class="sidebar-region-btn" data-regiao="z11" aria-pressed="false">
-              <span>📍 Bonito &bull; Z-11</span>
+            <button type="button" class="sidebar-region-btn" data-regiao="parana" aria-pressed="false">
+              <span>📍 Rio Paraná / Leste</span>
             </button>
           </div>
 
@@ -248,25 +281,25 @@
         <!-- ABA 2: POUSADAS & ESTRUTURA NÁUTICA -->
         <section id="pane-pousadas" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-pousadas">
           <h2 class="sidebar-section-title">
-            <span>🏨</span> <span>Pousadas, Ranchos &amp; Apoio</span>
+            <span>🏨</span> <span>Pousadas, Ranchos &amp; Apoio (MS)</span>
           </h2>
           <p class="sidebar-section-desc">
-            Atracadouros, descidas de barco com rampa de concreto, marinas e pousadas ribeirinhas na Bacia do Rio Miranda.
+            Hotéis, pousadas, ranchos de pesca, marinas e rampas de barco reais em Mato Grosso do Sul com rota direta via Google Maps.
           </p>
 
           <div id="sidebar-pousadas-list" class="sidebar-cards-container" aria-live="polite">
-            <!-- Preenchido dinamicamente via JS com pontos de emergência e apoio -->
+            <!-- Preenchido dinamicamente via JS com pousadas, ranchos e rampas de apoio -->
           </div>
 
           <div style="margin-top: 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px;">
             <div style="font-size: 0.82rem; font-weight: 800; color: #0369a1; margin-bottom: 4px;">
-              ⭐ Divulgue sua Pousada ou Marina
+              ⭐ Destaque sua Pousada, Rancho ou Loja Náutica
             </div>
             <p style="font-size: 0.76rem; color: #0284c7; line-height: 1.4; margin-bottom: 8px;">
-              Conecte sua estrutura diretamente aos milhares de pescadores esportivos que planejam a expedição no WebGIS.
+              Coloque sua estrutura com Pin Ouro, Banner de Destaque e botão direto de WhatsApp no WebGIS Estadual de MS.
             </p>
             <button type="button" class="btn-guia-wa" style="background: #0284c7;" data-action="abrir-parcerias-pousadas">
-              <span>💬 Anunciar Pousada ou Rancho</span>
+              <span>💬 Anunciar Pousada ou Empresa</span>
             </button>
           </div>
         </section>
@@ -369,28 +402,44 @@
         <!-- ABA 4: CAMADAS CARTOGRÁFICAS -->
         <section id="pane-camadas" class="sidebar-pane" role="tabpanel" aria-labelledby="tab-camadas">
           <h2 class="sidebar-section-title">
-            <span>🗺️</span> <span>Camadas do WebGIS Pantanal</span>
+            <span>🗺️</span> <span>Camadas do WebGIS Mato Grosso do Sul</span>
           </h2>
           <p class="sidebar-section-desc">
-            Bases espaciais em SIRGAS 2000 / UTM 21S organizadas a partir de dados públicos abertos.
+            Bases oficiais de todo o estado de MS (IBGE, ANA, IMASUL, FUNAI, AGESUL/DNIT e OpenStreetMap).
           </p>
 
           <div class="layer-checkbox-group" role="group" aria-label="Controle de visibilidade das camadas">
 
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🏨</span>
+                <span>Pousadas, Hotéis &amp; Ranchos (MS)</span>
+              </div>
+              <input type="checkbox" id="layer-chk-anunciantes" checked data-camada-key="anunciantes_ms" aria-label="Ativar camada Pousadas e Anunciantes">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🚤</span>
-                <span>Piloteiros &amp; Guias Homologados</span>
+                <span>Piloteiros &amp; Guias Cadastrados</span>
               </div>
               <input type="checkbox" id="layer-chk-guias" checked data-camada-key="guias_credenciados" aria-label="Ativar camada Guias Credenciados">
             </label>
 
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span aria-hidden="true">⚓</span>
-                <span>Rampas Náuticas &amp; Atracadouros</span>
+                <span aria-hidden="true">🚨</span>
+                <span>Hospitais, Polícia, Bombeiros &amp; Rampas</span>
               </div>
-              <input type="checkbox" id="layer-chk-apoio" checked data-camada-key="pontos_emergencia" aria-label="Ativar camada Apoio Náutico e Rampas">
+              <input type="checkbox" id="layer-chk-apoio" checked data-camada-key="pontos_emergencia" aria-label="Ativar camada Hospitais, Polícia e Rampas">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🛣️</span>
+                <span>Rodovias Federais e Estaduais (BR/MS)</span>
+              </div>
+              <input type="checkbox" id="layer-chk-rodovias" checked data-camada-key="rodovias_ms" aria-label="Ativar camada Rodovias de MS">
             </label>
 
             <label class="layer-checkbox-item">
@@ -404,7 +453,7 @@
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🌊</span>
-                <span>Rios Principais do Estado</span>
+                <span>Rios Principais Navegáveis (MS)</span>
               </div>
               <input type="checkbox" id="layer-chk-rios" checked data-camada-key="rios_principais" aria-label="Ativar camada Rios Principais">
             </label>
@@ -412,7 +461,7 @@
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">⚠️</span>
-                <span>Unidades de Conservação (UCs)</span>
+                <span>Unidades de Conservação &amp; Terras Indígenas</span>
               </div>
               <input type="checkbox" id="layer-chk-restritas" checked data-camada-key="areas_restritas" aria-label="Ativar camada Unidades de Conservação">
             </label>
@@ -420,9 +469,17 @@
             <label class="layer-checkbox-item">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span aria-hidden="true">🗺️</span>
-                <span>Delimitação da Bacia do Miranda</span>
+                <span>Bacias Hidrográficas de MS (15 UPGs)</span>
               </div>
-              <input type="checkbox" id="layer-chk-uepgrh" data-camada-key="bacias_uepgrh" aria-label="Ativar camada Bacia do Miranda">
+              <input type="checkbox" id="layer-chk-uepgrh" data-camada-key="bacias_uepgrh" aria-label="Ativar camada Bacias Hidrográficas de MS">
+            </label>
+
+            <label class="layer-checkbox-item">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span aria-hidden="true">🏛️</span>
+                <span>Limites dos 79 Municípios de MS</span>
+              </div>
+              <input type="checkbox" id="layer-chk-municipios" data-camada-key="municipios_ms" aria-label="Ativar camada Municípios de MS">
             </label>
 
             <label class="layer-checkbox-item">
@@ -439,11 +496,12 @@
             <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.76rem; color: #334155;">
               <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #dc2626; border-radius: 2px;"></span> <span>🔴 Pesca Proibida (Rios Cênicos: Formoso, Salobra, Prata)</span></div>
               <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #f59e0b; border-radius: 2px;"></span> <span>🟠 Pesque e Solte Exclusivo (Rio Negro, Abobral, Vermelho)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #0284c7; border-radius: 2px;"></span> <span>🔵 Permitida com Cota (Miranda, Aquidauana, Paraguai)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span>🚤</span> <span>Piloteiro Credenciado (Z-1, Z-7, Z-11)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span>⚓</span> <span>Rampa Náutica &amp; Apoio</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span>🚨</span> <span>Posto PMA (Medição e Lacre)</span></div>
-              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 14px; height: 14px; background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; border-radius: 2px;"></span> <span>Unidade de Conservação (UC)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 4px; background: #0284c7; border-radius: 2px;"></span> <span>🔵 Permitida com Cota (Paraguai, Paraná, Miranda, Taquari)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 18px; height: 3px; background: #b45309; border-radius: 2px;"></span> <span>🛣️ Rodovias Federais (BR) e Estaduais (MS)</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🏨</span> <span>Pousada, Hotel ou Rancho de Pesca</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🚤</span> <span>Piloteiro / Guia Cadastrado</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span>🏥 / 🚓 / ⚓</span> <span>Hospital, Polícia/Bombeiros e Rampa Náutica</span></div>
+              <div style="display: flex; align-items: center; gap: 8px;"><span style="display: inline-block; width: 14px; height: 14px; background: rgba(245, 158, 11, 0.22); border: 1px solid #f59e0b; border-radius: 2px;"></span> <span>Unidade de Conservação (UC) / Terra Indígena</span></div>
             </div>
           </div>
         </section>
@@ -464,7 +522,7 @@
       <div id="local-search-container" class="local-search-container" role="search" aria-label="Busca no Mapa">
         <div class="local-search-input-wrapper">
           <span class="local-search-icon" aria-hidden="true">🔍</span>
-          <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar rio, piloteiro, porto ou rampa..." autocomplete="off" spellcheck="false" aria-label="Buscar feições locais no mapa">
+          <input type="text" id="local-search-input" class="local-search-input" placeholder="Buscar rio, município, pousada, hospital, rodovia..." autocomplete="off" spellcheck="false" aria-label="Buscar feições locais no mapa">
           <button type="button" id="btn-clear-local-search" class="local-clear-btn" style="display: none;" aria-label="Limpar busca">&times;</button>
         </div>
         <div id="local-search-results" class="local-search-results hidden" role="listbox" aria-label="Resultados da busca"></div>
@@ -477,12 +535,12 @@
       </div>
 
       <!-- O Mapa Leaflet em Si -->
-      <div id="map" role="application" aria-label="Mapa da governança da pesca na Bacia do Rio Miranda"></div>
+      <div id="map" role="application" aria-label="Mapa Estadual da Pesca Esportiva em Mato Grosso do Sul"></div>
 
-      <!-- Botão Flutuante de GPS Náutico -->
-      <button type="button" id="btn-gps" class="btn-gps" aria-label="Localizar minha posição no rio (GPS)" title="Onde estou no rio">
-        <span aria-hidden="true">📍</span>
-        <span>Onde estou</span>
+      <!-- Botão Flutuante de Enquadramento Geral de MS -->
+      <button type="button" id="btn-centralizar-bacia" class="btn-gps" aria-label="Enquadrar todo o estado de Mato Grosso do Sul" title="Ver Todo o MS">
+        <span aria-hidden="true">🗺️</span>
+        <span>Ver Todo MS</span>
       </button>
     </main>
 
@@ -797,8 +855,8 @@
 
           <!-- Orientação de Localização -->
           <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #1e40af; line-height: 1.45;">
-            📍 <strong>Como se orientar para passar sua localização:</strong><br>
-            Toque no botão <strong>"📍 Onde estou"</strong> sobre o mapa para ver sua posição geográfica exata. Ao ligar para os serviços públicos, informe o nome do rio, referências conhecidas (curvas, pontes, fazendas) e suas coordenadas de latitude e longitude.
+            📍 <strong>Como se orientar e traçar rota até o socorro:</strong><br>
+            Toque sobre qualquer ícone de <strong>🏥 Hospital</strong>, <strong>🚓 Polícia</strong> ou <strong>🚒 Bombeiros</strong> no mapa e clique em <strong>"📍 Abrir Rota no Google Maps"</strong>. Ao ligar para os serviços públicos, informe o nome do rio, a rodovia próxima (BR/MS) e o município.
           </div>
         </div>
         <div class="modal-footer" style="padding: 12px 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
