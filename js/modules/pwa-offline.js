@@ -176,16 +176,19 @@ export function initPWAOffline() {
     showToast('GeoFish MS instalado com sucesso no seu aparelho!', 'info');
   });
 
-  // Catálogo de camadas vetoriais fundamentais para navegação fluvial offline
+  // Catálogo de camadas vetoriais fundamentais para navegação fluvial offline em todo o MS
   const CAMADAS_PARA_OFFLINE = [
-    { key: 'hidrografia', url: 'data/processed/hidrografia.geojson', nome: 'Rede Hidrográfica e Regras' },
-    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: 'Rios Principais' },
-    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias Credenciados' },
-    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Rampas e Apoio Náutico' },
-    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: 'Unidades de Conservação (UCs)' },
-    { key: 'bacias_uepgrh', url: 'data/processed/bacia_miranda.geojson', nome: 'Bacia do Rio Miranda' },
+    { key: 'hidrografia', url: 'data/processed/hidrografia.geojson', nome: 'Rede Hidrográfica e Regras (MS)' },
+    { key: 'rios_principais', url: 'data/processed/rios_principais.geojson', nome: 'Rios Principais do Estado' },
+    { key: 'anunciantes_ms', url: 'data/processed/anunciantes_ms.geojson', nome: 'Pousadas, Hotéis e Ranchos (MS)' },
+    { key: 'guias_credenciados', url: 'data/processed/guias_credenciados.geojson', nome: 'Guias e Piloteiros' },
+    { key: 'pontos_emergencia', url: 'data/processed/pontos_emergencia.geojson', nome: 'Hospitais, Polícia e Rampas' },
+    { key: 'rodovias_ms', url: 'data/processed/rodovias_ms.geojson', nome: 'Rodovias Federais e Estaduais' },
+    { key: 'areas_restritas', url: 'data/processed/uc_ms.geojson', nome: 'Unidades de Conservação e TIs' },
+    { key: 'bacias_uepgrh', url: 'data/processed/bacias_ms.geojson', nome: 'Bacias Hidrográficas (UPGs)' },
+    { key: 'municipios_ms', url: 'data/processed/municipios_ms.geojson', nome: '79 Municípios de MS' },
     { key: 'bacias_especiais', url: 'data/processed/bacias_especiais.geojson', nome: 'Bacias dos Rios Cênicos' },
-    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: 'Comunidades Pantaneiras' }
+    { key: 'aglomerados_rurais', url: 'data/processed/aglomerados_rurais.geojson', nome: 'Comunidades Tradicionais' }
   ];
 
   // Botão "Salvar para o Barco" (Modo 100% Offline Verificável)

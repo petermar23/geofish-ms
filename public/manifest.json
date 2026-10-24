@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "GeoFish MS - Bacia do Rio Miranda",
+  "name": "GeoFish MS - WebGIS da Pesca Esportiva no Mato Grosso do Sul",
   "short_name": "GeoFish MS",
-  "description": "Navegação náutica, regras da pesca esportiva e pontos de apoio na Bacia do Rio Miranda (MS)",
+  "description": "WebGIS Estadual de Pesca Esportiva, Pousadas, Piloteiros, Hidrografia, Rodovias e Apoio Náutico em Mato Grosso do Sul (Bacias do Paraguai e Paraná)",
   "lang": "pt-BR",
   "start_url": "./index.html",
   "scope": "./",
@@ -33,10 +33,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Minha Posição no Rio",
-      "short_name": "Onde Estou",
-      "description": "Verifica radar de conformidade e rio mais próximo via GPS",
-      "url": "./index.html?action=gps",
+      "name": "Pousadas, Ranchos e Marinas",
+      "short_name": "Pousadas MS",
+      "description": "Consultar pousadas, ranchos e serviços náuticos em Mato Grosso do Sul",
+      "url": "./index.html?action=pousadas",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
@@ -47,9 +47,9 @@
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Rampas e Apoio Náutico",
-      "short_name": "Rampas",
-      "description": "Localizar portos, rampas de barco e emergência",
+      "name": "Rampas, Hospitais e Polícia",
+      "short_name": "Apoio e Rotas",
+      "description": "Localizar portos, rampas de barco, hospitais e polícia em MS",
       "url": "./index.html?action=apoio",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
